@@ -1,0 +1,12 @@
+name: "car_rental_bot"
+services:
+  db:
+    container_name: "car_rental_bot_db"
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "car_rental_bot_db"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    restart: "unless-stopped"

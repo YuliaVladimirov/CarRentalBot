@@ -12,25 +12,17 @@ CREATE TABLE customers (
                            username VARCHAR(100),
                            first_name VARCHAR(100) NOT NULL,
                            last_name VARCHAR(100) NOT NULL,
+                           phone_number VARCHAR(20),
+                           email VARCHAR(100),
                            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
---changeset yulia:2025-09-06-index-customers-first-name
-CREATE INDEX index_customers_first_name ON customers(first_name);
---changeset yulia:2025-09-06-index-customers-last-name
-CREATE INDEX index_customers_last_name ON customers(last_name);
-
-
--- ========================================
--- CATEGORIES
--- ========================================
-CREATE TABLE categories (
-                       id UUID PRIMARY KEY,
-                       name VARCHAR(100) NOT NULL
-);
-
---changeset yulia:2025-09-06-index-categories-name
-CREATE INDEX index_categories_name ON categories(name);
+--changeset yulia:2025-09-06-index-customers-username
+CREATE INDEX index_customers_username ON customers(username);
+--changeset yulia:2025-09-06-index-customers-phone-number
+CREATE INDEX index_customers_phone_number ON customers(phone_number);
+--changeset yulia:2025-09-06-index-customers-email
+CREATE INDEX idx_customers_email ON customers(email);
 
 
 -- ========================================
@@ -38,61 +30,89 @@ CREATE INDEX index_categories_name ON categories(name);
 -- ========================================
 CREATE TABLE cars (
                       id UUID PRIMARY KEY,
-                      name VARCHAR(100) NOT NULL,
+                      brand VARCHAR(100) NOT NULL,
                       model VARCHAR(100) NOT NULL,
+                      category VARCHAR(50) NOT NULL CHECK (category IN ('SEDAN', 'SUV',  'HATCHBACK', 'CONVERTIBLE', 'VAN')),
+                      description VARCHAR(500),
+                      image_url VARCHAR(200),
                       daily_rate DECIMAL(10,2) NOT NULL,
-                      available BOOLEAN DEFAULT TRUE,
-                      category_id UUID NOT NULL,
-                      CONSTRAINT fk_cars_category FOREIGN KEY (category_id) REFERENCES categories(id)
+                      available BOOLEAN DEFAULT TRUE
 );
 
 --changeset yulia:2025-09-06-index-cars-name
-CREATE INDEX index_cars_name ON cars(name);
+CREATE INDEX index_cars_name ON cars(brand);
+--changeset yulia:2025-09-06-index-cars-category
+CREATE INDEX index_cars_category_id ON cars(category);
 --changeset yulia:2025-09-06-index-cars-available
 CREATE INDEX index_cars_available ON cars(available);
---changeset yulia:2025-09-06-index-cars-category_id
-CREATE INDEX index_cars_category_id ON cars(category_id);
+
 
 
 -- ========================================
--- BOOKING
+-- BOOKINGS
 -- ========================================
-CREATE TABLE booking (
+CREATE TABLE bookings (
                          id UUID PRIMARY KEY,
                          customer_id UUID NOT NULL,
                          car_id UUID NOT NULL,
-                         start_time DATE NOT NULL,
-                         end_time DATE NOT NULL,
+                         start_date DATE NOT NULL,
+                         end_date DATE NOT NULL,
                          total_cost DECIMAL(10,2) NOT NULL,
                          status VARCHAR(20) NOT NULL CHECK (status IN ('PENDING', 'CONFIRMED','CANCELLED')),
                          CONSTRAINT fk_booking_customer FOREIGN KEY (customer_id) REFERENCES customers(id),
                          CONSTRAINT fk_booking_car FOREIGN KEY (car_id) REFERENCES cars(id)
 );
 
---changeset yulia:2025-09-06-index-booking-customer_id
-CREATE INDEX index_booking_customer_id ON booking(customer_id);
---changeset yulia:2025-09-06-index-booking-car_id
-CREATE INDEX index_booking_car_id ON booking(car_id);
---changeset yulia:2025-09-06-index-booking-start_time
-CREATE INDEX index_booking_start_time ON booking(start_time);
---changeset yulia:2025-09-06-index-booking-end_time
-CREATE INDEX index_booking_end_time ON booking(end_time);
---changeset yulia:2025-09-06-index-booking-status
-CREATE INDEX index_booking_status ON booking(status);
+--changeset yulia:2025-09-06-index-bookings-customer_id
+CREATE INDEX index_bookings_customer_id ON bookings(customer_id);
+--changeset yulia:2025-09-06-index-bookings-car_id
+CREATE INDEX index_bookings_car_id ON bookings(car_id);
+--changeset yulia:2025-09-06-index-bookings-start_time
+CREATE INDEX index_bookings_start_time ON bookings(start_date);
+--changeset yulia:2025-09-06-index-bookings-end_time
+CREATE INDEX index_bookings_end_time ON bookings(end_date);
+--changeset yulia:2025-09-06-index-bookings-status
+CREATE INDEX index_bookings_status ON bookings(status);
 
 
 -- ========================================
--- REMINDER LOG
+-- USER SESSIONS
 -- ========================================
-CREATE TABLE reminder_log (
-                              id SERIAL PRIMARY KEY,
-                              booking_id UUID NOT NULL,
-                              sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              message TEXT NOT NULL,
-                              CONSTRAINT fk_reminder_log_booking FOREIGN KEY (booking_id) REFERENCES booking(id)
+
+CREATE TABLE user_sessions (
+                               telegram_user_id BIGINT PRIMARY KEY,
+                               state VARCHAR(20) NOT NULL,
+                               temp_data TEXT,
+                               last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
---changeset yulia:2025-09-06-index-reminder_log-booking_id
-CREATE INDEX index_reminder_log_booking_id ON reminder_log(booking_id);
---changeset yulia:2025-09-06-index-reminder_log-sent_at
-CREATE INDEX index_reminder_log_sent_at ON reminder_log(sent_at);
+--changeset yulia:2025-09-06-index-user-sessions-last-updated
+CREATE INDEX index_user_sessions_last_updated ON user_sessions(last_updated);
+
+
+
+-- ========================================
+-- REMINDERS
+-- ========================================
+CREATE TABLE reminders (
+                              id SERIAL PRIMARY KEY,
+                              customer_id UUID NOT NULL,
+                              booking_id UUID NOT NULL,
+                              sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                              message VARCHAR(600) NOT NULL,
+                              due_at TIMESTAMP NOT NULL,
+                              sent BOOLEAN NOT NULL DEFAULT FALSE,
+                              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              CONSTRAINT fk_reminders_customers FOREIGN KEY (customer_id) REFERENCES customers (id),
+                              CONSTRAINT fk_reminders_bookings FOREIGN KEY (booking_id) REFERENCES bookings (id)
+);
+
+--changeset yulia:2025-09-06-index-reminders-customer-id
+CREATE INDEX index_reminders_customer_id ON reminders(customer_id);
+--changeset yulia:2025-09-06-index-reminders-booking-id
+CREATE INDEX index_reminders_booking_id ON reminders(booking_id);
+--changeset yulia:2025-09-06-index-reminders-due-at
+CREATE INDEX idx_reminder_due_at ON reminders(due_at);
+--changeset yulia:2025-09-06-index-reminders-sent
+CREATE INDEX idx_reminder_sent ON reminders(sent);
+

@@ -24,7 +24,7 @@ public class FallbackCallbackHandler implements CallbackHandler {
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("⚠️ This button is not supported anymore. Please use the main menu.")
+                .text("⚠️ This button is not supported. Please use the main menu (/menu).")
                 .parseMode("HTML")
                 .build());
     }

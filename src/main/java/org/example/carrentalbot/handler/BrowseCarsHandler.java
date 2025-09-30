@@ -41,10 +41,16 @@ public class BrowseCarsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        String categoryName = callbackQuery.getData().split(":")[1];
+        String categoryName;
+        if (callbackQuery.getData().contains(":")) {
+            categoryName = callbackQuery.getData().split(":", 2)[1];
+        } else {
+            categoryName = null;
+        }
 
         CarCategory carCategory;
         try {
+            assert categoryName != null;
             carCategory = CarCategory.valueOf(categoryName.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new InvalidDataException(chatId, String.format("❌ Invalid category: %s.", categoryName));
@@ -54,7 +60,7 @@ public class BrowseCarsHandler implements CallbackHandler {
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(cars);
 
-        navigationService.push(chatId, "BROWSE_CARS");
+        navigationService.push(chatId, "BROWSE_CARS:");
         SendMessageDto message = SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(String.format("Available cars in %s category", categoryName))

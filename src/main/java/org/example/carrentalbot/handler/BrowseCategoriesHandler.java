@@ -43,7 +43,7 @@ public class BrowseCategoriesHandler implements CallbackHandler {
         navigationService.push(chatId, "BROWSE_CATEGORIES");
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("Available Cars By Category")
+                .text("Available Categories")
                 .parseMode("HTML")
                 .replyMarkup(keyboard)
                 .build());

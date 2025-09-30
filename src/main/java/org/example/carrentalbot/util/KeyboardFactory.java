@@ -17,8 +17,8 @@ public class KeyboardFactory {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("🚗 Browse Cars")
-                                .callbackData("BROWSE_CARS")
+                                .text("🚗 Browse Categories")
+                                .callbackData("BROWSE_CATEGORIES")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📒 My Bookings")
@@ -49,14 +49,14 @@ public class KeyboardFactory {
                     .build();
 
             rows.add(List.of(button));
-
-            InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
-                    .text("⬅️ BACK")
-                    .callbackData("BACK")
-                    .build();
-
-            rows.add(List.of(backButton));
         }
+
+        InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
+                .text("⬅️ BACK")
+                .callbackData("BACK")
+                .build();
+
+        rows.add(List.of(backButton));
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)

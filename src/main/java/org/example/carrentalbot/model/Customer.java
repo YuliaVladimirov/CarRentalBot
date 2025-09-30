@@ -30,7 +30,7 @@ public class Customer {
     private Long chatId;
 
     @Column(name = "username", length = 100)
-    private String username;
+    private String userName;
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;

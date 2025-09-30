@@ -32,7 +32,7 @@ public class BrowseCategoriesHandler implements CallbackHandler {
 
     @Override
     public String getKey() {
-        return "BROWSE_CATEGORIES";
+        return "BROWSE_CATEGORIES:";
     }
 
     @Override
@@ -40,7 +40,7 @@ public class BrowseCategoriesHandler implements CallbackHandler {
         List<CategoryAvailabilityDto> availableCars = carService.getAvailableCarCounts();
         InlineKeyboardMarkupDto keyboard = keyboardFactory.buildCarCategoryKeyboard(availableCars);
 
-        navigationService.push(chatId, "BROWSE_CATEGORIES");
+        navigationService.push(chatId, "BROWSE_CATEGORIES:");
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text("Available Categories")

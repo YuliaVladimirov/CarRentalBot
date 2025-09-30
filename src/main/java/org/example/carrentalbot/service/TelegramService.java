@@ -96,6 +96,11 @@ public class TelegramService {
             return;
         }
 
+        if (callbackQuery.getData() == null || callbackQuery.getData().isEmpty()) {
+            log.warn("CallbackQuery data is null or empty: {}", callbackQuery);
+            return;
+        }
+
         String callbackData = callbackQuery.getData();
         Long chatId = callbackQuery.getMessage().getChat().getId();
 

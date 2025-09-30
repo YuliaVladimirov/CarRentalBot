@@ -7,6 +7,8 @@ import org.example.carrentalbot.repository.CarRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CarService {
@@ -23,5 +25,9 @@ public class CarService {
 
     public List<Car> getCarsByCategory(CarCategory carCategory) {
         return carRepository.findByCategoryAndAvailableIs(carCategory, true);
+    }
+
+    public Optional<Car> getCarInfo(UUID carId) {
+        return carRepository.findById(carId);
     }
 }

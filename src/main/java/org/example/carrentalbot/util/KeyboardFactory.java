@@ -19,19 +19,19 @@ public class KeyboardFactory {
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("🚗 Browse Categories")
-                                .callbackData("BROWSE_CATEGORIES")
+                                .callbackData("BROWSE_CATEGORIES:")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📒 My Bookings")
-                                .callbackData("MY_BOOKINGS")
+                                .callbackData("MY_BOOKINGS:")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("🧑 My Profile")
-                                .callbackData("MY_PROFILE")
+                                .callbackData("MY_PROFILE:")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📞 Help")
-                                .callbackData("HELP")
+                                .callbackData("HELP:")
                                 .build())
                 ))
                 .build();
@@ -81,7 +81,7 @@ public class KeyboardFactory {
         for (Car car : cars) {
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                     .text(String.format("%s  %s (%s)", "🔸", car.getBrand(), car.getModel()))
-                    .callbackData("CAR_INFO:" + car.getId())
+                    .callbackData("CAR_DETAILS:" + car.getId())
                     .build();
 
             rows.add(List.of(button));
@@ -93,6 +93,25 @@ public class KeyboardFactory {
                 .build();
 
         rows.add(List.of(backButton));
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(rows)
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildCarDetailsKeyboard(Car car) {
+        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
+
+        InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                .text("BOOK")
+                .callbackData("BOOK_CAR:" + car.getId())
+                .build();
+
+        InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
+                .text("⬅️ BACK")
+                .callbackData("BACK")
+                .build();
+        rows.add(List.of(button, backButton));
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)

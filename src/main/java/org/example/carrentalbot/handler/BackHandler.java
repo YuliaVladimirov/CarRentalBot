@@ -14,14 +14,16 @@ public class BackHandler implements CallbackHandler {
     private final MyProfileHandler myProfileHandler;
     private final HelpHandler helpHandler;
     private final BrowseCarsHandler browseCarsHandler;
+    private final CarDetailsHandler carDetailsHandler;
 
-    public BackHandler(NavigationService navigationService, ToMainMenuHandler toMainMenuHandler, BrowseCategoriesHandler browseCategoriesHandler, MyProfileHandler myProfileHandler, HelpHandler helpHandler, BrowseCarsHandler browseCarsHandler) {
+    public BackHandler(NavigationService navigationService, ToMainMenuHandler toMainMenuHandler, BrowseCategoriesHandler browseCategoriesHandler, MyProfileHandler myProfileHandler, HelpHandler helpHandler, BrowseCarsHandler browseCarsHandler, CarDetailsHandler carDetailsHandler) {
         this.navigationService = navigationService;
         this.toMainMenuHandler = toMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
         this.myProfileHandler = myProfileHandler;
         this.helpHandler = helpHandler;
         this.browseCarsHandler = browseCarsHandler;
+        this.carDetailsHandler = carDetailsHandler;
     }
 
     @Override
@@ -40,10 +42,11 @@ public class BackHandler implements CallbackHandler {
         }
 
         switch (previousState) {
-            case "BROWSE_CARS" -> browseCarsHandler.handle(chatId, callbackQuery);
-            case "BROWSE_CATEGORIES" -> browseCategoriesHandler.handle(chatId, callbackQuery);
-            case "MY_PROFILE" -> myProfileHandler.handle(chatId, callbackQuery);
-            case "HELP" -> helpHandler.handle(chatId, callbackQuery);
+            case "CAR_DETAILS:" -> carDetailsHandler.handle(chatId, callbackQuery);
+            case "BROWSE_CARS:" -> browseCarsHandler.handle(chatId, callbackQuery);
+            case "BROWSE_CATEGORIES:" -> browseCategoriesHandler.handle(chatId, callbackQuery);
+            case "MY_PROFILE:" -> myProfileHandler.handle(chatId, callbackQuery);
+            case "HELP:" -> helpHandler.handle(chatId, callbackQuery);
 
             default -> toMainMenuHandler.handle(chatId, callbackQuery);
         }

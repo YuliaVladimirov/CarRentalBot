@@ -107,8 +107,13 @@ public class TelegramService {
                         .build());
 
         log.info("Executing callback '{}' for chatId {}", callbackData, chatId);
-        callbackHandlerMap
-                .getOrDefault(callbackData, fallbackCallbackHandler)
-                .handle(chatId, callbackQuery);
+
+        CallbackHandler handler = callbackHandlerMap.entrySet().stream()
+                .filter(entry -> callbackData.startsWith(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(fallbackCallbackHandler);
+
+        handler.handle(chatId, callbackQuery);
     }
 }

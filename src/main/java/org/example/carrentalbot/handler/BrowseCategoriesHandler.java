@@ -36,7 +36,7 @@ public class BrowseCategoriesHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(Long chatId, CallbackQueryDto query) {
+    public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         List<CategoryAvailabilityDto> availableCars = carService.getAvailableCarCounts();
         InlineKeyboardMarkupDto keyboard = keyboardFactory.buildCarCategoryKeyboard(availableCars);
 

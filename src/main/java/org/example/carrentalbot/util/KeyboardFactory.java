@@ -3,6 +3,7 @@ package org.example.carrentalbot.util;
 import org.example.carrentalbot.dto.CategoryAvailabilityDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
+import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.springframework.stereotype.Component;
 
@@ -44,8 +45,8 @@ public class KeyboardFactory {
             int available = dto.count().intValue();
 
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                    .text(String.format("%s %s (%d available)", emoji, dto.category().name(), available))
-                    .callbackData("CATEGORY_" + dto.category().name())
+                    .text(String.format("%s %s (%d cars available)", emoji, dto.category().name(), available))
+                    .callbackData("BROWSE_CARS:" + dto.category().name())
                     .build();
 
             rows.add(List.of(button));
@@ -71,5 +72,30 @@ public class KeyboardFactory {
             case CONVERTIBLE -> "🏎️";
             case VAN -> "🚐";
         };
+    }
+
+    public InlineKeyboardMarkupDto buildCarKeyboard(List<Car> cars) {
+
+        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
+
+        for (Car car : cars) {
+            InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                    .text(String.format("%s  %s (%s)", "🔸", car.getBrand(), car.getModel()))
+                    .callbackData("CAR_INFO:" + car.getId())
+                    .build();
+
+            rows.add(List.of(button));
+        }
+
+        InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
+                .text("⬅️ BACK")
+                .callbackData("BACK")
+                .build();
+
+        rows.add(List.of(backButton));
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(rows)
+                .build();
     }
 }

@@ -13,13 +13,15 @@ public class BackHandler implements CallbackHandler {
     private final BrowseCategoriesHandler browseCategoriesHandler;
     private final MyProfileHandler myProfileHandler;
     private final HelpHandler helpHandler;
+    private final BrowseCarsHandler browseCarsHandler;
 
-    public BackHandler(NavigationService navigationService, ToMainMenuHandler toMainMenuHandler, BrowseCategoriesHandler browseCategoriesHandler, MyProfileHandler myProfileHandler, HelpHandler helpHandler) {
+    public BackHandler(NavigationService navigationService, ToMainMenuHandler toMainMenuHandler, BrowseCategoriesHandler browseCategoriesHandler, MyProfileHandler myProfileHandler, HelpHandler helpHandler, BrowseCarsHandler browseCarsHandler) {
         this.navigationService = navigationService;
         this.toMainMenuHandler = toMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
         this.myProfileHandler = myProfileHandler;
         this.helpHandler = helpHandler;
+        this.browseCarsHandler = browseCarsHandler;
     }
 
     @Override
@@ -38,6 +40,7 @@ public class BackHandler implements CallbackHandler {
         }
 
         switch (previousState) {
+            case "BROWSE_CARS" -> browseCarsHandler.handle(chatId, callbackQuery);
             case "BROWSE_CATEGORIES" -> browseCategoriesHandler.handle(chatId, callbackQuery);
             case "MY_PROFILE" -> myProfileHandler.handle(chatId, callbackQuery);
             case "HELP" -> helpHandler.handle(chatId, callbackQuery);

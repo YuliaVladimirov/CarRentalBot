@@ -2,10 +2,10 @@ package org.example.carrentalbot.service;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Service
 public class NavigationService {
@@ -17,8 +17,11 @@ public class NavigationService {
      */
     public void push(Long chatId, String state) {
         navigationHistory
-                .computeIfAbsent(chatId, id -> new ArrayDeque<>())
-                .push(state);
+                .computeIfAbsent(chatId, id -> new ConcurrentLinkedDeque<>());
+        Deque<String> stack = navigationHistory.get(chatId);
+        if (stack.isEmpty() || !stack.peek().equals(state)) {
+            stack.push(state);
+        }
     }
 
     /**

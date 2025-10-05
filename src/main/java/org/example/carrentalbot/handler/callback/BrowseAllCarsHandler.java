@@ -50,9 +50,9 @@ public class BrowseAllCarsHandler implements CallbackHandler {
                 .get(chatId, "category", CarCategory.class)
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found"));
 
-        List<Car> cars = carService.getAllCarsByCategory(carCategory);
+        List<Car> allCars = carService.getAllCarsByCategory(carCategory);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(cars);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(allCars);
 
         navigationService.push(chatId, KEY);
 

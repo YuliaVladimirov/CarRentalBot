@@ -1,4 +1,4 @@
-package org.example.carrentalbot.handler;
+package org.example.carrentalbot.handler.callback;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
@@ -55,13 +55,12 @@ public class BrowseAllCarsHandler implements CallbackHandler {
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(cars);
 
         navigationService.push(chatId, KEY);
-        SendMessageDto message = SendMessageDto.builder()
+
+        telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(String.format("Available cars in %s category:", carCategory))
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
-                .build();
-
-        telegramClient.sendMessage(message);
+                .build());
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Deque;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -29,26 +30,30 @@ public class NavigationService {
      * Returns null if no history is available.
      */
     public String pop(Long chatId) {
-        Deque<String> stack = navigationHistory.get(chatId);
-        if (stack == null || stack.isEmpty()) {
-            return null;
-        }
-        stack.pop();
-        return stack.peek();
+        return Optional.ofNullable(navigationHistory.get(chatId))
+                .filter(stack -> !stack.isEmpty())
+                .map(stack -> {
+                    stack.pop();
+                    return stack.peek();
+                })
+                .orElse(null);
     }
 
     /**
      * Peek the current state without removing.
      */
     public String peek(Long chatId) {
-        Deque<String> stack = navigationHistory.get(chatId);
-        return (stack == null || stack.isEmpty()) ? null : stack.peek();
+        return Optional.ofNullable(navigationHistory.get(chatId))
+                .filter(stack -> !stack.isEmpty())
+                .map(Deque::peek)
+                .orElse(null);
     }
 
     /**
      * Clear all navigation history for this user.
      */
     public void clear(Long chatId) {
-        navigationHistory.remove(chatId);
+        Optional.ofNullable(navigationHistory.get(chatId))
+                .ifPresent(stack -> navigationHistory.remove(chatId));
     }
 }

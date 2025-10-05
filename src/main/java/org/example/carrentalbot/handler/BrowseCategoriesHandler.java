@@ -15,6 +15,8 @@ import java.util.List;
 @Component
 public class BrowseCategoriesHandler implements CallbackHandler {
 
+    public static final String KEY = "BROWSE_CATEGORIES";
+
     private final CarService carService;
     private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
@@ -32,7 +34,7 @@ public class BrowseCategoriesHandler implements CallbackHandler {
 
     @Override
     public String getKey() {
-        return "BROWSE_CATEGORIES:";
+        return KEY;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class BrowseCategoriesHandler implements CallbackHandler {
         List<CategoryAvailabilityDto> availableCars = carService.getAvailableCarCounts();
         InlineKeyboardMarkupDto keyboard = keyboardFactory.buildCarCategoryKeyboard(availableCars);
 
-        navigationService.push(chatId, "BROWSE_CATEGORIES:");
+        navigationService.push(chatId, KEY);
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text("Available Categories")

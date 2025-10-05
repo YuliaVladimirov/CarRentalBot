@@ -15,17 +15,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class BrowseCarsHandler implements CallbackHandler {
+public class BrowseAllCarsHandler implements CallbackHandler {
+
+    public static final String KEY = "BROWSE_ALL_CARS";
 
     private final CarService carService;
     private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public BrowseCarsHandler(CarService carService,
-                                   NavigationService navigationService,
-                                   KeyboardFactory keyboardFactory,
-                                   TelegramClient telegramClient) {
+    public BrowseAllCarsHandler(CarService carService,
+                                NavigationService navigationService,
+                                KeyboardFactory keyboardFactory,
+                                TelegramClient telegramClient) {
         this.carService = carService;
         this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
@@ -35,7 +37,7 @@ public class BrowseCarsHandler implements CallbackHandler {
 
     @Override
     public String getKey() {
-        return "BROWSE_CARS:";
+        return KEY;
     }
 
     @Override
@@ -60,7 +62,7 @@ public class BrowseCarsHandler implements CallbackHandler {
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(cars);
 
-        navigationService.push(chatId, "BROWSE_CARS:");
+        navigationService.push(chatId, KEY);
         SendMessageDto message = SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(String.format("Available cars in %s category", categoryName))

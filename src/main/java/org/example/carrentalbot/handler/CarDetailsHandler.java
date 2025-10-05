@@ -17,6 +17,8 @@ import java.util.UUID;
 @Component
 public class CarDetailsHandler implements CallbackHandler {
 
+    public static final String KEY = "CAR_DETAILS";
+
     private final CarService carService;
     private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
@@ -35,7 +37,7 @@ public class CarDetailsHandler implements CallbackHandler {
 
     @Override
     public String getKey() {
-        return "CAR_DETAILS:";
+        return KEY;
     }
 
     @Override
@@ -60,7 +62,7 @@ public class CarDetailsHandler implements CallbackHandler {
         Car car = carService.getCarInfo(carId).orElseThrow(
                 () -> new DataNotFoundException(chatId, String.format("User with id: %s, was not found.", carIdString)));
 
-        navigationService.push(chatId, "CAR_DETAILS:");
+        navigationService.push(chatId, KEY);
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(car);
         String text = String.format("""
                 🚘 Car Details:

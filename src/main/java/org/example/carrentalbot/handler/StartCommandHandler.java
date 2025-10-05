@@ -50,7 +50,7 @@ public class StartCommandHandler implements CommandHandler {
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildMainMenuKeyboard();
 
-        navigationService.push(chatId, "MAIN_MENU");
+        navigationService.push(chatId, "GO_TO_MAIN_MENU");
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text("Main Menu")

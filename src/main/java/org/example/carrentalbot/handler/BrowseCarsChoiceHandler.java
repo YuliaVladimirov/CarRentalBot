@@ -43,8 +43,8 @@ public class BrowseCarsChoiceHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         if (sessionService.get(chatId, "category", CarCategory.class).isEmpty()) {
-            CarCategory extracted = extractCategoryFromCallback(chatId, callbackQuery.getData());
-            sessionService.put(chatId, "category", extracted);
+            CarCategory extractedCategory = extractCategoryFromCallback(chatId, callbackQuery.getData());
+            sessionService.put(chatId, "category", extractedCategory);
         }
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarChoiceKeyboard();

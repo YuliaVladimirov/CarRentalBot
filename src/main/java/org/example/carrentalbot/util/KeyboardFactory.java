@@ -148,5 +148,19 @@ public class KeyboardFactory {
                 .build();
     }
 
+    public InlineKeyboardMarkupDto buildConfirmRentalDatesKeyboard() {
 
+        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
+
+        InlineKeyboardButtonDto confirmButton = InlineKeyboardButtonDto.builder()
+                .text("✅ Confirm")
+                .callbackData("CONFIRM_RENTAL_DATES")
+                .build();
+
+        rows.add(List.of(confirmButton));
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(rows)
+                .build();
+    }
 }

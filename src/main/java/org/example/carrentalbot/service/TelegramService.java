@@ -2,14 +2,14 @@ package org.example.carrentalbot.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.*;
-import org.example.carrentalbot.handler.CallbackHandler;
-import org.example.carrentalbot.handler.CommandHandler;
+import org.example.carrentalbot.handler.callback.CallbackHandler;
+import org.example.carrentalbot.handler.command.CommandHandler;
+import org.example.carrentalbot.handler.text.FallbackTextHandler;
+import org.example.carrentalbot.handler.text.TextHandler;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -17,43 +17,75 @@ import java.util.Map;
 public class TelegramService {
 
     private final TelegramClient telegramClient;
-    private final Map<String, CallbackHandler> callbackHandlerMap = new HashMap<>();
-    private final Map<String, CommandHandler> commandHandlerMap = new HashMap<>();
-    private CommandHandler fallbackCommandHandler;
-    private CallbackHandler fallbackCallbackHandler;
+    private final Map<String, CallbackHandler> callbackHandlerMap;
+    private final Map<String, CommandHandler> commandHandlerMap;
+    private final List<TextHandler> textHandlers;
+    private final CommandHandler fallbackCommandHandler;
+    private final CallbackHandler fallbackCallbackHandler;
+    private final TextHandler fallbackTextHandler;
 
-    public TelegramService(
-            TelegramClient telegramClient,
-            List<CallbackHandler> callbackHandlerList,
-            List<CommandHandler> commandHandlerList
-    ) {
+    public TelegramService( TelegramClient telegramClient,
+                            List<CallbackHandler> callbackHandlerList,
+                            List<CommandHandler> commandHandlerList,
+                            List<TextHandler> textHandlers ) {
         this.telegramClient = telegramClient;
+
+        CallbackHandler tempFallbackCallbackHandler = null;
+        Map<String, CallbackHandler> tempCallbackHandlers = new HashMap<>();
 
         for (CallbackHandler callbackHandler : callbackHandlerList) {
             if ("__FALLBACK__".equals(callbackHandler.getKey())) {
-                this.fallbackCallbackHandler = callbackHandler;
+                tempFallbackCallbackHandler = callbackHandler;
             } else {
-                this.callbackHandlerMap.put(callbackHandler.getKey(), callbackHandler);
+                tempCallbackHandlers.put(callbackHandler.getKey(), callbackHandler);
                 log.info("Registered callback handler: {}", callbackHandler.getClass().getSimpleName());
             }
         }
 
-        if (this.fallbackCallbackHandler == null) {
+        if (tempFallbackCallbackHandler == null) {
             throw new IllegalStateException("No fallback callback handler defined!");
         }
 
+        this.fallbackCallbackHandler = tempFallbackCallbackHandler;
+        this.callbackHandlerMap = tempCallbackHandlers;
+
+        CommandHandler tempFallbackCommandHandler = null;
+        Map<String, CommandHandler> tempCommandHandlers = new HashMap<>();
+
         for (CommandHandler commandHandler : commandHandlerList) {
             if ("__FALLBACK__".equals(commandHandler.getCommand())) {
-                this.fallbackCommandHandler = commandHandler;
+                tempFallbackCommandHandler = commandHandler;
             } else {
-                this.commandHandlerMap.put(commandHandler.getCommand(), commandHandler);
+                tempCommandHandlers.put(commandHandler.getCommand(), commandHandler);
                 log.info("Registered command handler: {}", commandHandler.getClass().getSimpleName());
             }
         }
 
-        if (this.fallbackCommandHandler == null) {
+        if (tempFallbackCommandHandler == null) {
             throw new IllegalStateException("No fallback command handler defined!");
         }
+
+        this.fallbackCommandHandler = tempFallbackCommandHandler;
+        this.commandHandlerMap = tempCommandHandlers;
+
+        FallbackTextHandler tempFallbackTextHandler = null;
+        List<TextHandler> tempTextHandlers = new ArrayList<>();
+
+        for (TextHandler textHandler : textHandlers) {
+            if (textHandler instanceof FallbackTextHandler fallback) {
+                tempFallbackTextHandler = fallback;
+            } else {
+                tempTextHandlers.add(textHandler);
+                log.info("Registered text handler: {}", textHandler.getClass().getSimpleName());
+            }
+        }
+
+        if (tempFallbackTextHandler == null) {
+            throw new IllegalStateException("FallbackTextHandler not found");
+        }
+
+        this.fallbackTextHandler = tempFallbackTextHandler;
+        this.textHandlers = tempTextHandlers;
     }
 
     public void handleUpdate(UpdateDto update) {
@@ -75,18 +107,33 @@ public class TelegramService {
 
         if (message.getChat() == null) {
             log.warn("No chat id received in message: {}", message);
+            return;
         }
 
         Long chatId = message.getChat().getId();
-        String text = message.getText();
-        if (text != null && text.startsWith("/")) {
-            log.info("Executing command '{}' for chatId {}", text.trim().toLowerCase(), chatId);
-            commandHandlerMap
-                    .getOrDefault(text.trim().toLowerCase(), fallbackCommandHandler)
-                    .handle(chatId, message);
-        } else {
-            log.debug("Ignoring non-command message for chatId {}: {}", chatId, text);
+        String text = Optional.ofNullable(message.getText()).orElse("").trim();
+
+        if (text.isEmpty()) {
+            log.debug("Ignoring empty message from chatId {}", chatId);
+            return;
         }
+
+        if (text.startsWith("/")) {
+            log.info("Executing command '{}' for chatId {}", text.toLowerCase(), chatId);
+            commandHandlerMap
+                    .getOrDefault(text.toLowerCase(), fallbackCommandHandler)
+                    .handle(chatId, message);
+            return;
+        }
+        log.info("Executing message for chatId {}: {}", chatId, text);
+
+        textHandlers.stream()
+                .filter(handler -> handler.canHandle(text))
+                .findFirst()
+                .ifPresentOrElse(
+                        handler -> handler.handle(chatId, message),
+                        () -> fallbackTextHandler.handle(chatId, message)
+                );
     }
 
     public void handleCallbackQuery(CallbackQueryDto callbackQuery) {

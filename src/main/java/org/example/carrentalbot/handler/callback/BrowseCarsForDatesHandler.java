@@ -35,13 +35,12 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
         """;
 
         navigationService.push(chatId, KEY);
-        SendMessageDto message = SendMessageDto.builder()
+
+        telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(text)
                 .parseMode("HTML")
                 .replyMarkup(null)
-                .build();
-
-        telegramClient.sendMessage(message);
+                .build());
     }
 }

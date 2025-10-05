@@ -12,13 +12,15 @@ public class GoBackHandler implements CallbackHandler {
     private final BrowseCategoriesHandler browseCategoriesHandler;
     private final BrowseAllCarsHandler browseAllCarsHandler;
     private final CarDetailsHandler carDetailsHandler;
+    private final BrowseCarsChoiceHandler browseCarsChoiceHandler;
 
-    public GoBackHandler(NavigationService navigationService, GoToMainMenuHandler goToMainMenuHandler, BrowseCategoriesHandler browseCategoriesHandler, BrowseAllCarsHandler browseAllCarsHandler, CarDetailsHandler carDetailsHandler) {
+    public GoBackHandler(NavigationService navigationService, GoToMainMenuHandler goToMainMenuHandler, BrowseCategoriesHandler browseCategoriesHandler, BrowseAllCarsHandler browseAllCarsHandler, CarDetailsHandler carDetailsHandler, BrowseCarsChoiceHandler browseCarsChoiceHandler) {
         this.navigationService = navigationService;
         this.goToMainMenuHandler = goToMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
         this.browseAllCarsHandler = browseAllCarsHandler;
         this.carDetailsHandler = carDetailsHandler;
+        this.browseCarsChoiceHandler = browseCarsChoiceHandler;
     }
 
     @Override
@@ -39,6 +41,7 @@ public class GoBackHandler implements CallbackHandler {
         switch (previousState) {
             case "CAR_DETAILS" -> carDetailsHandler.handle(chatId, callbackQuery);
             case "BROWSE_CARS" -> browseAllCarsHandler.handle(chatId, callbackQuery);
+            case "BROWSE_CARS_CHOICE" -> browseCarsChoiceHandler.handle(chatId, callbackQuery);
             case "BROWSE_CATEGORIES" -> browseCategoriesHandler.handle(chatId, callbackQuery);
 
             default -> goToMainMenuHandler.handle(chatId, callbackQuery);

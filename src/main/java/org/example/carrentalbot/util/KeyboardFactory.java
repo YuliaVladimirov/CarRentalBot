@@ -48,7 +48,7 @@ public class KeyboardFactory {
 
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                     .text(String.format("%s %s - from €%s/day", emoji, dto.category().getValue(), minimalDailyRate))
-                    .callbackData("BROWSE_CARS:" + dto.category().name())
+                    .callbackData("BROWSE_CARS_CHOICE:" + dto.category().name())
                     .build();
 
             rows.add(List.of(button));
@@ -76,6 +76,33 @@ public class KeyboardFactory {
         };
     }
 
+    public InlineKeyboardMarkupDto buildCarChoiceKeyboard() {
+
+        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
+
+        InlineKeyboardButtonDto allCarsButton = InlineKeyboardButtonDto.builder()
+                .text("All Cars")
+                .callbackData("BROWSE_ALL_CARS")
+                .build();
+        rows.add(List.of(allCarsButton));
+
+        InlineKeyboardButtonDto carsForMyDatesButton = InlineKeyboardButtonDto.builder()
+                .text("Cars For My Dates")
+                .callbackData("BROWSE_CARS_FOR_MY_DATES")
+                .build();
+        rows.add(List.of(carsForMyDatesButton));
+
+        InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
+                .text("⬅️ BACK")
+                .callbackData("GO_BACK")
+                .build();
+        rows.add(List.of(backButton));
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(rows)
+                .build();
+    }
+
     public InlineKeyboardMarkupDto buildCarKeyboard(List<Car> cars) {
 
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
@@ -101,7 +128,10 @@ public class KeyboardFactory {
                 .build();
     }
 
+
+
     public InlineKeyboardMarkupDto buildCarDetailsKeyboard(Car car) {
+
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
         InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
@@ -119,4 +149,6 @@ public class KeyboardFactory {
                 .inlineKeyboard(rows)
                 .build();
     }
+
+
 }

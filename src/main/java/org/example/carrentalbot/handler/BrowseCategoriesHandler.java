@@ -1,7 +1,7 @@
 package org.example.carrentalbot.handler;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
-import org.example.carrentalbot.dto.CategoryAvailabilityDto;
+import org.example.carrentalbot.dto.CarProjectionDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.service.CarService;
@@ -39,8 +39,8 @@ public class BrowseCategoriesHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
-        List<CategoryAvailabilityDto> availableCars = carService.getAvailableCarCounts();
-        InlineKeyboardMarkupDto keyboard = keyboardFactory.buildCarCategoryKeyboard(availableCars);
+        List<CarProjectionDto> carCategories = carService.getCarCategories();
+        InlineKeyboardMarkupDto keyboard = keyboardFactory.buildCarCategoryKeyboard(carCategories);
 
         navigationService.push(chatId, KEY);
         telegramClient.sendMessage(SendMessageDto.builder()

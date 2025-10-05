@@ -1,6 +1,6 @@
 package org.example.carrentalbot.service;
 
-import org.example.carrentalbot.dto.CategoryAvailabilityDto;
+import org.example.carrentalbot.dto.CarProjectionDto;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.repository.CarRepository;
@@ -19,8 +19,8 @@ public class CarService {
         this.carRepository = carRepository;
     }
 
-    public List<CategoryAvailabilityDto> getAvailableCarCounts() {
-        return carRepository.countAvailableCarsByCategory();
+    public List<CarProjectionDto> getCarCategories() {
+        return carRepository.getCarCategories();
     }
 
     public List<Car> getCarsByCategory(CarCategory carCategory) {

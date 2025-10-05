@@ -1,12 +1,14 @@
 package org.example.carrentalbot.util;
 
-import org.example.carrentalbot.dto.CategoryAvailabilityDto;
+import org.example.carrentalbot.dto.CarProjectionDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,33 +21,33 @@ public class KeyboardFactory {
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("🚗 Browse Categories")
-                                .callbackData("BROWSE_CATEGORIES:")
+                                .callbackData("BROWSE_CATEGORIES")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📒 My Bookings")
-                                .callbackData("MY_BOOKINGS:")
+                                .callbackData("MY_BOOKINGS")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("🧑 My Profile")
-                                .callbackData("MY_PROFILE:")
+                                .callbackData("MY_PROFILE")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📞 Help")
-                                .callbackData("HELP:")
+                                .callbackData("HELP")
                                 .build())
                 ))
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildCarCategoryKeyboard(List<CategoryAvailabilityDto> availability) {
+    public InlineKeyboardMarkupDto buildCarCategoryKeyboard(List<CarProjectionDto> availability) {
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
-        for (CategoryAvailabilityDto dto : availability) {
+        for (CarProjectionDto dto : availability) {
             String emoji = getCategoryEmoji(dto.category());
-            int available = dto.count().intValue();
+            BigDecimal minimalDailyRate = dto.minimalDailyRate().setScale(0, RoundingMode.HALF_UP);
 
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                    .text(String.format("%s %s (%d cars available)", emoji, dto.category().name(), available))
+                    .text(String.format("%s %s - from €%s/day", emoji, dto.category().getValue(), minimalDailyRate))
                     .callbackData("BROWSE_CARS:" + dto.category().name())
                     .build();
 
@@ -54,7 +56,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
-                .callbackData("BACK")
+                .callbackData("GO_BACK")
                 .build();
 
         rows.add(List.of(backButton));
@@ -89,7 +91,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
-                .callbackData("BACK")
+                .callbackData("GO_BACK")
                 .build();
 
         rows.add(List.of(backButton));
@@ -109,7 +111,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
-                .callbackData("BACK")
+                .callbackData("GO_BACK")
                 .build();
         rows.add(List.of(button, backButton));
 

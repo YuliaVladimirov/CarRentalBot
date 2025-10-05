@@ -74,23 +74,6 @@ CREATE INDEX index_bookings_end_time ON bookings(end_date);
 --changeset yulia:2025-09-06-index-bookings-status
 CREATE INDEX index_bookings_status ON bookings(status);
 
-
--- ========================================
--- USER SESSIONS
--- ========================================
-
-CREATE TABLE user_sessions (
-                               telegram_user_id BIGINT PRIMARY KEY,
-                               state VARCHAR(20) NOT NULL,
-                               temp_data TEXT,
-                               last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
---changeset yulia:2025-09-06-index-user-sessions-last-updated
-CREATE INDEX index_user_sessions_last_updated ON user_sessions(last_updated);
-
-
-
 -- ========================================
 -- REMINDERS
 -- ========================================

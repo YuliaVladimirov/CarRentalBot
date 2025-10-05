@@ -21,8 +21,8 @@ public class SendMessageDto {
     private String text;
 
     @JsonProperty("parse_mode")
-    private String parseMode; // "HTML", "MarkdownV2", optional
+    private String parseMode;
 
     @JsonProperty("reply_markup")
-    private Object replyMarkup; // InlineKeyboardMarkup or ReplyKeyboardMarkup
+    private Object replyMarkup;
 }

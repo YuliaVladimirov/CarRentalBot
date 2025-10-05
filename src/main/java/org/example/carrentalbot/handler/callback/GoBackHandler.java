@@ -1,4 +1,4 @@
-package org.example.carrentalbot.handler;
+package org.example.carrentalbot.handler.callback;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.service.NavigationService;

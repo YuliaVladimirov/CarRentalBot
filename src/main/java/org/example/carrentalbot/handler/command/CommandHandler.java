@@ -1,4 +1,4 @@
-package org.example.carrentalbot.handler;
+package org.example.carrentalbot.handler.command;
 
 import org.example.carrentalbot.dto.MessageDto;
 

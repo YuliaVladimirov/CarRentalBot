@@ -1,30 +1,30 @@
-package org.example.carrentalbot.handler;
+package org.example.carrentalbot.handler.callback;
 
-import org.example.carrentalbot.dto.MessageDto;
+import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FallbackCommandHandler implements CommandHandler {
+public class FallbackCallbackHandler implements CallbackHandler {
 
     private final TelegramClient telegramClient;
 
-    public FallbackCommandHandler(TelegramClient telegramClient) {
+    public FallbackCallbackHandler(TelegramClient telegramClient) {
         this.telegramClient = telegramClient;
     }
 
     @Override
-    public String getCommand() {
+    public String getKey() {
         return "__FALLBACK__";
     }
 
     @Override
-    public void handle(Long chatId, MessageDto message) {
+    public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("❓ Sorry, I did not understand that command. Type /help for available options.")
+                .text("⚠️ This button is not supported. Please use the main menu (/menu).")
                 .parseMode("HTML")
                 .build());
     }

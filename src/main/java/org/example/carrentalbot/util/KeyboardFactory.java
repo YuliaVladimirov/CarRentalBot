@@ -110,7 +110,7 @@ public class KeyboardFactory {
         for (Car car : cars) {
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                     .text(String.format("%s  %s (%s)", "🔸", car.getBrand(), car.getModel()))
-                    .callbackData("CAR_DETAILS:" + car.getId())
+                    .callbackData("DISPLAY_CAR_DETAILS:" + car.getId())
                     .build();
 
             rows.add(List.of(button));

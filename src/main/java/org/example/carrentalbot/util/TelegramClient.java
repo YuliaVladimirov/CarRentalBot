@@ -3,6 +3,7 @@ package org.example.carrentalbot.util;
 import org.example.carrentalbot.config.TelegramBotProperties;
 import org.example.carrentalbot.dto.AnswerCallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.dto.SendPhotoDto;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,13 +22,6 @@ public class TelegramClient {
         return apiBase + "/" + method;
     }
 
-    public void sendMessage(SendMessageDto request) {
-         restTemplate.postForEntity(
-                getApiUrl("sendMessage"),
-                request,
-                String.class);
-    }
-
     public void answerCallbackQuery(AnswerCallbackQueryDto request) {
         restTemplate.postForEntity(
                 getApiUrl("answerCallbackQuery"),
@@ -36,4 +30,17 @@ public class TelegramClient {
         );
     }
 
+    public void sendMessage(SendMessageDto request) {
+        restTemplate.postForEntity(
+                getApiUrl("sendMessage"),
+                request,
+                String.class);
+    }
+
+    public void sendPhoto(SendPhotoDto request) {
+        restTemplate.postForEntity(
+                getApiUrl("sendPhoto"),
+                request,
+                String.class);
+    }
 }

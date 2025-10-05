@@ -10,10 +10,13 @@ public class GoBackHandler implements CallbackHandler {
     private final NavigationService navigationService;
     private final GoToMainMenuHandler goToMainMenuHandler;
     private final BrowseCategoriesHandler browseCategoriesHandler;
-    private final BrowseAllCarsHandler browseAllCarsHandler;
-    private final BrowseCarsForDatesHandler browseCarsForDatesHandler;
-    private final DisplayCarDetailsHandler displayCarDetailsHandler;
     private final BrowseCarsChoiceHandler browseCarsChoiceHandler;
+    private final BrowseAllCarsHandler browseAllCarsHandler;
+    private final DisplayCarDetailsHandler displayCarDetailsHandler;
+    private final BrowseCarsForDatesHandler browseCarsForDatesHandler;
+    private final ConfirmRentalDaysHandler confirmRentalDaysHandler;
+
+
 
     public GoBackHandler(NavigationService navigationService,
                          GoToMainMenuHandler goToMainMenuHandler,
@@ -21,7 +24,7 @@ public class GoBackHandler implements CallbackHandler {
                          BrowseAllCarsHandler browseAllCarsHandler,
                          BrowseCarsForDatesHandler browseCarsForDatesHandler,
                          DisplayCarDetailsHandler displayCarDetailsHandler,
-                         BrowseCarsChoiceHandler browseCarsChoiceHandler) {
+                         BrowseCarsChoiceHandler browseCarsChoiceHandler, ConfirmRentalDaysHandler confirmRentalDaysHandler) {
         this.navigationService = navigationService;
         this.goToMainMenuHandler = goToMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
@@ -29,6 +32,7 @@ public class GoBackHandler implements CallbackHandler {
         this.browseCarsForDatesHandler = browseCarsForDatesHandler;
         this.displayCarDetailsHandler = displayCarDetailsHandler;
         this.browseCarsChoiceHandler = browseCarsChoiceHandler;
+        this.confirmRentalDaysHandler = confirmRentalDaysHandler;
     }
 
     @Override
@@ -47,8 +51,9 @@ public class GoBackHandler implements CallbackHandler {
         }
 
         switch (previousState) {
-            case "DISPLAY_CAR_DETAILS" -> displayCarDetailsHandler.handle(chatId, callbackQuery);
+            case "CONFIRM_RENTAL_DATES" -> confirmRentalDaysHandler.handle(chatId, callbackQuery);
             case "BROWSE_CARS_FOR_DATES" -> browseCarsForDatesHandler.handle(chatId, callbackQuery);
+            case "DISPLAY_CAR_DETAILS" -> displayCarDetailsHandler.handle(chatId, callbackQuery);
             case "BROWSE_ALL_CARS" -> browseAllCarsHandler.handle(chatId, callbackQuery);
             case "BROWSE_CARS_CHOICE" -> browseCarsChoiceHandler.handle(chatId, callbackQuery);
             case "BROWSE_CATEGORIES" -> browseCategoriesHandler.handle(chatId, callbackQuery);

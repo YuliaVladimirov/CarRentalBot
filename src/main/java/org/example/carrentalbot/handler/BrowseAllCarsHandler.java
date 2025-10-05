@@ -3,11 +3,12 @@ package org.example.carrentalbot.handler;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
-import org.example.carrentalbot.exception.InvalidDataException;
+import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.NavigationService;
+import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -21,15 +22,17 @@ public class BrowseAllCarsHandler implements CallbackHandler {
 
     private final CarService carService;
     private final NavigationService navigationService;
+    private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public BrowseAllCarsHandler(CarService carService,
-                                NavigationService navigationService,
+                                NavigationService navigationService, SessionService sessionService,
                                 KeyboardFactory keyboardFactory,
                                 TelegramClient telegramClient) {
         this.carService = carService;
         this.navigationService = navigationService;
+        this.sessionService = sessionService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -43,29 +46,18 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        String categoryName;
-        if (callbackQuery.getData().contains(":")) {
-            categoryName = callbackQuery.getData().split(":", 2)[1];
-        } else {
-            categoryName = null;
-        }
+        CarCategory carCategory = sessionService
+                .get(chatId, "category", CarCategory.class)
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found"));
 
-        CarCategory carCategory;
-        try {
-            assert categoryName != null;
-            carCategory = CarCategory.valueOf(categoryName.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new InvalidDataException(chatId, String.format("❌ Invalid category: %s.", categoryName));
-        }
-
-        List<Car> cars = carService.getCarsByCategory(carCategory);
+        List<Car> cars = carService.getAllCarsByCategory(carCategory);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(cars);
 
         navigationService.push(chatId, KEY);
         SendMessageDto message = SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text(String.format("Available cars in %s category", categoryName))
+                .text(String.format("Available cars in %s category:", carCategory))
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build();

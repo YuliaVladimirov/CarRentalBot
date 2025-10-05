@@ -23,8 +23,8 @@ public class CarService {
         return carRepository.getCarCategories();
     }
 
-    public List<Car> getCarsByCategory(CarCategory carCategory) {
-        return carRepository.findByCategoryAndAvailableIs(carCategory, true);
+    public List<Car> getAllCarsByCategory(CarCategory carCategory) {
+        return carRepository.findByCategory(carCategory);
     }
 
     public Optional<Car> getCarInfo(UUID carId) {

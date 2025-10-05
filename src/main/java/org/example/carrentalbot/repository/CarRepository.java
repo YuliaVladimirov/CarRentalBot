@@ -19,5 +19,5 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
             """)
     List<CarProjectionDto> getCarCategories();
 
-    List<Car> findByCategoryAndAvailableIs(CarCategory carCategory, Boolean available);
+    List<Car> findByCategory(CarCategory carCategory);
 }

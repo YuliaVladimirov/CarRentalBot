@@ -88,7 +88,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto carsForMyDatesButton = InlineKeyboardButtonDto.builder()
                 .text("Cars For My Dates")
-                .callbackData("BROWSE_CARS_FOR_MY_DATES")
+                .callbackData("BROWSE_CARS_FOR_DATES")
                 .build();
         rows.add(List.of(carsForMyDatesButton));
 
@@ -127,8 +127,6 @@ public class KeyboardFactory {
                 .inlineKeyboard(rows)
                 .build();
     }
-
-
 
     public InlineKeyboardMarkupDto buildCarDetailsKeyboard(Car car) {
 

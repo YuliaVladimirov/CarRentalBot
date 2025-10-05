@@ -36,8 +36,8 @@ public class Car {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "image_url", length = 200)
-    private String imageUrl;
+    @Column(name = "image_file_id", length = 200)
+    private String imageFileId;
 
     @Column(name = "daily_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal dailyRate;

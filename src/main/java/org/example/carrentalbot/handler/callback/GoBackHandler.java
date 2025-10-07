@@ -16,8 +16,6 @@ public class GoBackHandler implements CallbackHandler {
     private final BrowseCarsForDatesHandler browseCarsForDatesHandler;
     private final ConfirmRentalDaysHandler confirmRentalDaysHandler;
 
-
-
     public GoBackHandler(NavigationService navigationService,
                          GoToMainMenuHandler goToMainMenuHandler,
                          BrowseCategoriesHandler browseCategoriesHandler,
@@ -51,12 +49,12 @@ public class GoBackHandler implements CallbackHandler {
         }
 
         switch (previousState) {
-            case "CONFIRM_RENTAL_DATES" -> confirmRentalDaysHandler.handle(chatId, callbackQuery);
-            case "BROWSE_CARS_FOR_DATES" -> browseCarsForDatesHandler.handle(chatId, callbackQuery);
-            case "DISPLAY_CAR_DETAILS" -> displayCarDetailsHandler.handle(chatId, callbackQuery);
-            case "BROWSE_ALL_CARS" -> browseAllCarsHandler.handle(chatId, callbackQuery);
-            case "CHOOSE_CAR_BROWSING_MODE" -> chooseCarBrowsingModeHandler.handle(chatId, callbackQuery);
-            case "BROWSE_CATEGORIES" -> browseCategoriesHandler.handle(chatId, callbackQuery);
+            case ConfirmRentalDaysHandler.KEY -> confirmRentalDaysHandler.handle(chatId, callbackQuery);
+            case BrowseCarsForDatesHandler.KEY -> browseCarsForDatesHandler.handle(chatId, callbackQuery);
+            case DisplayCarDetailsHandler.KEY -> displayCarDetailsHandler.handle(chatId, callbackQuery);
+            case BrowseAllCarsHandler.KEY -> browseAllCarsHandler.handle(chatId, callbackQuery);
+            case ChooseCarBrowsingModeHandler.KEY -> chooseCarBrowsingModeHandler.handle(chatId, callbackQuery);
+            case BrowseCategoriesHandler.KEY -> browseCategoriesHandler.handle(chatId, callbackQuery);
 
             default -> goToMainMenuHandler.handle(chatId, callbackQuery);
         }

@@ -15,19 +15,19 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class BrowseCarsChoiceHandler implements CallbackHandler {
+public class ChooseCarBrowsingModeHandler implements CallbackHandler {
 
-    public static final String KEY = "BROWSE_CARS_CHOICE";
+    public static final String KEY = "CHOOSE_CAR_BROWSING_MODE";
 
     private final NavigationService navigationService;
     private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public BrowseCarsChoiceHandler(NavigationService navigationService,
-                                   SessionService sessionService,
-                                   KeyboardFactory keyboardFactory,
-                                   TelegramClient telegramClient) {
+    public ChooseCarBrowsingModeHandler(NavigationService navigationService,
+                                        SessionService sessionService,
+                                        KeyboardFactory keyboardFactory,
+                                        TelegramClient telegramClient) {
         this.navigationService = navigationService;
         this.sessionService = sessionService;
         this.keyboardFactory = keyboardFactory;

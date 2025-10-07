@@ -10,7 +10,7 @@ public class GoBackHandler implements CallbackHandler {
     private final NavigationService navigationService;
     private final GoToMainMenuHandler goToMainMenuHandler;
     private final BrowseCategoriesHandler browseCategoriesHandler;
-    private final BrowseCarsChoiceHandler browseCarsChoiceHandler;
+    private final ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler;
     private final BrowseAllCarsHandler browseAllCarsHandler;
     private final DisplayCarDetailsHandler displayCarDetailsHandler;
     private final BrowseCarsForDatesHandler browseCarsForDatesHandler;
@@ -24,14 +24,14 @@ public class GoBackHandler implements CallbackHandler {
                          BrowseAllCarsHandler browseAllCarsHandler,
                          BrowseCarsForDatesHandler browseCarsForDatesHandler,
                          DisplayCarDetailsHandler displayCarDetailsHandler,
-                         BrowseCarsChoiceHandler browseCarsChoiceHandler, ConfirmRentalDaysHandler confirmRentalDaysHandler) {
+                         ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler, ConfirmRentalDaysHandler confirmRentalDaysHandler) {
         this.navigationService = navigationService;
         this.goToMainMenuHandler = goToMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
         this.browseAllCarsHandler = browseAllCarsHandler;
         this.browseCarsForDatesHandler = browseCarsForDatesHandler;
         this.displayCarDetailsHandler = displayCarDetailsHandler;
-        this.browseCarsChoiceHandler = browseCarsChoiceHandler;
+        this.chooseCarBrowsingModeHandler = chooseCarBrowsingModeHandler;
         this.confirmRentalDaysHandler = confirmRentalDaysHandler;
     }
 
@@ -55,7 +55,7 @@ public class GoBackHandler implements CallbackHandler {
             case "BROWSE_CARS_FOR_DATES" -> browseCarsForDatesHandler.handle(chatId, callbackQuery);
             case "DISPLAY_CAR_DETAILS" -> displayCarDetailsHandler.handle(chatId, callbackQuery);
             case "BROWSE_ALL_CARS" -> browseAllCarsHandler.handle(chatId, callbackQuery);
-            case "BROWSE_CARS_CHOICE" -> browseCarsChoiceHandler.handle(chatId, callbackQuery);
+            case "CHOOSE_CAR_BROWSING_MODE" -> chooseCarBrowsingModeHandler.handle(chatId, callbackQuery);
             case "BROWSE_CATEGORIES" -> browseCategoriesHandler.handle(chatId, callbackQuery);
 
             default -> goToMainMenuHandler.handle(chatId, callbackQuery);

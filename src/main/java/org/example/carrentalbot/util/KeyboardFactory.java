@@ -50,7 +50,7 @@ public class KeyboardFactory {
 
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                     .text(String.format("%s %s - from €%s/day", emoji, dto.category().getValue(), minimalDailyRate))
-                    .callbackData("BROWSE_CARS_CHOICE:" + dto.category().name())
+                    .callbackData("CHOOSE_CAR_BROWSING_MODE:" + dto.category().name())
                     .build();
 
             rows.add(List.of(button));
@@ -137,8 +137,8 @@ public class KeyboardFactory {
         switch (carBrowsingMode) {
             case "BROWSE_ALL_CARS" -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                        .text("CHECK AVAILABILITY")
-                        .callbackData("CHECK AVAILABILITY")
+                        .text("CHECK CAR AVAILABILITY")
+                        .callbackData("CHECK_CAR_AVAILABILITY")
                         .build();
                 rows.add(List.of(button));
             }

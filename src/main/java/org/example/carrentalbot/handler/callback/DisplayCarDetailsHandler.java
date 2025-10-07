@@ -48,17 +48,13 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        UUID carId = sessionService.get(chatId, "carId", UUID.class)
-                .orElseGet(() -> {
-                    UUID extractCarIdFromCallback = extractCarIdFromCallback(chatId, callbackQuery.getData());
-                    sessionService.put(chatId, "carId", extractCarIdFromCallback);
-                    return extractCarIdFromCallback;
-                });
-
+        UUID carId = retrieveCarId(chatId, callbackQuery.getData());
         Car car = carService.getCarInfo(carId).orElseThrow(
-                () -> new DataNotFoundException(chatId, String.format("User with id: %s, was not found.", carId)));
+                () -> new DataNotFoundException(chatId, String.format("Car with id: %s, was not found.", carId)));
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(car);
+        String carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(carBrowsingMode);
+
         String text = String.format("""
                 🚘 Car Details:
                 
@@ -68,7 +64,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                 💰 Daily Rate: €%s/day
                 """, car.getBrand(), car.getModel(), car.getDescription(), car.getDailyRate().setScale(0, RoundingMode.HALF_UP));
 
-        navigationService.push(chatId, KEY);
+        navigationService.push(chatId, KEY + ":" + car.getId());
 
         telegramClient.sendPhoto(SendPhotoDto.builder()
                 .chatId(chatId.toString())
@@ -79,19 +75,36 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                 .build());
     }
 
+    private UUID retrieveCarId(Long chatId, String callbackData) {
+
+        UUID fromCallback = extractCarIdFromCallback(chatId, callbackData);
+        UUID fromSession = sessionService.get(chatId, "carId", UUID.class).orElse(null);
+
+        if (fromCallback == null && fromSession == null) {
+            throw new DataNotFoundException(chatId, "❌ Car id not found in callback or session");
+        }
+
+        UUID result = (fromCallback != null) ? fromCallback : fromSession;
+
+        if (!result.equals(fromSession)) {
+            sessionService.put(chatId, "carId", result);
+        }
+
+        return result;
+    }
+
     private UUID extractCarIdFromCallback (Long chatId, String callbackData) {
 
-        String carIdString = Optional.ofNullable(callbackData)
+        return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
                 .map(data -> data.split(":", 2)[1])
-                .orElseThrow(() ->
-                        new InvalidDataException(chatId, "❌ Missing car id information.")
-                );
-
-        try {
-            return UUID.fromString(carIdString);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidDataException(chatId, String.format("Invalid UUID format: %s",carIdString));
-        }
+                .map(idStr -> {
+                    try {
+                        return UUID.fromString(idStr);
+                    } catch (IllegalArgumentException e) {
+                        throw new InvalidDataException(chatId, "❌ Invalid UUID format: " + idStr);
+                    }
+                })
+                .orElse(null);
     }
 }

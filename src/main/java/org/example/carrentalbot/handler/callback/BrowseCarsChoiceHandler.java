@@ -3,6 +3,7 @@ package org.example.carrentalbot.handler.callback;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.service.NavigationService;
@@ -42,10 +43,7 @@ public class BrowseCarsChoiceHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        if (sessionService.get(chatId, "category", CarCategory.class).isEmpty()) {
-            CarCategory extractedCategory = extractCategoryFromCallback(chatId, callbackQuery.getData());
-            sessionService.put(chatId, "category", extractedCategory);
-        }
+        CarCategory category = retrieveCategory(chatId, callbackQuery.getData());
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarChoiceKeyboard();
 
@@ -61,18 +59,35 @@ public class BrowseCarsChoiceHandler implements CallbackHandler {
         telegramClient.sendMessage(message);
     }
 
+    private CarCategory retrieveCategory(Long chatId, String callbackData) {
+        CarCategory fromCallback = extractCategoryFromCallback(chatId, callbackData);
+        CarCategory fromSession = sessionService.get(chatId, "carCategory", CarCategory.class).orElse(null);
+
+        if (fromCallback == null && fromSession == null) {
+            throw new DataNotFoundException(chatId, "❌ Car category not found in callback or session");
+        }
+
+        CarCategory result = fromCallback != null ? fromCallback : fromSession;
+
+        if (!result.equals(fromSession)) {
+            sessionService.put(chatId, "carCategory", result);
+        }
+
+        return result;
+    }
+
     private CarCategory extractCategoryFromCallback(Long chatId, String callbackData) {
-        String categoryName = Optional.ofNullable(callbackData)
+        return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
                 .map(data -> data.split(":", 2)[1])
-                .orElseThrow(() ->
-                        new InvalidDataException(chatId, "❌ Missing category information.")
-                );
-
-        try {
-            return CarCategory.valueOf(categoryName.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new InvalidDataException(chatId, String.format("❌ Invalid category: %s.", categoryName));
-        }
+                .map(String::toUpperCase)
+                .map(categoryStr -> {
+                    try {
+                        return CarCategory.valueOf(categoryStr);
+                    } catch (IllegalArgumentException e) {
+                        throw new InvalidDataException(chatId, "❌ Invalid category: " + categoryStr);
+                    }
+                })
+                .orElse(null);
     }
 }

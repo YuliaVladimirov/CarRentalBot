@@ -47,7 +47,7 @@ public class ConfirmRentalDaysHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         CarCategory carCategory = sessionService
-                .get(chatId, "category", CarCategory.class)
+                .get(chatId, "carCategory", CarCategory.class)
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found"));
 
         LocalDate startDate = sessionService
@@ -60,7 +60,7 @@ public class ConfirmRentalDaysHandler implements CallbackHandler {
 
         List<Car> availableCars = carService.getAvailableCarsByCategoryAndDates(carCategory, startDate, endDate);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(availableCars);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarsKeyboard(availableCars);
 
         navigationService.push(chatId, KEY);
 

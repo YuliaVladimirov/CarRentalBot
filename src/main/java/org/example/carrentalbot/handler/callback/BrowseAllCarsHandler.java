@@ -46,19 +46,21 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
+        sessionService.put(chatId, "carBrowsingMode", KEY);
+
         CarCategory carCategory = sessionService
-                .get(chatId, "category", CarCategory.class)
+                .get(chatId, "carCategory", CarCategory.class)
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found"));
 
         List<Car> allCars = carService.getAllCarsByCategory(carCategory);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarKeyboard(allCars);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarsKeyboard(allCars);
 
         navigationService.push(chatId, KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text(String.format("Available cars in %s category:", carCategory))
+                .text(String.format("All cars in %s category:", carCategory))
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());

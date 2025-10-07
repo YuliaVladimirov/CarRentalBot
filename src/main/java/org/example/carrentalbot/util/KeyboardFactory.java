@@ -1,5 +1,6 @@
 package org.example.carrentalbot.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CarProjectionDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class KeyboardFactory {
 
     public InlineKeyboardMarkupDto buildMainMenuKeyboard() {
@@ -103,7 +105,7 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildCarKeyboard(List<Car> cars) {
+    public InlineKeyboardMarkupDto buildCarsKeyboard(List<Car> cars) {
 
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
@@ -128,20 +130,34 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildCarDetailsKeyboard(Car car) {
+    public InlineKeyboardMarkupDto buildCarDetailsKeyboard(String carBrowsingMode) {
 
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
-        InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+        switch (carBrowsingMode) {
+            case "BROWSE_ALL_CARS" -> {
+                InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                        .text("CHECK AVAILABILITY")
+                        .callbackData("CHECK AVAILABILITY")
+                        .build();
+                rows.add(List.of(button));
+            }
+
+            case "BROWSE_CARS_FOR_DATES" -> {
+                InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                 .text("BOOK")
-                .callbackData("BOOK_CAR:" + car.getId())
+                .callbackData("BOOK_CAR")
                 .build();
+                rows.add(List.of(button));
+            }
+            default -> log.warn("Unknown car browsing mode: {}", carBrowsingMode);
+        }
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
                 .callbackData("GO_BACK")
                 .build();
-        rows.add(List.of(button, backButton));
+        rows.add(List.of(backButton));
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)

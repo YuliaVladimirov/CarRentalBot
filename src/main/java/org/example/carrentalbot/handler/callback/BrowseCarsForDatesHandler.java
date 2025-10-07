@@ -3,6 +3,7 @@ package org.example.carrentalbot.handler.callback;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.service.NavigationService;
+import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
@@ -12,11 +13,13 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
     public static final String KEY = "BROWSE_CARS_FOR_DATES";
 
     private final NavigationService navigationService;
+    private final SessionService sessionService;
     private final TelegramClient telegramClient;
 
-    public BrowseCarsForDatesHandler(NavigationService navigationService,
+    public BrowseCarsForDatesHandler(NavigationService navigationService, SessionService sessionService,
                                      TelegramClient telegramClient) {
         this.navigationService = navigationService;
+        this.sessionService = sessionService;
         this.telegramClient = telegramClient;
     }
 
@@ -27,6 +30,8 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+
+        sessionService.put(chatId, "carBrowsingMode", KEY);
 
         String text = """
         Please enter your rental period.

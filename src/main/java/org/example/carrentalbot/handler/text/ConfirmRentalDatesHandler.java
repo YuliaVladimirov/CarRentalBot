@@ -5,6 +5,7 @@ import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
+import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -54,7 +55,8 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                 Please confirm or enter again.
                 """, startDate.format(formatter), endDate.format(formatter));
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmRentalDatesKeyboard();
+        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmRentalDatesKeyboard(carBrowsingMode);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

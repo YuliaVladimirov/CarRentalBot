@@ -7,35 +7,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class GoBackHandler implements CallbackHandler {
 
+    public static final String KEY = "GO_BACK";
+
     private final NavigationService navigationService;
     private final GoToMainMenuHandler goToMainMenuHandler;
     private final BrowseCategoriesHandler browseCategoriesHandler;
     private final ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler;
     private final BrowseAllCarsHandler browseAllCarsHandler;
     private final DisplayCarDetailsHandler displayCarDetailsHandler;
-    private final BrowseCarsForDatesHandler browseCarsForDatesHandler;
-    private final ConfirmRentalDaysHandler confirmRentalDaysHandler;
+    private final AskForRentalDatesHandler askForRentalDatesHandler;
+    private final BrowseCarsForDates browseCarsForDates;
 
     public GoBackHandler(NavigationService navigationService,
                          GoToMainMenuHandler goToMainMenuHandler,
                          BrowseCategoriesHandler browseCategoriesHandler,
                          BrowseAllCarsHandler browseAllCarsHandler,
-                         BrowseCarsForDatesHandler browseCarsForDatesHandler,
+                         AskForRentalDatesHandler askForRentalDatesHandler,
                          DisplayCarDetailsHandler displayCarDetailsHandler,
-                         ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler, ConfirmRentalDaysHandler confirmRentalDaysHandler) {
+                         ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler,
+                         BrowseCarsForDates browseCarsForDates) {
         this.navigationService = navigationService;
         this.goToMainMenuHandler = goToMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
         this.browseAllCarsHandler = browseAllCarsHandler;
-        this.browseCarsForDatesHandler = browseCarsForDatesHandler;
+        this.askForRentalDatesHandler = askForRentalDatesHandler;
         this.displayCarDetailsHandler = displayCarDetailsHandler;
         this.chooseCarBrowsingModeHandler = chooseCarBrowsingModeHandler;
-        this.confirmRentalDaysHandler = confirmRentalDaysHandler;
+        this.browseCarsForDates = browseCarsForDates;
     }
 
     @Override
     public String getKey() {
-        return "GO_BACK";
+        return KEY;
     }
 
     @Override
@@ -49,8 +52,8 @@ public class GoBackHandler implements CallbackHandler {
         }
 
         switch (previousState) {
-            case ConfirmRentalDaysHandler.KEY -> confirmRentalDaysHandler.handle(chatId, callbackQuery);
-            case BrowseCarsForDatesHandler.KEY -> browseCarsForDatesHandler.handle(chatId, callbackQuery);
+            case BrowseCarsForDates.KEY -> browseCarsForDates.handle(chatId, callbackQuery);
+            case AskForRentalDatesHandler.KEY -> askForRentalDatesHandler.handle(chatId, callbackQuery);
             case DisplayCarDetailsHandler.KEY -> displayCarDetailsHandler.handle(chatId, callbackQuery);
             case BrowseAllCarsHandler.KEY -> browseAllCarsHandler.handle(chatId, callbackQuery);
             case ChooseCarBrowsingModeHandler.KEY -> chooseCarBrowsingModeHandler.handle(chatId, callbackQuery);

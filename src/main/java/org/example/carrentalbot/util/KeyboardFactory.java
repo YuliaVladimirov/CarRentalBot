@@ -6,6 +6,7 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
 import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.Car;
+import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,7 @@ public class KeyboardFactory {
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("🚗 Browse Categories")
-                                .callbackData(BrowseAllCarsHandler.KEY)
+                                .callbackData(BrowseCategoriesHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📒 My Bookings")
@@ -79,19 +80,19 @@ public class KeyboardFactory {
         };
     }
 
-    public InlineKeyboardMarkupDto buildCarChoiceKeyboard() {
+    public InlineKeyboardMarkupDto buildCarBrowsingModeKeyboard() {
 
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
         InlineKeyboardButtonDto allCarsButton = InlineKeyboardButtonDto.builder()
                 .text("All Cars")
-                .callbackData(BrowseAllCarsHandler.KEY)
+                .callbackData(BrowseAllCarsHandler.KEY + ":" + CarBrowsingMode.ALL_CARS.name())
                 .build();
         rows.add(List.of(allCarsButton));
 
         InlineKeyboardButtonDto carsForMyDatesButton = InlineKeyboardButtonDto.builder()
                 .text("Cars For My Dates")
-                .callbackData(AskForRentalDatesHandler.KEY)
+                .callbackData(AskForRentalDatesHandler.KEY + ":" + CarBrowsingMode.CARS_FOR_DATES.name())
                 .build();
         rows.add(List.of(carsForMyDatesButton));
 
@@ -131,20 +132,20 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildCarDetailsKeyboard(String carBrowsingMode) {
+    public InlineKeyboardMarkupDto buildCarDetailsKeyboard(CarBrowsingMode carBrowsingMode) {
 
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
         switch (carBrowsingMode) {
-            case "BROWSE_ALL_CARS" -> {
+            case ALL_CARS -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                         .text("CHECK CAR AVAILABILITY")
-                        .callbackData(CheckCarAvailabilityHandler.KEY)
+                        .callbackData(AskForRentalDatesHandler.KEY)//add  + ":" + CarBrowsingMode.ALL_CARS.name(), if not working properly
                         .build();
                 rows.add(List.of(button));
             }
 
-            case "BROWSE_CARS_FOR_DATES" -> {
+            case CARS_FOR_DATES -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                 .text("BOOK")
                 .callbackData("BOOK_CAR")
@@ -165,16 +166,28 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildConfirmRentalDatesKeyboard() {
+    public InlineKeyboardMarkupDto buildConfirmRentalDatesKeyboard(CarBrowsingMode carBrowsingMode) {
 
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
-        InlineKeyboardButtonDto confirmButton = InlineKeyboardButtonDto.builder()
-                .text("✅ Confirm")
-                .callbackData(ConfirmRentalDaysHandler.KEY)
-                .build();
+        switch(carBrowsingMode) {
+            case CARS_FOR_DATES -> {
+                InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                        .text("✅ Confirm")
+                        .callbackData(BrowseCarsForDates.KEY)
+                        .build();
+                rows.add(List.of(button));
+            }
+            case ALL_CARS -> {
+                InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                        .text("✅ Confirm")
+                        .callbackData("START_BOOKING")
+                        .build();
+                rows.add(List.of(button));
+            }
 
-        rows.add(List.of(confirmButton));
+            default -> log.warn("Unknown car browsing mode: {}", carBrowsingMode);
+        }
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)

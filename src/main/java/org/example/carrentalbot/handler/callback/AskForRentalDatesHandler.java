@@ -2,10 +2,15 @@ package org.example.carrentalbot.handler.callback;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.exception.InvalidDataException;
+import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class AskForRentalDatesHandler implements CallbackHandler {
@@ -31,7 +36,7 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        sessionService.put(chatId, "carBrowsingMode", "BROWSE_CARS_FOR_DATES");
+        handleBrowsingMode(chatId, callbackQuery.getData());
 
         String text = """
         Please enter your rental period.
@@ -47,5 +52,37 @@ public class AskForRentalDatesHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(null)
                 .build());
+    }
+
+
+    private void handleBrowsingMode(Long chatId, String callbackData) {
+        CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(chatId, callbackData);
+        CarBrowsingMode fromSession = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElse(null);
+
+        if (fromCallback == null && fromSession == null) {
+            throw new DataNotFoundException(chatId, "❌ Car browsing mode not found in callback or session");
+        }
+
+        CarBrowsingMode result = fromCallback != null ? fromCallback : fromSession;
+
+        if (!result.equals(fromSession)) {
+            sessionService.put(chatId, "carBrowsingMode", result);
+        }
+    }
+
+
+    private CarBrowsingMode extractBrowsingModeFromCallback(Long chatId, String callbackData) {
+        return Optional.ofNullable(callbackData)
+                .filter(data -> data.contains(":"))
+                .map(data -> data.split(":", 2)[1])
+                .map(String::toUpperCase)
+                .map(categoryStr -> {
+                    try {
+                        return CarBrowsingMode.valueOf(categoryStr);
+                    } catch (IllegalArgumentException e) {
+                        throw new InvalidDataException(chatId, "❌ Invalid car browsing mode: " + categoryStr);
+                    }
+                })
+                .orElse(null);
     }
 }

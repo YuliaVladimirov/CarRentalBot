@@ -6,6 +6,7 @@ import org.example.carrentalbot.dto.SendPhotoDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.Car;
+import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
@@ -52,7 +53,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
         Car car = carService.getCarInfo(carId).orElseThrow(
                 () -> new DataNotFoundException(chatId, String.format("Car with id: %s, was not found.", carId)));
 
-        String carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(carBrowsingMode);
 
         String text = String.format("""

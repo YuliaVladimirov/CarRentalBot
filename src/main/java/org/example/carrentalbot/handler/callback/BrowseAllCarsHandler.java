@@ -4,7 +4,9 @@ import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.Car;
+import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.NavigationService;
@@ -14,6 +16,7 @@ import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class BrowseAllCarsHandler implements CallbackHandler {
@@ -46,7 +49,7 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        sessionService.put(chatId, "carBrowsingMode", "BROWSE_ALL_CARS");
+        handleBrowsingMode(chatId, callbackQuery.getData());
 
         CarCategory carCategory = sessionService
                 .get(chatId, "carCategory", CarCategory.class)
@@ -64,5 +67,36 @@ public class BrowseAllCarsHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
+    }
+
+    private void handleBrowsingMode(Long chatId, String callbackData) {
+        CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(chatId, callbackData);
+        CarBrowsingMode fromSession = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElse(null);
+
+        if (fromCallback == null && fromSession == null) {
+            throw new DataNotFoundException(chatId, "❌ Car browsing mode not found in callback or session");
+        }
+
+        CarBrowsingMode result = fromCallback != null ? fromCallback : fromSession;
+
+        if (!result.equals(fromSession)) {
+            sessionService.put(chatId, "carBrowsingMode", result);
+        }
+    }
+
+
+    private CarBrowsingMode extractBrowsingModeFromCallback(Long chatId, String callbackData) {
+        return Optional.ofNullable(callbackData)
+                .filter(data -> data.contains(":"))
+                .map(data -> data.split(":", 2)[1])
+                .map(String::toUpperCase)
+                .map(categoryStr -> {
+                    try {
+                        return CarBrowsingMode.valueOf(categoryStr);
+                    } catch (IllegalArgumentException e) {
+                        throw new InvalidDataException(chatId, "❌ Invalid car browsing mode: " + categoryStr);
+                    }
+                })
+                .orElse(null);
     }
 }

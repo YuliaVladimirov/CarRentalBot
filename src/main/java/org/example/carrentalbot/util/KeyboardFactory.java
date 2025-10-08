@@ -139,7 +139,7 @@ public class KeyboardFactory {
         switch (carBrowsingMode) {
             case ALL_CARS -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                        .text("CHECK CAR AVAILABILITY")
+                        .text("🕒 CHECK AVAILABILITY")
                         .callbackData(AskForRentalDatesHandler.KEY)//add  + ":" + CarBrowsingMode.ALL_CARS.name(), if not working properly
                         .build();
                 rows.add(List.of(button));
@@ -147,8 +147,8 @@ public class KeyboardFactory {
 
             case CARS_FOR_DATES -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                .text("BOOK")
-                .callbackData("BOOK_CAR")
+                .text("📝 START BOOKING")
+                .callbackData(AskForPhoneHandler.KEY)
                 .build();
                 rows.add(List.of(button));
             }
@@ -173,21 +173,64 @@ public class KeyboardFactory {
         switch(carBrowsingMode) {
             case CARS_FOR_DATES -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                        .text("✅ Confirm")
-                        .callbackData(BrowseCarsForDates.KEY)
+                        .text("✅ CONFIRM")
+                        .callbackData(BrowseCarsForDatesHandler.KEY)
                         .build();
                 rows.add(List.of(button));
             }
             case ALL_CARS -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                        .text("✅ Confirm")
-                        .callbackData("START_BOOKING")
+                        .text("✅ CONFIRM")
+                        .callbackData("CHECK_AVAILABILITY")
                         .build();
                 rows.add(List.of(button));
             }
 
             default -> log.warn("Unknown car browsing mode: {}", carBrowsingMode);
         }
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(rows)
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildCarAvailableKeyboard() {
+
+        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
+
+        InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                .text("📝 START BOOKING")
+                .callbackData(AskForPhoneHandler.KEY)
+                .build();
+        rows.add(List.of(button));
+
+        InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
+                .text("⬅️ BACK")
+                .callbackData(GoBackHandler.KEY)
+                .build();
+        rows.add(List.of(backButton));
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(rows)
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildCarUnavailableKeyboard() {
+
+        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
+
+        InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                .text("🗓️ CHANGE DATES")
+                .callbackData(AskForRentalDatesHandler.KEY)
+                .build();
+        rows.add(List.of(button));
+
+        InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
+                .text("⬅️ BACK TO CARS")
+                .callbackData(BrowseAllCarsHandler.KEY)
+                .build();
+        rows.add(List.of(backButton));
+
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)

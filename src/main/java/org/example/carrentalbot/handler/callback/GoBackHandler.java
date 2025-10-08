@@ -16,7 +16,8 @@ public class GoBackHandler implements CallbackHandler {
     private final BrowseAllCarsHandler browseAllCarsHandler;
     private final DisplayCarDetailsHandler displayCarDetailsHandler;
     private final AskForRentalDatesHandler askForRentalDatesHandler;
-    private final BrowseCarsForDates browseCarsForDates;
+    private final BrowseCarsForDatesHandler browseCarsForDatesHandler;
+    private final CheckCarAvailabilityHandler checkCarAvailabilityHandler;
 
     public GoBackHandler(NavigationService navigationService,
                          GoToMainMenuHandler goToMainMenuHandler,
@@ -25,7 +26,7 @@ public class GoBackHandler implements CallbackHandler {
                          AskForRentalDatesHandler askForRentalDatesHandler,
                          DisplayCarDetailsHandler displayCarDetailsHandler,
                          ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler,
-                         BrowseCarsForDates browseCarsForDates) {
+                         BrowseCarsForDatesHandler browseCarsForDatesHandler, CheckCarAvailabilityHandler checkCarAvailabilityHandler) {
         this.navigationService = navigationService;
         this.goToMainMenuHandler = goToMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
@@ -33,7 +34,8 @@ public class GoBackHandler implements CallbackHandler {
         this.askForRentalDatesHandler = askForRentalDatesHandler;
         this.displayCarDetailsHandler = displayCarDetailsHandler;
         this.chooseCarBrowsingModeHandler = chooseCarBrowsingModeHandler;
-        this.browseCarsForDates = browseCarsForDates;
+        this.browseCarsForDatesHandler = browseCarsForDatesHandler;
+        this.checkCarAvailabilityHandler = checkCarAvailabilityHandler;
     }
 
     @Override
@@ -52,7 +54,8 @@ public class GoBackHandler implements CallbackHandler {
         }
 
         switch (previousState) {
-            case BrowseCarsForDates.KEY -> browseCarsForDates.handle(chatId, callbackQuery);
+            case CheckCarAvailabilityHandler.KEY -> checkCarAvailabilityHandler.handle(chatId, callbackQuery);
+            case BrowseCarsForDatesHandler.KEY -> browseCarsForDatesHandler.handle(chatId, callbackQuery);
             case AskForRentalDatesHandler.KEY -> askForRentalDatesHandler.handle(chatId, callbackQuery);
             case DisplayCarDetailsHandler.KEY -> displayCarDetailsHandler.handle(chatId, callbackQuery);
             case BrowseAllCarsHandler.KEY -> browseAllCarsHandler.handle(chatId, callbackQuery);

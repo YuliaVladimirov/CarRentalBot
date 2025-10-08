@@ -1,0 +1,77 @@
+package org.example.carrentalbot.handler.callback;
+
+import org.example.carrentalbot.dto.CallbackQueryDto;
+import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
+import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.service.BookingService;
+import org.example.carrentalbot.service.NavigationService;
+import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.util.KeyboardFactory;
+import org.example.carrentalbot.util.TelegramClient;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Component
+public class CheckCarAvailabilityHandler implements CallbackHandler {
+
+    public static final String KEY = "CHECK_AVAILABILITY";
+
+    private final BookingService bookingService;
+    private final NavigationService navigationService;
+    private final SessionService sessionService;
+    private final KeyboardFactory keyboardFactory;
+    private final TelegramClient telegramClient;
+
+    public CheckCarAvailabilityHandler(BookingService bookingService,
+                                       NavigationService navigationService,
+                                       SessionService sessionService, KeyboardFactory keyboardFactory,
+                                       TelegramClient telegramClient) {
+        this.bookingService = bookingService;
+        this.navigationService = navigationService;
+        this.sessionService = sessionService;
+        this.keyboardFactory = keyboardFactory;
+        this.telegramClient = telegramClient;
+    }
+
+
+    @Override
+    public String getKey() {
+        return KEY;
+    }
+
+    @Override
+    public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+
+        UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
+        LocalDate startDate = sessionService.get(chatId, "startDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found"));
+        LocalDate endDate = sessionService.get(chatId, "endDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "End date id not found"));
+
+        boolean available = bookingService.isCarAvailable(carId, startDate, endDate);
+
+
+        String carAvailable = """
+            ✅ This car is available for your selected dates!
+            You can proceed to booking.
+            """;
+
+        String carUnavailable = """
+            ❌ Sorry, this car is not available for the selected dates.
+            Please choose different dates or another car.
+            """;
+
+        String text = available ? carAvailable : carUnavailable;
+
+        InlineKeyboardMarkupDto replyMarkup = available ? keyboardFactory.buildCarAvailableKeyboard() : keyboardFactory.buildCarUnavailableKeyboard();
+
+        navigationService.push(chatId, KEY);
+        telegramClient.sendMessage(SendMessageDto.builder()
+                .chatId(chatId.toString())
+                .text(text)
+                .replyMarkup(replyMarkup)
+                .build());
+
+    }
+}

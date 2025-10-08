@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum CarCategory {
+
     SEDAN("Sedan"),
     SUV("SUV"),
     HATCHBACK("Hatchback"),

@@ -48,8 +48,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         String text = String.format("""
-                ✅ You entered:
-                
+                You entered:
                 Rental period: %s - %s
 
                 Please confirm or enter again.

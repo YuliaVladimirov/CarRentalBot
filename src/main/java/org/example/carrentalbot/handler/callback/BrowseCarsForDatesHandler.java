@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-public class BrowseCarsForDates implements CallbackHandler {
+public class BrowseCarsForDatesHandler implements CallbackHandler {
 
     public static final String KEY = "BROWSE_CARS_FOR_DATES";
 
@@ -27,10 +27,10 @@ public class BrowseCarsForDates implements CallbackHandler {
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public BrowseCarsForDates(CarService carService,
-                              NavigationService navigationService,
-                              SessionService sessionService, KeyboardFactory keyboardFactory,
-                              TelegramClient telegramClient) {
+    public BrowseCarsForDatesHandler(CarService carService,
+                                     NavigationService navigationService,
+                                     SessionService sessionService, KeyboardFactory keyboardFactory,
+                                     TelegramClient telegramClient) {
         this.carService = carService;
         this.navigationService = navigationService;
         this.sessionService = sessionService;

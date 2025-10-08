@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CarProjectionDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
+import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class KeyboardFactory {
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("🚗 Browse Categories")
-                                .callbackData("BROWSE_CATEGORIES")
+                                .callbackData(BrowseAllCarsHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📒 My Bookings")
@@ -50,7 +51,7 @@ public class KeyboardFactory {
 
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                     .text(String.format("%s %s - from €%s/day", emoji, dto.category().getValue(), minimalDailyRate))
-                    .callbackData("CHOOSE_CAR_BROWSING_MODE:" + dto.category().name())
+                    .callbackData(ChooseCarBrowsingModeHandler.KEY + ":" + dto.category().name())
                     .build();
 
             rows.add(List.of(button));
@@ -58,7 +59,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
-                .callbackData("GO_BACK")
+                .callbackData(GoBackHandler.KEY)
                 .build();
 
         rows.add(List.of(backButton));
@@ -84,19 +85,19 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto allCarsButton = InlineKeyboardButtonDto.builder()
                 .text("All Cars")
-                .callbackData("BROWSE_ALL_CARS")
+                .callbackData(BrowseAllCarsHandler.KEY)
                 .build();
         rows.add(List.of(allCarsButton));
 
         InlineKeyboardButtonDto carsForMyDatesButton = InlineKeyboardButtonDto.builder()
                 .text("Cars For My Dates")
-                .callbackData("BROWSE_CARS_FOR_DATES")
+                .callbackData(AskForRentalDatesHandler.KEY)
                 .build();
         rows.add(List.of(carsForMyDatesButton));
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
-                .callbackData("GO_BACK")
+                .callbackData(GoBackHandler.KEY)
                 .build();
         rows.add(List.of(backButton));
 
@@ -112,7 +113,7 @@ public class KeyboardFactory {
         for (Car car : cars) {
             InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                     .text(String.format("%s  %s (%s)", "🔸", car.getBrand(), car.getModel()))
-                    .callbackData("DISPLAY_CAR_DETAILS:" + car.getId())
+                    .callbackData(DisplayCarDetailsHandler.KEY + ":" + car.getId())
                     .build();
 
             rows.add(List.of(button));
@@ -120,7 +121,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
-                .callbackData("GO_BACK")
+                .callbackData(GoBackHandler.KEY)
                 .build();
 
         rows.add(List.of(backButton));
@@ -138,7 +139,7 @@ public class KeyboardFactory {
             case "BROWSE_ALL_CARS" -> {
                 InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
                         .text("CHECK CAR AVAILABILITY")
-                        .callbackData("CHECK_CAR_AVAILABILITY")
+                        .callbackData(CheckCarAvailabilityHandler.KEY)
                         .build();
                 rows.add(List.of(button));
             }
@@ -155,7 +156,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto backButton = InlineKeyboardButtonDto.builder()
                 .text("⬅️ BACK")
-                .callbackData("GO_BACK")
+                .callbackData(GoBackHandler.KEY)
                 .build();
         rows.add(List.of(backButton));
 
@@ -170,7 +171,7 @@ public class KeyboardFactory {
 
         InlineKeyboardButtonDto confirmButton = InlineKeyboardButtonDto.builder()
                 .text("✅ Confirm")
-                .callbackData("CONFIRM_RENTAL_DATES")
+                .callbackData(ConfirmRentalDaysHandler.KEY)
                 .build();
 
         rows.add(List.of(confirmButton));

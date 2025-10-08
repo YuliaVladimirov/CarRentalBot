@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
-public class RentalDatesTextHandler implements TextHandler {
+public class ConfirmRentalDatesHandler implements TextHandler {
 
     private static final Pattern DATE_RANGE_PATTERN =
             Pattern.compile("\\d{2}\\.\\d{2}\\.\\d{4}\\s*-\\s*\\d{2}\\.\\d{2}\\.\\d{4}");
@@ -27,7 +27,7 @@ public class RentalDatesTextHandler implements TextHandler {
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public RentalDatesTextHandler(SessionService sessionService, KeyboardFactory keyboardFactory, TelegramClient telegramClient) {
+    public ConfirmRentalDatesHandler(SessionService sessionService, KeyboardFactory keyboardFactory, TelegramClient telegramClient) {
         this.sessionService = sessionService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;

@@ -8,16 +8,16 @@ import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BrowseCarsForDatesHandler implements CallbackHandler {
+public class AskForRentalDatesHandler implements CallbackHandler {
 
-    public static final String KEY = "BROWSE_CARS_FOR_DATES";
+    public static final String KEY = "ASK_FOR_RENTAL_DAYS";
 
     private final NavigationService navigationService;
     private final SessionService sessionService;
     private final TelegramClient telegramClient;
 
-    public BrowseCarsForDatesHandler(NavigationService navigationService, SessionService sessionService,
-                                     TelegramClient telegramClient) {
+    public AskForRentalDatesHandler(NavigationService navigationService, SessionService sessionService,
+                                    TelegramClient telegramClient) {
         this.navigationService = navigationService;
         this.sessionService = sessionService;
         this.telegramClient = telegramClient;

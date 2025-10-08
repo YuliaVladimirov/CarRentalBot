@@ -21,7 +21,8 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     private final SessionService sessionService;
     private final TelegramClient telegramClient;
 
-    public AskForRentalDatesHandler(NavigationService navigationService, SessionService sessionService,
+    public AskForRentalDatesHandler(NavigationService navigationService,
+                                    SessionService sessionService,
                                     TelegramClient telegramClient) {
         this.navigationService = navigationService;
         this.sessionService = sessionService;
@@ -40,6 +41,7 @@ public class AskForRentalDatesHandler implements CallbackHandler {
 
         String text = """
         Please enter your rental period.
+        
         Format: DD.MM.YYYY - DD.MM.YYYY
         Example: 05.10.2025 - 10.10.2025
         """;

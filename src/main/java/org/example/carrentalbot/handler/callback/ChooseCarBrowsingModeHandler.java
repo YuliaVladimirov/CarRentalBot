@@ -43,9 +43,9 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        CarCategory category = retrieveCategory(chatId, callbackQuery.getData());
+        handleCategory(chatId, callbackQuery.getData());
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarChoiceKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarBrowsingModeKeyboard();
 
         navigationService.push(chatId, KEY);
 
@@ -59,7 +59,8 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
         telegramClient.sendMessage(message);
     }
 
-    private CarCategory retrieveCategory(Long chatId, String callbackData) {
+    private void handleCategory(Long chatId, String callbackData) {
+
         CarCategory fromCallback = extractCategoryFromCallback(chatId, callbackData);
         CarCategory fromSession = sessionService.get(chatId, "carCategory", CarCategory.class).orElse(null);
 
@@ -73,7 +74,6 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
             sessionService.put(chatId, "carCategory", result);
         }
 
-        return result;
     }
 
     private CarCategory extractCategoryFromCallback(Long chatId, String callbackData) {

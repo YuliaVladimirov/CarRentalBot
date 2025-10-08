@@ -31,7 +31,7 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        sessionService.put(chatId, "carBrowsingMode", KEY);
+        sessionService.put(chatId, "carBrowsingMode", "BROWSE_CARS_FOR_DATES");
 
         String text = """
         Please enter your rental period.

@@ -46,7 +46,7 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        sessionService.put(chatId, "carBrowsingMode", KEY);
+        sessionService.put(chatId, "carBrowsingMode", "BROWSE_ALL_CARS");
 
         CarCategory carCategory = sessionService
                 .get(chatId, "carCategory", CarCategory.class)

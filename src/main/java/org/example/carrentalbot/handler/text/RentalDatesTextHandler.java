@@ -3,6 +3,8 @@ package org.example.carrentalbot.handler.text;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -10,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
@@ -35,22 +40,19 @@ public class RentalDatesTextHandler implements TextHandler {
 
     @Override
     public void handle(Long chatId, MessageDto message) {
-        String[] parts = message.getText().split("-");
+
+        LocalDate[] rentalDates = retrieveRentalDates(chatId, message.getText());
+        LocalDate startDate = rentalDates[0];
+        LocalDate endDate = rentalDates[1];
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
-        LocalDate startDate = LocalDate.parse(parts[0].trim(), formatter);
-        LocalDate endDate = LocalDate.parse(parts[1].trim(), formatter);
-
-        sessionService.put(chatId, "startDate", startDate);
-        sessionService.put(chatId, "endDate", endDate);
-
         String text = String.format("""
-    ✅ You entered:
-    
-    Rental period: %s - %s
+                ✅ You entered:
+                
+                Rental period: %s - %s
 
-    Please confirm or enter again.
-    """, startDate.format(formatter), endDate.format(formatter));
+                Please confirm or enter again.
+                """, startDate.format(formatter), endDate.format(formatter));
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmRentalDatesKeyboard();
 
@@ -62,5 +64,44 @@ public class RentalDatesTextHandler implements TextHandler {
 
     }
 
+    private LocalDate[] retrieveRentalDates(Long chatId, String text) {
 
+        LocalDate[] datesFromCallback = extractDatesFromCallback(chatId, text);
+
+        LocalDate startDateFromSession = sessionService.get(chatId, "startDate", LocalDate.class).orElse(null);
+        LocalDate endDateFromSession = sessionService.get(chatId, "endDate", LocalDate.class).orElse(null);
+
+        if (datesFromCallback == null && (startDateFromSession == null || endDateFromSession == null)) {
+            throw new DataNotFoundException(chatId, "❌ Rental dates not found in callback or session");
+        }
+
+        LocalDate startDate = (datesFromCallback != null) ? datesFromCallback[0] : startDateFromSession;
+        LocalDate endDate = (datesFromCallback != null) ? datesFromCallback[1] : endDateFromSession;
+
+        if (datesFromCallback != null && (!startDate.equals(startDateFromSession) || !endDate.equals(endDateFromSession))) {
+            sessionService.put(chatId, "startDate", startDate);
+            sessionService.put(chatId, "endDate", endDate);
+        }
+
+
+        return new LocalDate[]{startDate, endDate};
+    }
+
+    private LocalDate[] extractDatesFromCallback(Long chatId, String text) {
+
+        return Optional.ofNullable(text)
+                .map(datePart -> Arrays.stream(datePart.split("-"))
+                        .map(String::trim)
+                        .map(dateStr -> {
+                            try {
+                                return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+                            } catch (DateTimeParseException e) {
+                                throw new InvalidDataException(chatId, "❌ Invalid date format: " + datePart);
+                            }
+                        })
+                        .toArray(LocalDate[]::new)
+                )
+                .filter(array -> array.length == 2)
+                .orElse(null);
+    }
 }

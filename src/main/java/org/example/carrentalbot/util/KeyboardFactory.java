@@ -200,4 +200,20 @@ public class KeyboardFactory {
                 ))
                 .build();
     }
+
+    public InlineKeyboardMarkupDto buildBookingDetailsKeyboard() {
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("✅ CONFIRM")
+                                .callbackData(ConfirmBookingHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("✏️ EDIT BOOKING")
+                                .callbackData("EDIT_BOOKING")
+                                .build())
+                ))
+                .build();
+    }
 }

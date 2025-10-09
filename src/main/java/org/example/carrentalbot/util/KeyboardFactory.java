@@ -166,32 +166,25 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildConfirmRentalDatesKeyboard(CarBrowsingMode carBrowsingMode) {
-
-        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
-
-        switch(carBrowsingMode) {
-            case CARS_FOR_DATES -> {
-                InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                        .text("✅ CONFIRM")
-                        .callbackData(BrowseCarsForDatesHandler.KEY)
-                        .build();
-                rows.add(List.of(button));
-            }
-            case ALL_CARS -> {
-                InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
-                        .text("✅ CONFIRM")
-                        .callbackData("CHECK_AVAILABILITY")
-                        .build();
-                rows.add(List.of(button));
-            }
-
-            default -> log.warn("Unknown car browsing mode: {}", carBrowsingMode);
-        }
+    public InlineKeyboardMarkupDto buildConfirmKeyboard(String callbackKey) {
+        InlineKeyboardButtonDto button = InlineKeyboardButtonDto.builder()
+                .text("✅ CONFIRM")
+                .callbackData(callbackKey)
+                .build();
 
         return InlineKeyboardMarkupDto.builder()
-                .inlineKeyboard(rows)
+                .inlineKeyboard(List.of(List.of(button)))
                 .build();
+    }
+
+    public InlineKeyboardMarkupDto buildConfirmRentalDatesKeyboard(CarBrowsingMode carBrowsingMode) {
+
+        String callbackKey = switch (carBrowsingMode) {
+            case CARS_FOR_DATES -> BrowseCarsForDatesHandler.KEY;
+            case ALL_CARS -> CheckCarAvailabilityHandler.KEY;
+        };
+
+        return buildConfirmKeyboard(callbackKey);
     }
 
     public InlineKeyboardMarkupDto buildCarAvailableKeyboard() {
@@ -230,7 +223,6 @@ public class KeyboardFactory {
                 .callbackData(BrowseAllCarsHandler.KEY)
                 .build();
         rows.add(List.of(backButton));
-
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)

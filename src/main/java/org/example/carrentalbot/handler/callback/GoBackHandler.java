@@ -18,6 +18,9 @@ public class GoBackHandler implements CallbackHandler {
     private final AskForRentalDatesHandler askForRentalDatesHandler;
     private final BrowseCarsForDatesHandler browseCarsForDatesHandler;
     private final CheckCarAvailabilityHandler checkCarAvailabilityHandler;
+    private final AskForPhoneHandler askForPhoneHandler;
+    private final AskForEmailHandler askForEmailHandler;
+    private final DisplayBookingDetailsHandler displayBookingDetailsHandler;
 
     public GoBackHandler(NavigationService navigationService,
                          GoToMainMenuHandler goToMainMenuHandler,
@@ -26,7 +29,7 @@ public class GoBackHandler implements CallbackHandler {
                          AskForRentalDatesHandler askForRentalDatesHandler,
                          DisplayCarDetailsHandler displayCarDetailsHandler,
                          ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler,
-                         BrowseCarsForDatesHandler browseCarsForDatesHandler, CheckCarAvailabilityHandler checkCarAvailabilityHandler) {
+                         BrowseCarsForDatesHandler browseCarsForDatesHandler, CheckCarAvailabilityHandler checkCarAvailabilityHandler, AskForPhoneHandler askForPhoneHandler, AskForEmailHandler askForEmailHandler, DisplayBookingDetailsHandler displayBookingDetailsHandler) {
         this.navigationService = navigationService;
         this.goToMainMenuHandler = goToMainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
@@ -36,6 +39,9 @@ public class GoBackHandler implements CallbackHandler {
         this.chooseCarBrowsingModeHandler = chooseCarBrowsingModeHandler;
         this.browseCarsForDatesHandler = browseCarsForDatesHandler;
         this.checkCarAvailabilityHandler = checkCarAvailabilityHandler;
+        this.askForPhoneHandler = askForPhoneHandler;
+        this.askForEmailHandler = askForEmailHandler;
+        this.displayBookingDetailsHandler = displayBookingDetailsHandler;
     }
 
     @Override
@@ -54,6 +60,9 @@ public class GoBackHandler implements CallbackHandler {
         }
 
         switch (previousState) {
+            case DisplayBookingDetailsHandler.KEY -> displayBookingDetailsHandler.handle(chatId, callbackQuery);
+            case AskForEmailHandler.KEY -> askForEmailHandler.handle(chatId, callbackQuery);
+            case AskForPhoneHandler.KEY -> askForPhoneHandler.handle(chatId, callbackQuery);
             case CheckCarAvailabilityHandler.KEY -> checkCarAvailabilityHandler.handle(chatId, callbackQuery);
             case BrowseCarsForDatesHandler.KEY -> browseCarsForDatesHandler.handle(chatId, callbackQuery);
             case AskForRentalDatesHandler.KEY -> askForRentalDatesHandler.handle(chatId, callbackQuery);

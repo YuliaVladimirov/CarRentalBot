@@ -55,6 +55,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                 """, startDate.format(formatter), endDate.format(formatter));
 
         CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmRentalDatesKeyboard(carBrowsingMode);
 
         telegramClient.sendMessage(SendMessageDto.builder()
@@ -67,7 +68,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
 
     private LocalDate[] retrieveRentalDates(Long chatId, String text) {
 
-        LocalDate[] datesFromCallback = extractDatesFromCallback(chatId, text);
+        LocalDate[] datesFromCallback = extractDatesFromMessageText(chatId, text);
 
         LocalDate startDateFromSession = sessionService.get(chatId, "startDate", LocalDate.class).orElse(null);
         LocalDate endDateFromSession = sessionService.get(chatId, "endDate", LocalDate.class).orElse(null);
@@ -88,7 +89,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
         return new LocalDate[]{startDate, endDate};
     }
 
-    private LocalDate[] extractDatesFromCallback(Long chatId, String text) {
+    private LocalDate[] extractDatesFromMessageText(Long chatId, String text) {
 
         return Optional.ofNullable(text)
                 .map(datePart -> Arrays.stream(datePart.split("-"))

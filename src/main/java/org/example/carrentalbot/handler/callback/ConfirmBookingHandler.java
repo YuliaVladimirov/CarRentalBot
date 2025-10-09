@@ -10,7 +10,7 @@ public class ConfirmBookingHandler implements CallbackHandler{
 
     @Override
     public String getKey() {
-        return "";
+        return KEY;
     }
 
     @Override

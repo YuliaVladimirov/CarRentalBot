@@ -53,7 +53,7 @@ public class StartCommandHandler implements CommandHandler {
         navigationService.push(chatId, "GO_TO_MAIN_MENU");
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("Main Menu")
+                .text("<b>Main Menu:</b>")
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());

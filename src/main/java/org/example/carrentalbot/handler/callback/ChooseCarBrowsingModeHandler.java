@@ -51,7 +51,7 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
 
         SendMessageDto message = SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("Choose browsing mode:")
+                .text("<b>Choose browsing mode:</b>")
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build();

@@ -42,7 +42,6 @@ public class AskForRentalDatesHandler implements CallbackHandler {
         String text = """
         Please enter your rental period.
         
-        Format: DD.MM.YYYY - DD.MM.YYYY
         Example: 05.10.2025 - 10.10.2025
         """;
 

@@ -49,7 +49,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         String text = String.format("""
                 You entered:
-                Rental period: %s - %s
+                Rental period: <b>%s - %s</b>
 
                 Please confirm or enter again.
                 """, startDate.format(formatter), endDate.format(formatter));
@@ -61,6 +61,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(text)
+                .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
 

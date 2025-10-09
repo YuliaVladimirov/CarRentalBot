@@ -57,12 +57,12 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(carBrowsingMode);
 
         String text = String.format("""
-                🚘 Car Details:
+                🚘  <b>Car Details</b>:
                 
-                🏷️ Brand: %s
-                📌 Model: %s
-                📝 Description: %s
-                💰 Daily Rate: €%s/day
+                🏷️  Brand:  %s
+                📌  Model:  %s
+                📝  Description:  %s
+                💰  Daily Rate:  €%s/day
                 """, car.getBrand(), car.getModel(), car.getDescription(), car.getDailyRate().setScale(0, RoundingMode.HALF_UP));
 
         navigationService.push(chatId, KEY + ":" + car.getId());

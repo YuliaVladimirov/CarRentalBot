@@ -43,7 +43,7 @@ public class ConfirmPhoneHandler implements TextHandler {
 
         String text = String.format("""
                 You entered:
-                Phone number: %s
+                Phone number: <b>%s</b>
 
                 Please confirm or enter again.
                 """, phone);
@@ -53,6 +53,7 @@ public class ConfirmPhoneHandler implements TextHandler {
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(text)
+                .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
 

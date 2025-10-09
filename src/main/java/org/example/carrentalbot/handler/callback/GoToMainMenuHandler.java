@@ -36,9 +36,10 @@ public class GoToMainMenuHandler implements CallbackHandler {
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildMainMenuKeyboard();
 
         navigationService.push(chatId, KEY);
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("Main Menu")
+                .text("<b>Main Menu:</b>")
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());

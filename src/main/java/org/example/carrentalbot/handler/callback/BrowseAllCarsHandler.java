@@ -59,11 +59,15 @@ public class BrowseAllCarsHandler implements CallbackHandler {
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarsKeyboard(allCars);
 
+        String text = String.format("""
+                        <b>All cars in category '%s':</b>
+                        """, carCategory.getValue());
+
         navigationService.push(chatId, KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text(String.format("All cars in %s category:", carCategory))
+                .text(text)
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());

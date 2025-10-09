@@ -29,9 +29,8 @@ public class AskForEmailHandler  implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         String text = """
-        Please enter your your email address.
-        
-        Format: user@example.com
+        Please enter your email address.
+
         Example: user@example.com
         """;
 

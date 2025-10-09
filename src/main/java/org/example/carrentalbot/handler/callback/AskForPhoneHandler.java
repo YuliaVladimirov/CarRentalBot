@@ -31,7 +31,6 @@ public class AskForPhoneHandler implements CallbackHandler {
         String text = """
                 Please enter your your phone number.
                 
-                Format: +49 123 456789
                 Example: +49 123 456789
                 """;
 

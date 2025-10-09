@@ -44,7 +44,7 @@ public class ConfirmEmailHandler implements TextHandler  {
 
         String text = String.format("""
                 You entered:
-                Email: %s
+                Email: <b>%s</b>
 
                 Please confirm or enter again.
                 """, email);
@@ -54,6 +54,7 @@ public class ConfirmEmailHandler implements TextHandler  {
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(text)
+                .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
 

@@ -65,24 +65,25 @@ public static final String KEY = "DISPLAY_BOOKING_DETAILS";
         String email = sessionService.get(chatId, "email", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Email not found"));
 
         String text = String.format("""
-                Your booking details:
+                <b>Your booking details:</b>
                 
-                Car: %s (%s)
-                Category: %s
-                Rental period: %s - %s
-                Total Days: %d
-                Daily Rate: €%s/day
-                Total Cost: €%s
-                Phone number: %s
-                Email: %s
+                🚗  Car:  %s (%s)
+                       Category:  %s
+                📅  Rental period:  %s - %s
+                       Total Days:  %d
+                💰  Daily Rate:  €%s/day
+                       Total Cost:  €%s
+                
+                📞  Phone number:  %s
+                📧  Email:  %s
                 """,
-                car.getBrand(), car.getModel(), car.getCategory(),
+                car.getBrand(), car.getModel(), car.getCategory().getValue(),
                 startDate.format(formatter), endDate.format(formatter),
                 totalDays,
                 dailyRate, totalCost,
                 phone, email);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(ConfirmBookingHandler.KEY);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBookingDetailsKeyboard();
 
         navigationService.push(chatId, KEY);
 

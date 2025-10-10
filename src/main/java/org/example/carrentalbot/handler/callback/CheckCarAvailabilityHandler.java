@@ -53,14 +53,16 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
 
 
         String carAvailable = """
-            ✅ This car is <b>available</b> for your selected dates!
-               You can proceed to booking.
-            """;
+                This car is <b>available</b> for your selected dates!
+                
+                You can proceed to booking.
+                """;
 
         String carUnavailable = """
-            ❌ Sorry, this car is <b>not available</b> for the selected dates.
-               Please choose different dates or another car.
-            """;
+                Sorry, this car is <b>not available</b> for the selected dates.
+                
+                Please choose different dates or another car.
+                """;
 
         String text = available ? carAvailable : carUnavailable;
 

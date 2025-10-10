@@ -20,6 +20,7 @@ public class AskForEmailHandler  implements CallbackHandler {
         this.navigationService = navigationService;
         this.telegramClient = telegramClient;
     }
+
     @Override
     public String getKey() {
         return KEY;
@@ -42,6 +43,5 @@ public class AskForEmailHandler  implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(null)
                 .build());
-
     }
 }

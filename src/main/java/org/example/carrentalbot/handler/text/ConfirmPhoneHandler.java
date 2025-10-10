@@ -56,7 +56,6 @@ public class ConfirmPhoneHandler implements TextHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-
     }
 
     private String retrievePhone(Long chatId, String text) {

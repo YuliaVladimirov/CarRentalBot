@@ -12,8 +12,6 @@ CREATE TABLE customers (
                            username VARCHAR(100),
                            first_name VARCHAR(100) NOT NULL,
                            last_name VARCHAR(100) NOT NULL,
-                           phone_number VARCHAR(20),
-                           email VARCHAR(100),
                            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -59,7 +57,7 @@ CREATE TABLE bookings (
                           end_date DATE NOT NULL,
                           total_cost DECIMAL(10, 2) NOT NULL,
                           phone VARCHAR(20),
-                          email VARCHAR(20),
+                          email VARCHAR(100),
                           status  VARCHAR(20) NOT NULL CHECK (status IN ('CONFIRMED', 'CANCELLED')),
                           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                           updated_at TIMESTAMP NOT NULL,

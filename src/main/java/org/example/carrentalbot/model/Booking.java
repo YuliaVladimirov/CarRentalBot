@@ -42,10 +42,10 @@ public class Booking {
     @Column(name = "total_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalCost;
 
-    @Column(name = "phone", nullable = false)
+    @Column(name = "phone", nullable = false, length = 20)
     private String phone;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, length = 100)
     private String email;
 
     @Enumerated(EnumType.STRING)

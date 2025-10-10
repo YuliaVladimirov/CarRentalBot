@@ -52,15 +52,19 @@ CREATE INDEX index_cars_available ON cars(available);
 -- BOOKINGS
 -- ========================================
 CREATE TABLE bookings (
-                         id UUID PRIMARY KEY,
-                         customer_id UUID NOT NULL,
-                         car_id UUID NOT NULL,
-                         start_date DATE NOT NULL,
-                         end_date DATE NOT NULL,
-                         total_cost DECIMAL(10,2) NOT NULL,
-                         status VARCHAR(20) NOT NULL CHECK (status IN ('PENDING', 'CONFIRMED','CANCELLED')),
-                         CONSTRAINT fk_booking_customer FOREIGN KEY (customer_id) REFERENCES customers(id),
-                         CONSTRAINT fk_booking_car FOREIGN KEY (car_id) REFERENCES cars(id)
+                          id UUID PRIMARY KEY,
+                          customer_id UUID NOT NULL,
+                          car_id  UUID NOT NULL,
+                          start_date DATE NOT NULL,
+                          end_date DATE NOT NULL,
+                          total_cost DECIMAL(10, 2) NOT NULL,
+                          phone VARCHAR(20),
+                          email VARCHAR(20),
+                          status  VARCHAR(20) NOT NULL CHECK (status IN ('CONFIRMED', 'CANCELLED')),
+                          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          updated_at TIMESTAMP NOT NULL,
+                          CONSTRAINT fk_booking_customer FOREIGN KEY (customer_id) REFERENCES customers (id),
+                          CONSTRAINT fk_booking_car FOREIGN KEY (car_id) REFERENCES cars (id)
 );
 
 --changeset yulia:2025-09-06-index-bookings-customer_id
@@ -71,6 +75,10 @@ CREATE INDEX index_bookings_car_id ON bookings(car_id);
 CREATE INDEX index_bookings_start_time ON bookings(start_date);
 --changeset yulia:2025-09-06-index-bookings-end_time
 CREATE INDEX index_bookings_end_time ON bookings(end_date);
+--changeset yulia:2025-09-06-index-bookings-phone
+CREATE INDEX index_bookings_phone ON bookings(phone);
+--changeset yulia:2025-09-06-index-bookings-email
+CREATE INDEX index_bookings_email ON bookings(email);
 --changeset yulia:2025-09-06-index-bookings-status
 CREATE INDEX index_bookings_status ON bookings(status);
 

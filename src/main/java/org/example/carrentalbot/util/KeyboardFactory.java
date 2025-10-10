@@ -32,10 +32,6 @@ public class KeyboardFactory {
                                 .callbackData("MY_BOOKINGS")
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("🧑 My Profile")
-                                .callbackData("MY_PROFILE")
-                                .build()),
-                        List.of(InlineKeyboardButtonDto.builder()
                                 .text("📞 Help")
                                 .callbackData("HELP")
                                 .build())

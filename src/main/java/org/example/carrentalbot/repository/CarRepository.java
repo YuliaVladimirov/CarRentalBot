@@ -30,9 +30,7 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
           SELECT b.car.id FROM Booking b
           WHERE b.startDate <= :endDate
             AND b.endDate >= :startDate
-            AND b.status IN (
-            org.example.carrentalbot.model.enums.BookingStatus.CONFIRMED,
-            org.example.carrentalbot.model.enums.BookingStatus.PENDING)
+            AND b.status = org.example.carrentalbot.model.enums.BookingStatus.CONFIRMED
       )
 """)
     List<Car> findAvailableCarsByCategoryAndDates(

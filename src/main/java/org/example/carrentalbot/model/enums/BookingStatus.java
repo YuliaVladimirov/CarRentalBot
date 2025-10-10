@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum BookingStatus {
-    PENDING ("Pending"),
     CONFIRMED ("Confirmed"),
     CANCELLED ("Cancelled");
 

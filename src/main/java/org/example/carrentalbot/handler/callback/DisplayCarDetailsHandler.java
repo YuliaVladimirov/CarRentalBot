@@ -50,8 +50,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         UUID carId = retrieveCarId(chatId, callbackQuery.getData());
-        Car car = carService.getCarInfo(carId).orElseThrow(
-                () -> new DataNotFoundException(chatId, String.format("Car with id: %s, was not found.", carId)));
+        Car car = carService.getCar(chatId, carId);
 
         CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(carBrowsingMode);

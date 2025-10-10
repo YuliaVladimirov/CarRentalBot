@@ -210,8 +210,31 @@ public class KeyboardFactory {
                                 .callbackData(ConfirmBookingHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("✏️ EDIT BOOKING")
-                                .callbackData("EDIT_BOOKING")
+                                .text("✏️ EDIT")
+                                .callbackData(EditBookingDetailsHandler.KEY)
+                                .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildEditBookingKeyboard() {
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("📅 Edit Dates")
+                                .callbackData(AskForRentalDatesHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("📞 Edit Phone")
+                                .callbackData(AskForPhoneHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("📧 Edit Email")
+                                .callbackData(AskForEmailHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ BACK")
+                                .callbackData(GoBackHandler.KEY)
                                 .build())
                 ))
                 .build();

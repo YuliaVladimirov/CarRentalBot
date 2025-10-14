@@ -17,10 +17,6 @@ CREATE TABLE customers (
 
 --changeset yulia:2025-09-06-index-customers-username
 CREATE INDEX index_customers_username ON customers(username);
---changeset yulia:2025-09-06-index-customers-phone-number
-CREATE INDEX index_customers_phone_number ON customers(phone_number);
---changeset yulia:2025-09-06-index-customers-email
-CREATE INDEX idx_customers_email ON customers(email);
 
 
 -- ========================================

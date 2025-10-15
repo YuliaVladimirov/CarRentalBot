@@ -1,13 +1,17 @@
 package org.example.carrentalbot.handler.callback;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.NavigationService;
 import org.springframework.stereotype.Component;
+
+import java.util.EnumSet;
 
 @Component
 public class GoBackHandler implements CallbackHandler {
 
     public static final String KEY = "GO_BACK";
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     private final NavigationService navigationService;
     private final GoToMainMenuHandler goToMainMenuHandler;
@@ -47,6 +51,11 @@ public class GoBackHandler implements CallbackHandler {
     @Override
     public String getKey() {
         return KEY;
+    }
+
+    @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
     }
 
     @Override

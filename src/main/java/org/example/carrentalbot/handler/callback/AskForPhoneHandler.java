@@ -2,21 +2,28 @@ package org.example.carrentalbot.handler.callback;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.NavigationService;
+import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
+
+import java.util.EnumSet;
 
 @Component
 public class AskForPhoneHandler implements CallbackHandler {
 
     public static final String KEY = "ASK_FOR_PHONE";
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     private final NavigationService navigationService;
+    private final SessionService sessionService;
     private final TelegramClient telegramClient;
 
-    public AskForPhoneHandler(NavigationService navigationService,
+    public AskForPhoneHandler(NavigationService navigationService, SessionService sessionService,
                               TelegramClient telegramClient) {
         this.navigationService = navigationService;
+        this.sessionService = sessionService;
         this.telegramClient = telegramClient;
     }
 
@@ -26,7 +33,14 @@ public class AskForPhoneHandler implements CallbackHandler {
     }
 
     @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
+    }
+
+    @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+
+        sessionService.put(chatId, "flowContext", FlowContext.BOOKING_FLOW);
 
         String text = """
                 Please enter your your phone number.

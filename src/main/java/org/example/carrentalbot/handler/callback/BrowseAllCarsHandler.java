@@ -8,6 +8,7 @@ import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
@@ -15,6 +16,7 @@ import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class BrowseAllCarsHandler implements CallbackHandler {
 
     public static final String KEY = "BROWSE_ALL_CARS";
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final CarService carService;
     private final NavigationService navigationService;
@@ -40,10 +43,14 @@ public class BrowseAllCarsHandler implements CallbackHandler {
         this.telegramClient = telegramClient;
     }
 
-
     @Override
     public String getKey() {
         return KEY;
+    }
+
+    @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
     }
 
     @Override

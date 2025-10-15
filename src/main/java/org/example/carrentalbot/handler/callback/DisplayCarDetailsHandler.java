@@ -7,6 +7,7 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
@@ -15,6 +16,7 @@ import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 import java.math.RoundingMode;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class DisplayCarDetailsHandler implements CallbackHandler {
 
     public static final String KEY = "DISPLAY_CAR_DETAILS";
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final CarService carService;
     private final NavigationService navigationService;
@@ -47,12 +50,18 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
+    }
+
+    @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         UUID carId = retrieveCarId(chatId, callbackQuery.getData());
         Car car = carService.getCar(chatId, carId);
 
         CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(carBrowsingMode);
 
         String text = String.format("""

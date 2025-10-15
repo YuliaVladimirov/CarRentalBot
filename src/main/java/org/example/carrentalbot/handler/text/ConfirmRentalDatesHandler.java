@@ -5,7 +5,9 @@ import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
+import org.example.carrentalbot.exception.InvalidFlowContextException;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -15,12 +17,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
 public class ConfirmRentalDatesHandler implements TextHandler {
 
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
     private static final Pattern DATE_RANGE_PATTERN =
             Pattern.compile("\\d{2}\\.\\d{2}\\.\\d{4}\\s*-\\s*\\d{2}\\.\\d{2}\\.\\d{4}");
 
@@ -28,7 +32,9 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public ConfirmRentalDatesHandler(SessionService sessionService, KeyboardFactory keyboardFactory, TelegramClient telegramClient) {
+    public ConfirmRentalDatesHandler(SessionService sessionService,
+                                     KeyboardFactory keyboardFactory,
+                                     TelegramClient telegramClient) {
         this.sessionService = sessionService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
@@ -40,7 +46,17 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     }
 
     @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
+    }
+
+    @Override
     public void handle(Long chatId, MessageDto message) {
+
+        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class).orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found."));
+        if(flowContext != FlowContext.BROWSING_FLOW){
+            throw new InvalidFlowContextException(chatId, "⚠️ You cannot enter dates at this stage. Please start from the main menu.");
+        }
 
         LocalDate[] rentalDates = retrieveRentalDates(chatId, message.getText());
         LocalDate startDate = rentalDates[0];
@@ -64,7 +80,6 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-
     }
 
     private LocalDate[] retrieveRentalDates(Long chatId, String text) {

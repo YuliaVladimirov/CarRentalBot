@@ -6,6 +6,7 @@ import org.example.carrentalbot.handler.callback.CallbackHandler;
 import org.example.carrentalbot.handler.command.CommandHandler;
 import org.example.carrentalbot.handler.text.FallbackTextHandler;
 import org.example.carrentalbot.handler.text.TextHandler;
+import org.example.carrentalbot.util.FlowContextHelper;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Service;
 
@@ -19,16 +20,19 @@ public class TelegramService {
     private final TelegramClient telegramClient;
     private final Map<String, CallbackHandler> callbackHandlerMap;
     private final Map<String, CommandHandler> commandHandlerMap;
-    private final List<TextHandler> textHandlers;
+    private final List<TextHandler> textHandlerList;
     private final CommandHandler fallbackCommandHandler;
     private final CallbackHandler fallbackCallbackHandler;
     private final TextHandler fallbackTextHandler;
+    private final FlowContextHelper flowContextHelper;
 
-    public TelegramService( TelegramClient telegramClient,
-                            List<CallbackHandler> callbackHandlerList,
-                            List<CommandHandler> commandHandlerList,
-                            List<TextHandler> textHandlers ) {
+    public TelegramService(TelegramClient telegramClient,
+                           List<CallbackHandler> callbackHandlerList,
+                           List<CommandHandler> commandHandlerList,
+                           List<TextHandler> textHandlerList,
+                           FlowContextHelper flowContextHelper) {
         this.telegramClient = telegramClient;
+        this.flowContextHelper = flowContextHelper;
 
         CallbackHandler tempFallbackCallbackHandler = null;
         Map<String, CallbackHandler> tempCallbackHandlers = new HashMap<>();
@@ -71,7 +75,7 @@ public class TelegramService {
         FallbackTextHandler tempFallbackTextHandler = null;
         List<TextHandler> tempTextHandlers = new ArrayList<>();
 
-        for (TextHandler textHandler : textHandlers) {
+        for (TextHandler textHandler : textHandlerList) {
             if (textHandler instanceof FallbackTextHandler fallback) {
                 tempFallbackTextHandler = fallback;
             } else {
@@ -85,7 +89,7 @@ public class TelegramService {
         }
 
         this.fallbackTextHandler = tempFallbackTextHandler;
-        this.textHandlers = tempTextHandlers;
+        this.textHandlerList = tempTextHandlers;
     }
 
     public void handleUpdate(UpdateDto update) {
@@ -120,18 +124,24 @@ public class TelegramService {
 
         if (text.startsWith("/")) {
             log.info("Executing command '{}' for chatId {}", text.toLowerCase(), chatId);
-            commandHandlerMap
-                    .getOrDefault(text.toLowerCase(), fallbackCommandHandler)
-                    .handle(chatId, message);
+
+            CommandHandler handler = commandHandlerMap
+                    .getOrDefault(text.toLowerCase(), fallbackCommandHandler);
+
+            flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
+            handler.handle(chatId, message);
             return;
         }
-        log.info("Executing message for chatId {}: {}", chatId, text);
 
-        textHandlers.stream()
+        log.info("Executing message for chatId {}: {}", chatId, text);
+        textHandlerList.stream()
                 .filter(handler -> handler.canHandle(text))
                 .findFirst()
                 .ifPresentOrElse(
-                        handler -> handler.handle(chatId, message),
+                        handler -> {
+                            flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
+                            handler.handle(chatId, message);
+                        },
                         () -> fallbackTextHandler.handle(chatId, message)
                 );
     }
@@ -166,6 +176,7 @@ public class TelegramService {
                 .findFirst()
                 .orElse(fallbackCallbackHandler);
 
+        flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
         handler.handle(chatId, callbackQuery);
     }
 }

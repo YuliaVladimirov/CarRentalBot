@@ -4,18 +4,20 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
-import org.example.carrentalbot.handler.callback.DisplayBookingDetailsHandler;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
 public class ConfirmEmailHandler implements TextHandler  {
 
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
@@ -38,6 +40,11 @@ public class ConfirmEmailHandler implements TextHandler  {
     }
 
     @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
+    }
+
+    @Override
     public void handle(Long chatId, MessageDto message) {
 
         String email = retrieveEmail(chatId, message.getText());
@@ -49,7 +56,9 @@ public class ConfirmEmailHandler implements TextHandler  {
                 Please confirm or enter again.
                 """, email);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(DisplayBookingDetailsHandler.KEY);
+        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmEmailKeyboard(flowContext);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
@@ -57,8 +66,6 @@ public class ConfirmEmailHandler implements TextHandler  {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-
-
     }
 
     private String retrieveEmail(Long chatId, String text) {

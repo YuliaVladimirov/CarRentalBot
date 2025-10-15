@@ -5,6 +5,7 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendPhotoDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Car;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.NavigationService;
@@ -17,12 +18,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.UUID;
 
 @Component
-public class DisplayBookingDetailsHandler implements CallbackHandler{
+public class DisplayBookingDetailsHandler implements CallbackHandler {
 
-public static final String KEY = "DISPLAY_BOOKING_DETAILS";
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
+    public static final String KEY = "DISPLAY_BOOKING_DETAILS";
 
     private final NavigationService navigationService;
     private final SessionService sessionService;
@@ -49,7 +52,19 @@ public static final String KEY = "DISPLAY_BOOKING_DETAILS";
     }
 
     @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
+    }
+
+    @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+
+        FlowContext current = sessionService.get(chatId, "flowContext", FlowContext.class)
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+
+        if (current == FlowContext.EDIT_BOOKING_FLOW) {
+            sessionService.put(chatId, "flowContext", FlowContext.BOOKING_FLOW);
+        }
 
         UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
 
@@ -72,18 +87,18 @@ public static final String KEY = "DISPLAY_BOOKING_DETAILS";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         String text = String.format("""
-                <b>Your booking details:</b>
-                
-                🚗  Car:  %s (%s)
-                       Category:  %s
-                📅  Rental period:  %s - %s
-                       Total Days:  %d
-                💰  Daily Rate:  €%s/day
-                       Total Cost:  €%s
-                
-                📞  Phone number:  %s
-                📧  Email:  %s
-                """,
+                        <b>Your booking details:</b>
+                        
+                        🚗  Car:  %s (%s)
+                               Category:  %s
+                        📅  Rental period:  %s - %s
+                               Total Days:  %d
+                        💰  Daily Rate:  €%s/day
+                               Total Cost:  €%s
+                        
+                        📞  Phone number:  %s
+                        📧  Email:  %s
+                        """,
                 car.getBrand(), car.getModel(), car.getCategory().getValue(),
                 startDate.format(formatter), endDate.format(formatter),
                 totalDays,

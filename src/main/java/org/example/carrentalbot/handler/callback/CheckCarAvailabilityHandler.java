@@ -4,6 +4,7 @@ import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
@@ -12,12 +13,14 @@ import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.EnumSet;
 import java.util.UUID;
 
 @Component
 public class CheckCarAvailabilityHandler implements CallbackHandler {
 
     public static final String KEY = "CHECK_AVAILABILITY";
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final BookingService bookingService;
     private final NavigationService navigationService;
@@ -40,6 +43,11 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
     @Override
     public String getKey() {
         return KEY;
+    }
+
+    @Override
+    public EnumSet<FlowContext> getAllowedContexts() {
+        return ALLOWED_CONTEXTS;
     }
 
     @Override

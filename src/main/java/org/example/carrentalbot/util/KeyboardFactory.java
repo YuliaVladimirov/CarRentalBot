@@ -8,6 +8,7 @@ import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
+import org.example.carrentalbot.model.enums.FlowContext;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -121,11 +122,11 @@ public class KeyboardFactory {
 
         switch (carBrowsingMode) {
             case ALL_CARS -> {
-                text = "🕒 CHECK AVAILABILITY";
+                text = "🕒 Check Availability";
                 callbackKey = AskForRentalDatesHandler.KEY;
             }
             case CARS_FOR_DATES -> {
-                text = "📝 START BOOKING";
+                text = "📝 Start Booking";
                 callbackKey = AskForPhoneHandler.KEY;
             }
             default -> log.warn("Unknown car browsing mode: {}", carBrowsingMode);
@@ -158,8 +159,29 @@ public class KeyboardFactory {
     public InlineKeyboardMarkupDto buildConfirmRentalDatesKeyboard(CarBrowsingMode carBrowsingMode) {
 
         String callbackKey = switch (carBrowsingMode) {
-            case CARS_FOR_DATES -> BrowseCarsForDatesHandler.KEY;
-            case ALL_CARS -> CheckCarAvailabilityHandler.KEY;
+                case CARS_FOR_DATES -> BrowseCarsForDatesHandler.KEY;
+                case ALL_CARS -> CheckCarAvailabilityHandler.KEY;
+            };
+
+        return buildConfirmKeyboard(callbackKey);
+    }
+
+    public InlineKeyboardMarkupDto buildConfirmPhoneKeyboard(FlowContext flowContext) {
+
+        String callbackKey = switch (flowContext) {
+            case BOOKING_FLOW -> AskForEmailHandler.KEY;
+            case EDIT_BOOKING_FLOW -> DisplayBookingDetailsHandler.KEY;
+            default -> throw new IllegalStateException("Unexpected flow context: " + flowContext);
+        };
+
+        return buildConfirmKeyboard(callbackKey);
+    }
+
+    public InlineKeyboardMarkupDto buildConfirmEmailKeyboard(FlowContext flowContext) {
+
+        String callbackKey = switch (flowContext) {
+            case BOOKING_FLOW, EDIT_BOOKING_FLOW -> DisplayBookingDetailsHandler.KEY;
+            default -> throw new IllegalStateException("Unexpected flow context: " + flowContext);
         };
 
         return buildConfirmKeyboard(callbackKey);
@@ -170,7 +192,7 @@ public class KeyboardFactory {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("📝 START BOOKING")
+                                .text("📝 Start Booking")
                                 .callbackData(AskForPhoneHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
@@ -186,11 +208,11 @@ public class KeyboardFactory {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("🗓️ CHANGE DATES")
+                                .text("🗓️ Change Dates")
                                 .callbackData(AskForRentalDatesHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ BACK TO CARS")
+                                .text("⬅️ Back To Cars")
                                 .callbackData(BrowseAllCarsHandler.KEY)
                                 .build())
                 ))
@@ -202,12 +224,16 @@ public class KeyboardFactory {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("✅ CONFIRM")
+                                .text("✅ Confirm Booking")
                                 .callbackData(ConfirmBookingHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("✏️ EDIT")
+                                .text("✏️ Edit Booking")
                                 .callbackData(EditBookingDetailsHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("❌ Cancel Booking")
+                                .callbackData(CancelBookingHandler.KEY)
                                 .build())
                 ))
                 .build();
@@ -216,10 +242,7 @@ public class KeyboardFactory {
     public InlineKeyboardMarkupDto buildEditBookingKeyboard() {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
-                        List.of(InlineKeyboardButtonDto.builder()
-                                .text("📅 Edit Dates")
-                                .callbackData(AskForRentalDatesHandler.KEY)
-                                .build()),
+
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📞 Edit Phone")
                                 .callbackData(AskForPhoneHandler.KEY)
@@ -229,10 +252,40 @@ public class KeyboardFactory {
                                 .callbackData(AskForEmailHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
+                                .text("❌ Cancel Booking")
+                                .callbackData(CancelBookingHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
                                 .text("⬅️ BACK")
                                 .callbackData(GoBackHandler.KEY)
                                 .build())
                 ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildCancelBookingKeyboard() {
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("✅ Yes, Cancel")
+                                .callbackData(ConfirmCancelBookingHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ No, Go Back")
+                                .callbackData(DisplayBookingDetailsHandler.KEY)
+                                .build())))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildBackMainMenuKeyboard() {
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ Back To Main Menu")
+                                .callbackData(GoToMainMenuHandler.KEY)
+                                .build())))
                 .build();
     }
 }

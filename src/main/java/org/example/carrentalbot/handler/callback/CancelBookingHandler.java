@@ -16,7 +16,7 @@ import java.util.EnumSet;
 public class CancelBookingHandler implements CallbackHandler {
 
     public static final String KEY = "CANCEL_BOOKING";
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.EDIT_BOOKING_FLOW);
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     private final SessionService sessionService;
     private final NavigationService navigationService;
@@ -45,12 +45,7 @@ public class CancelBookingHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        FlowContext current = sessionService.get(chatId, "flowContext", FlowContext.class)
-                .orElse(null);
-
-        if (current == FlowContext.BOOKING_FLOW) {
-            sessionService.put(chatId, "flowContext", FlowContext.EDIT_BOOKING_FLOW);
-        }
+        sessionService.put(chatId, "flowContext", FlowContext.EDIT_BOOKING_FLOW);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCancelBookingKeyboard();
 

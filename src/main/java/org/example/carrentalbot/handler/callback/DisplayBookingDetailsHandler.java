@@ -59,12 +59,7 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        FlowContext current = sessionService.get(chatId, "flowContext", FlowContext.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
-
-        if (current == FlowContext.EDIT_BOOKING_FLOW) {
-            sessionService.put(chatId, "flowContext", FlowContext.BOOKING_FLOW);
-        }
+        sessionService.put(chatId, "flowContext", FlowContext.BOOKING_FLOW);
 
         UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
 

@@ -5,6 +5,7 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.NavigationService;
+import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -18,13 +19,16 @@ public class GoToMainMenuHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     private final NavigationService navigationService;
+    private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public GoToMainMenuHandler(NavigationService navigationService,
+                               SessionService sessionService,
                                KeyboardFactory keyboardFactory,
                                TelegramClient telegramClient) {
         this.navigationService = navigationService;
+        this.sessionService = sessionService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -41,6 +45,8 @@ public class GoToMainMenuHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+
+        sessionService.clear(chatId);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildMainMenuKeyboard();
 

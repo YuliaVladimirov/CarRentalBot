@@ -42,16 +42,18 @@ public class FlowContextHelper {
 
     private String getInvalidContextMessage(FlowContext current) {
         if (current == null) {
-            return "This action isn’t available right now. Please continue your current flow or return to the main menu.";
+            return "This action is not available right now. Please continue your current flow or return to the main menu.";
         }
 
         return switch (current) {
             case BROWSING_FLOW ->
-                    "You’re currently browsing cars. This action isn’t available in browsing. Please continue your current flow or return to the main menu.";
+                    "You are currently browsing cars. This action is not available in browsing. Please continue your current flow or return to the main menu.";
             case BOOKING_FLOW ->
-                    "⚠️ You’re in the middle of a booking. This action isn’t available in booking. Please finish booking or cancel it or return to the main menu.";
+                    "⚠️ You are in the middle of a booking. This action is not available in booking. Please finish booking or cancel it or return to the main menu.";
             case EDIT_BOOKING_FLOW ->
-                    "⚠️ You’re editing a booking. This action isn’t available in editing. Please finish editing or cancel booking or return to the main menu.";
+                    "⚠️ You are editing a booking. This action is not available in editing. Please finish editing or cancel booking or return to the main menu.";
+            case MY_BOOKINGS_FLOW ->
+                    "⚠️ You are currently managing your bookings. This action is not available right now. Please finish viewing or editing your bookings, or return to the main menu.";
         };
     }
 }

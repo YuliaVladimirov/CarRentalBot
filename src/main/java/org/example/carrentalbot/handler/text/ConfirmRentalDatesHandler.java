@@ -64,14 +64,14 @@ public class ConfirmRentalDatesHandler implements TextHandler {
 
             LocalDate startDate = rentalDates[0];
             LocalDate endDate = rentalDates[1];
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
             text = String.format("""
                     You entered:
                     Rental period: <b>%s - %s</b>
 
                     Please confirm or enter again.
-                    """, startDate.format(formatter), endDate.format(formatter));
+                    """, startDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                    endDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
             replyMarkup = keyboardFactory.buildConfirmKeyboard(callbackKey);
 

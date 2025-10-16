@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.RoundingMode;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -60,9 +61,9 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
         UUID carId = retrieveCarId(chatId, callbackQuery.getData());
         Car car = carService.getCar(chatId, carId);
 
-        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+        Map.Entry<String, String> data = getDataForKeyboard(chatId);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(carBrowsingMode);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarDetailsKeyboard(data.getKey(), data.getValue());
 
         String text = String.format("""
                 🚘  <b>Car Details</b>:
@@ -115,5 +116,15 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                     }
                 })
                 .orElse(null);
+    }
+
+    private Map.Entry<String, String> getDataForKeyboard(Long chatId) {
+        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class)
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found"));
+
+        return switch (carBrowsingMode) {
+            case ALL_CARS -> Map.entry(AskForRentalDatesHandler.KEY, "🕒 Check Availability");
+            case CARS_FOR_DATES -> Map.entry(AskForPhoneHandler.KEY, "📝 Start Booking");
+        };
     }
 }

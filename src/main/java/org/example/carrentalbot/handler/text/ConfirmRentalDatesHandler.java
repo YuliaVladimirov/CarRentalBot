@@ -5,7 +5,8 @@ import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
-import org.example.carrentalbot.exception.InvalidFlowContextException;
+import org.example.carrentalbot.handler.callback.BrowseCarsForDatesHandler;
+import org.example.carrentalbot.handler.callback.CheckCarAvailabilityHandler;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
@@ -53,11 +54,6 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
-        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class).orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found."));
-        if(flowContext != FlowContext.BROWSING_FLOW){
-            throw new InvalidFlowContextException(chatId, "⚠️ You cannot enter dates at this stage. Please start from the main menu.");
-        }
-
         LocalDate[] rentalDates = retrieveRentalDates(chatId, message.getText());
         LocalDate startDate = rentalDates[0];
         LocalDate endDate = rentalDates[1];
@@ -70,9 +66,9 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                 Please confirm or enter again.
                 """, startDate.format(formatter), endDate.format(formatter));
 
-        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
+        String callbackKey = getDataForKeyboard(chatId);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmRentalDatesKeyboard(carBrowsingMode);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(callbackKey);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
@@ -101,7 +97,6 @@ public class ConfirmRentalDatesHandler implements TextHandler {
             sessionService.put(chatId, "endDate", endDate);
         }
 
-
         return new LocalDate[]{startDate, endDate};
     }
 
@@ -121,5 +116,15 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                 )
                 .filter(array -> array.length == 2)
                 .orElse(null);
+    }
+
+    private String getDataForKeyboard(Long chatId) {
+        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class)
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found"));
+
+        return switch (carBrowsingMode) {
+            case ALL_CARS -> CheckCarAvailabilityHandler.KEY;
+            case CARS_FOR_DATES -> BrowseCarsForDatesHandler.KEY;
+        };
     }
 }

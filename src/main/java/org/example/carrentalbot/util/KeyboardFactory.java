@@ -8,7 +8,6 @@ import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
-import org.example.carrentalbot.model.enums.FlowContext;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -115,22 +114,7 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildCarDetailsKeyboard(CarBrowsingMode carBrowsingMode) {
-
-        String text = null;
-        String callbackKey = null;
-
-        switch (carBrowsingMode) {
-            case ALL_CARS -> {
-                text = "🕒 Check Availability";
-                callbackKey = AskForRentalDatesHandler.KEY;
-            }
-            case CARS_FOR_DATES -> {
-                text = "📝 Start Booking";
-                callbackKey = AskForPhoneHandler.KEY;
-            }
-            default -> log.warn("Unknown car browsing mode: {}", carBrowsingMode);
-        }
+    public InlineKeyboardMarkupDto buildCarDetailsKeyboard(String callbackKey, String text) {
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -154,37 +138,6 @@ public class KeyboardFactory {
                         .callbackData(callbackKey)
                         .build())))
                 .build();
-    }
-
-    public InlineKeyboardMarkupDto buildConfirmRentalDatesKeyboard(CarBrowsingMode carBrowsingMode) {
-
-        String callbackKey = switch (carBrowsingMode) {
-                case CARS_FOR_DATES -> BrowseCarsForDatesHandler.KEY;
-                case ALL_CARS -> CheckCarAvailabilityHandler.KEY;
-            };
-
-        return buildConfirmKeyboard(callbackKey);
-    }
-
-    public InlineKeyboardMarkupDto buildConfirmPhoneKeyboard(FlowContext flowContext) {
-
-        String callbackKey = switch (flowContext) {
-            case BOOKING_FLOW -> AskForEmailHandler.KEY;
-            case EDIT_BOOKING_FLOW -> DisplayBookingDetailsHandler.KEY;
-            default -> throw new IllegalStateException("Unexpected flow context: " + flowContext);
-        };
-
-        return buildConfirmKeyboard(callbackKey);
-    }
-
-    public InlineKeyboardMarkupDto buildConfirmEmailKeyboard(FlowContext flowContext) {
-
-        String callbackKey = switch (flowContext) {
-            case BOOKING_FLOW, EDIT_BOOKING_FLOW -> DisplayBookingDetailsHandler.KEY;
-            default -> throw new IllegalStateException("Unexpected flow context: " + flowContext);
-        };
-
-        return buildConfirmKeyboard(callbackKey);
     }
 
     public InlineKeyboardMarkupDto buildCarAvailableKeyboard() {

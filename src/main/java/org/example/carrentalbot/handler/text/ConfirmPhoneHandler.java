@@ -4,7 +4,8 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
-import org.example.carrentalbot.exception.InvalidFlowContextException;
+import org.example.carrentalbot.handler.callback.AskForEmailHandler;
+import org.example.carrentalbot.handler.callback.DisplayBookingDetailsHandler;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
@@ -47,15 +48,6 @@ public class ConfirmPhoneHandler implements TextHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
-        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found."));
-
-        if (flowContext != FlowContext.BOOKING_FLOW
-                && flowContext != FlowContext.EDIT_BOOKING_FLOW) {
-            throw new InvalidFlowContextException(chatId,
-                    "⚠️ This action is not allowed in current state. Please start from the main menu.");
-        }
-
         String phone = retrievePhone(chatId, message.getText());
 
         String text = String.format("""
@@ -65,7 +57,9 @@ public class ConfirmPhoneHandler implements TextHandler {
                 Please confirm or enter again.
                 """, phone);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmPhoneKeyboard(flowContext);
+        String callbackKey = getDataForKeyboard(chatId);
+
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(callbackKey);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
@@ -100,5 +94,16 @@ public class ConfirmPhoneHandler implements TextHandler {
                 .filter(t -> !t.isEmpty())
                 .filter(t -> PHONE_PATTERN.matcher(t).matches())
                 .orElse(null);
+    }
+
+    private String getDataForKeyboard(Long chatId) {
+        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class)
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found."));
+
+        return switch (flowContext) {
+            case BOOKING_FLOW -> AskForEmailHandler.KEY;
+            case EDIT_BOOKING_FLOW -> DisplayBookingDetailsHandler.KEY;
+            default -> throw new IllegalStateException("Unexpected flow context for ConfirmPhoneHandler: " + flowContext);
+        };
     }
 }

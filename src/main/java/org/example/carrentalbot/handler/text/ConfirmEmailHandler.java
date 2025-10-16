@@ -4,6 +4,7 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.handler.callback.DisplayBookingDetailsHandler;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
@@ -56,9 +57,7 @@ public class ConfirmEmailHandler implements TextHandler  {
                 Please confirm or enter again.
                 """, email);
 
-        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class).orElseThrow(() -> new DataNotFoundException(chatId, "Data not found"));
-
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmEmailKeyboard(flowContext);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(DisplayBookingDetailsHandler.KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
@@ -85,7 +84,6 @@ public class ConfirmEmailHandler implements TextHandler  {
         }
         return result;
     }
-
 
     private String ExtractEmailFromMessageText(String text) {
         return Optional.ofNullable(text)

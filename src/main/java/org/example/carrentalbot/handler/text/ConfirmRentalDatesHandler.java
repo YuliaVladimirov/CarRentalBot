@@ -55,20 +55,37 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     public void handle(Long chatId, MessageDto message) {
 
         LocalDate[] rentalDates = retrieveRentalDates(chatId, message.getText());
-        LocalDate startDate = rentalDates[0];
-        LocalDate endDate = rentalDates[1];
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        String text = String.format("""
-                You entered:
-                Rental period: <b>%s - %s</b>
-
-                Please confirm or enter again.
-                """, startDate.format(formatter), endDate.format(formatter));
-
+        String text;
+        InlineKeyboardMarkupDto replyMarkup = null;
         String callbackKey = getDataForKeyboard(chatId);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(callbackKey);
+        if (rentalDates.length == 2) {
+
+            LocalDate startDate = rentalDates[0];
+            LocalDate endDate = rentalDates[1];
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+            text = String.format("""
+                    You entered:
+                    Rental period: <b>%s - %s</b>
+
+                    Please confirm or enter again.
+                    """, startDate.format(formatter), endDate.format(formatter));
+
+            replyMarkup = keyboardFactory.buildConfirmKeyboard(callbackKey);
+
+        } else {
+            text = """
+                    <b>Invalid rental period:</b>
+                    
+                    ⚠️ <b>Make sure:</b>
+                    • You cannot book for past days
+                    • The start date must be before the end date.
+                    
+                    Please check your dates and re-enter:
+                    """;
+        }
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
@@ -86,11 +103,15 @@ public class ConfirmRentalDatesHandler implements TextHandler {
         LocalDate endDateFromSession = sessionService.get(chatId, "endDate", LocalDate.class).orElse(null);
 
         if (datesFromCallback == null && (startDateFromSession == null || endDateFromSession == null)) {
-            throw new DataNotFoundException(chatId, "❌ Rental dates not found in callback or session");
+            throw new DataNotFoundException(chatId, "Rental dates not found in callback or session");
         }
 
         LocalDate startDate = (datesFromCallback != null) ? datesFromCallback[0] : startDateFromSession;
         LocalDate endDate = (datesFromCallback != null) ? datesFromCallback[1] : endDateFromSession;
+
+        if (startDate.isBefore(LocalDate.now()) || endDate.isBefore(LocalDate.now()) || startDate.isAfter(endDate)) {
+            return new LocalDate[0];
+        }
 
         if (datesFromCallback != null && (!startDate.equals(startDateFromSession) || !endDate.equals(endDateFromSession))) {
             sessionService.put(chatId, "startDate", startDate);
@@ -109,7 +130,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                             try {
                                 return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
                             } catch (DateTimeParseException e) {
-                                throw new InvalidDataException(chatId, "❌ Invalid date format: " + datePart);
+                                throw new InvalidDataException(chatId, "Invalid date format: " + datePart);
                             }
                         })
                         .toArray(LocalDate[]::new)

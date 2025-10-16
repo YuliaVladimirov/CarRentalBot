@@ -1,6 +1,7 @@
 package org.example.carrentalbot.service;
 
 import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.exception.InvalidStateException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.Customer;
@@ -45,7 +46,7 @@ public class BookingService {
         Car car = carRepository.findById(carId).orElseThrow(() -> new DataNotFoundException(chatId, String.format("Car with id: %s, was not found.", carId)));
 
         if (!isCarAvailable(carId, startDate, endDate)) {
-            throw new IllegalStateException("Car is no longer available for selected dates");
+            throw new InvalidStateException(chatId, "Car is no longer available for selected dates");
         }
 
         Booking booking = Booking.builder()

@@ -79,8 +79,6 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
         BigDecimal totalCost = bookingService.calculateTotalCost(dailyRate, totalDays);
         sessionService.put(chatId, "totalCost", totalCost);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
         String text = String.format("""
                         <b>Your booking details:</b>
                         
@@ -95,7 +93,7 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
                         📧  Email:  %s
                         """,
                 car.getBrand(), car.getModel(), car.getCategory().getValue(),
-                startDate.format(formatter), endDate.format(formatter),
+                startDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), endDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                 totalDays,
                 dailyRate, totalCost,
                 phone, email);

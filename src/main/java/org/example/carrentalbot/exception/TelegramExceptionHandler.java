@@ -59,7 +59,7 @@ public class TelegramExceptionHandler {
     }
 
     @ExceptionHandler(InvalidStateException.class)
-    public void handleFlowContextStateException(InvalidStateException exception) {
+    public void handleInvalidStateStateException(InvalidStateException exception) {
         log.error("Internal flow state error: {}", exception.getMessage(), exception);
 
         String text = """

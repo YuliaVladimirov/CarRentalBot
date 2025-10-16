@@ -22,15 +22,12 @@ public class FlowContextHelper {
                 .orElse(null);
 
         if (current != null && !allowedContexts.contains(current)) {
-            throw new InvalidFlowContextException(chatId,
-                    "This action is not allowed in the current state. Please start from the main menu.");
+            throw new InvalidFlowContextException(chatId, getInvalidContextMessage(current));
         }
 
         if (current == null && !allowedContexts.equals(EnumSet.allOf(FlowContext.class))) {
-            throw new InvalidFlowContextException(chatId,
-                    "This action is not allowed in the current state. Please start from the main menu.");
+            throw new InvalidFlowContextException(chatId, getInvalidContextMessage(null));
         }
-
     }
 
     public FlowContext getFlowContext(Long chatId) {
@@ -41,5 +38,20 @@ public class FlowContextHelper {
 
     public void setFlowContext(Long chatId, FlowContext context) {
         sessionService.put(chatId, "flowContext", context);
+    }
+
+    private String getInvalidContextMessage(FlowContext current) {
+        if (current == null) {
+            return "This action isn’t available right now. Please continue your current flow or return to the main menu.";
+        }
+
+        return switch (current) {
+            case BROWSING_FLOW ->
+                    "You’re currently browsing cars. This action isn’t available in browsing. Please continue your current flow or return to the main menu.";
+            case BOOKING_FLOW ->
+                    "⚠️ You’re in the middle of a booking. This action isn’t available in booking. Please finish booking or cancel it or return to the main menu.";
+            case EDIT_BOOKING_FLOW ->
+                    "⚠️ You’re editing a booking. This action isn’t available in editing. Please finish editing or cancel booking or return to the main menu.";
+        };
     }
 }

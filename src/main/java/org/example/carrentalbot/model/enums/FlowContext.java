@@ -7,7 +7,8 @@ public enum FlowContext {
 
     BROWSING_FLOW  ("Catalog"),
     BOOKING_FLOW ("Booking"),
-    EDIT_BOOKING_FLOW ("Edit Booking");
+    EDIT_BOOKING_FLOW ("Edit Booking"),
+    MY_BOOKINGS_FLOW ("My Bookings");
 
     private final String value;
 

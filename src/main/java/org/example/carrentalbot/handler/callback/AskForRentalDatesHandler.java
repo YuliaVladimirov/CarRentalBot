@@ -45,7 +45,7 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        handleBrowsingMode(chatId, callbackQuery.getData());
+        updateBrowsingModeInSession(chatId, callbackQuery.getData());
 
         String text = """
         Please enter your rental period.
@@ -64,7 +64,7 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     }
 
 
-    private void handleBrowsingMode(Long chatId, String callbackData) {
+    private void updateBrowsingModeInSession(Long chatId, String callbackData) {
         CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(chatId, callbackData);
         CarBrowsingMode fromSession = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElse(null);
 

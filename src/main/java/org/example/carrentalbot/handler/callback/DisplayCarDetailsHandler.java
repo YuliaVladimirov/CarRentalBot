@@ -58,7 +58,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        UUID carId = retrieveCarId(chatId, callbackQuery.getData());
+        UUID carId = updateCarIdInSession(chatId, callbackQuery.getData());
         Car car = carService.getCar(chatId, carId);
 
         Map.Entry<String, String> data = getDataForKeyboard(chatId);
@@ -85,7 +85,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                 .build());
     }
 
-    private UUID retrieveCarId(Long chatId, String callbackData) {
+    private UUID updateCarIdInSession(Long chatId, String callbackData) {
 
         UUID fromCallback = extractCarIdFromCallback(chatId, callbackData);
         UUID fromSession = sessionService.get(chatId, "carId", UUID.class).orElse(null);

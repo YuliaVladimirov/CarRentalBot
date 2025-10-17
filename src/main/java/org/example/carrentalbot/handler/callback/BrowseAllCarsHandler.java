@@ -56,7 +56,7 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        handleBrowsingMode(chatId, callbackQuery.getData());
+        updateBrowsingModeInSession(chatId, callbackQuery.getData());
 
         CarCategory carCategory = sessionService
                 .get(chatId, "carCategory", CarCategory.class)
@@ -80,7 +80,7 @@ public class BrowseAllCarsHandler implements CallbackHandler {
                 .build());
     }
 
-    private void handleBrowsingMode(Long chatId, String callbackData) {
+    private void updateBrowsingModeInSession(Long chatId, String callbackData) {
         CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(chatId, callbackData);
         CarBrowsingMode fromSession = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElse(null);
 
@@ -94,7 +94,6 @@ public class BrowseAllCarsHandler implements CallbackHandler {
             sessionService.put(chatId, "carBrowsingMode", result);
         }
     }
-
 
     private CarBrowsingMode extractBrowsingModeFromCallback(Long chatId, String callbackData) {
         return Optional.ofNullable(callbackData)

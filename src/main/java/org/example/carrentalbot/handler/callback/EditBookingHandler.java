@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
-public class EditBookingDetailsHandler implements CallbackHandler {
+public class EditBookingHandler implements CallbackHandler {
 
-    public static final String KEY = "EDIT_BOOKING_DETAILS";
+    public static final String KEY = "EDIT_BOOKING";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW);
 
     private final TelegramClient telegramClient;
@@ -23,7 +23,7 @@ public class EditBookingDetailsHandler implements CallbackHandler {
     private final NavigationService navigationService;
     private final SessionService sessionService;
 
-    public EditBookingDetailsHandler(
+    public EditBookingHandler(
             TelegramClient telegramClient,
             KeyboardFactory keyboardFactory,
             NavigationService navigationService, SessionService sessionService
@@ -71,6 +71,5 @@ public class EditBookingDetailsHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-
     }
 }

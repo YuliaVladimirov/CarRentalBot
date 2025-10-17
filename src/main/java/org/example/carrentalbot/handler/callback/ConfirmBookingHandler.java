@@ -92,6 +92,5 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-
     }
 }

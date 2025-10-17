@@ -57,6 +57,7 @@ public class BrowseCategoriesHandler implements CallbackHandler {
         InlineKeyboardMarkupDto keyboard = keyboardFactory.buildCarCategoryKeyboard(carCategories);
 
         navigationService.push(chatId, KEY);
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text("<b>Available Categories:</b>")

@@ -59,7 +59,6 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
 
         boolean available = bookingService.isCarAvailable(carId, startDate, endDate);
 
-
         String carAvailable = """
                 This car is <b>available</b> for your selected dates!
                 
@@ -77,12 +76,12 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
         InlineKeyboardMarkupDto replyMarkup = available ? keyboardFactory.buildCarAvailableKeyboard() : keyboardFactory.buildCarUnavailableKeyboard();
 
         navigationService.push(chatId, KEY);
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(text)
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-
     }
 }

@@ -54,7 +54,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
-        LocalDate[] rentalDates = retrieveRentalDates(chatId, message.getText());
+        LocalDate[] rentalDates = updateRentalDatesInSession(chatId, message.getText());
 
         String text;
         InlineKeyboardMarkupDto replyMarkup = null;
@@ -66,14 +66,13 @@ public class ConfirmRentalDatesHandler implements TextHandler {
             LocalDate endDate = rentalDates[1];
 
             text = String.format("""
-                    You entered:
-                    Rental period: <b>%s - %s</b>
+                    Rental dates <b>%s - %s</b> saved for this booking:
 
-                    Please confirm or enter again.
+                    Press <b>OK</b> to continue or enter a new email.
                     """, startDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                     endDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
-            replyMarkup = keyboardFactory.buildConfirmKeyboard(callbackKey);
+            replyMarkup = keyboardFactory.buildOkKeyboard(callbackKey);
 
         } else {
             text = """
@@ -95,7 +94,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                 .build());
     }
 
-    private LocalDate[] retrieveRentalDates(Long chatId, String text) {
+    private LocalDate[] updateRentalDatesInSession(Long chatId, String text) {
 
         LocalDate[] datesFromCallback = extractDatesFromMessageText(chatId, text);
 

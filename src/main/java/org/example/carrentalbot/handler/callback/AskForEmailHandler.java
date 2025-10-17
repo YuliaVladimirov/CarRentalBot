@@ -13,7 +13,7 @@ import java.util.EnumSet;
 public class AskForEmailHandler  implements CallbackHandler {
 
     public static final String KEY = "ASK_FOR_EMAIL";
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     private final NavigationService navigationService;
     private final TelegramClient telegramClient;

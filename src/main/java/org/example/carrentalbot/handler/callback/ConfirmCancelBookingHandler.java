@@ -56,7 +56,7 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
         sessionService.clear(chatId);
         navigationService.clear(chatId);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBackMainMenuKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

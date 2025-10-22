@@ -59,8 +59,6 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        sessionService.put(chatId, "flowContext", FlowContext.BOOKING_FLOW);
-
         UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
 
         LocalDate startDate = sessionService.get(chatId, "startDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found"));
@@ -81,17 +79,18 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
         String text = String.format("""
                         <b>Your booking details:</b>
-                        
-                        🚗  Car:  %s (%s)
-                               Category:  %s
-                        📅  Rental period:  %s - %s
-                               Total Days:  %d
-                        💰  Daily Rate:  €%s/day
-                               Total Cost:  €%s
-                        
-                        📞  Phone number:  %s
-                        📧  Email:  %s
-                        """,
+                       
+                       🚗  Car:  %s (%s)
+                       🏷️  Category:  %s
+                       
+                       📅  Rental period:  %s - %s
+                       📆  Total Days: %d
+                       💰  Daily Rate:  €%s/day
+                       💳  Total Cost:  €%s
+                       
+                       📞  Phone number:  %s
+                       📧  Email:  %s
+                       """,
                 car.getBrand(), car.getModel(), car.getCategory().getValue(),
                 startDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), endDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                 totalDays,

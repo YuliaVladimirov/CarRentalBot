@@ -1,9 +1,13 @@
 package org.example.carrentalbot.handler.callback;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
+import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
+import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.util.KeyboardFactory;
+import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
@@ -14,14 +18,20 @@ public class StartBookingHandler implements CallbackHandler {
     public static final String KEY = "START_BOOKING";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
-    private final AskForPhoneHandler askForPhoneHandler;
+
     private final SessionService sessionService;
     private final NavigationService navigationService;
+    private final KeyboardFactory keyboardFactory;
+    private final TelegramClient telegramClient;
 
-    public StartBookingHandler(AskForPhoneHandler askForPhoneHandler, SessionService sessionService, NavigationService navigationService) {
-        this.askForPhoneHandler = askForPhoneHandler;
+    public StartBookingHandler(SessionService sessionService,
+                               NavigationService navigationService,
+                               KeyboardFactory keyboardFactory,
+                               TelegramClient telegramClient) {
         this.sessionService = sessionService;
         this.navigationService = navigationService;
+        this.keyboardFactory = keyboardFactory;
+        this.telegramClient = telegramClient;
     }
 
     @Override
@@ -35,10 +45,24 @@ public class StartBookingHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        navigationService.push(chatId, KEY);
-
         sessionService.put(chatId, "flowContext", FlowContext.BOOKING_FLOW);
 
-        askForPhoneHandler.handle(chatId, callbackQuery);
+        String text = """
+                <b>Starting a New Booking</b>
+
+                Please provide contact information step by step.
+                You can cancel anytime before confirming your booking.
+                """;
+
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildStartBookingKeyboard();
+
+        navigationService.push(chatId, KEY);
+
+        telegramClient.sendMessage(SendMessageDto.builder()
+                .chatId(chatId.toString())
+                .text(text)
+                .parseMode("HTML")
+                .replyMarkup(replyMarkup)
+                .build());
     }
 }

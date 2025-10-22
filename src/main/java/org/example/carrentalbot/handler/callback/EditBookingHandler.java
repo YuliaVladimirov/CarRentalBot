@@ -3,6 +3,7 @@ package org.example.carrentalbot.handler.callback;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
@@ -16,7 +17,7 @@ import java.util.EnumSet;
 public class EditBookingHandler implements CallbackHandler {
 
     public static final String KEY = "EDIT_BOOKING";
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW);
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW, FlowContext.MY_BOOKINGS_FLOW);
 
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
@@ -47,21 +48,23 @@ public class EditBookingHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        sessionService.put(chatId, "flowContext", FlowContext.EDIT_BOOKING_FLOW);
+        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class).orElseThrow(() -> new DataNotFoundException(chatId, String.format("Flow context not found in session for chat: %s", chatId)));
+
+        if (flowContext == FlowContext.BOOKING_FLOW) {
+            sessionService.put(chatId, "flowContext", FlowContext.EDIT_BOOKING_FLOW);
+        }
 
         String text = """
-                <b>Edit your booking details:</b>
-
-                ⚠️
-                <i>To change rental dates,</i>
-                <i>please cancel this booking</i>
-                <i>and start a new one.</i>
+                ⚠️ <i>To change rental dates,</i>
+                <i>please create a new booking.</i>
                 
-                To edit your contact details
-                please choose an option below:
+                <b>Edit Contact Info:</b>
+                
+                Update your phone or email below,
+                then press <b>Continue</b> when done.
                 """;
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildEditBookingKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildEditBookingKeyboard(DisplayBookingDetailsHandler.KEY);
 
         navigationService.push(chatId, KEY);
 

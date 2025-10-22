@@ -4,7 +4,10 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.exception.InvalidStateException;
 import org.example.carrentalbot.handler.callback.DisplayBookingDetailsHandler;
+import org.example.carrentalbot.handler.callback.EditBookingHandler;
+import org.example.carrentalbot.handler.callback.EditMyBookingHandler;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
@@ -18,7 +21,7 @@ import java.util.regex.Pattern;
 @Component
 public class ConfirmEmailHandler implements TextHandler  {
 
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
@@ -48,16 +51,20 @@ public class ConfirmEmailHandler implements TextHandler  {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
-        String email = retrieveEmail(chatId, message.getText());
+        String email = extractEmailFromMessageText(message.getText());
+        sessionService.put(chatId, "email", email);
 
         String text = String.format("""
-                You entered:
-                Email: <b>%s</b>
+                Confirm your email:
+                <b>%s</b>
 
-                Please confirm or enter again.
+                Press <b>OK</b> to continue
+                or enter a new email.
                 """, email);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(DisplayBookingDetailsHandler.KEY);
+        String callbackKey = getDataForKeyboard(chatId);
+
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildOkKeyboard(callbackKey);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
@@ -67,29 +74,23 @@ public class ConfirmEmailHandler implements TextHandler  {
                 .build());
     }
 
-    private String retrieveEmail(Long chatId, String text) {
-
-        String emailFromMessageText = ExtractEmailFromMessageText(text);
-
-        String emailFromSession = sessionService.get(chatId, "email", String.class).orElse(null);
-
-        if (emailFromMessageText == null && emailFromSession == null) {
-            throw new DataNotFoundException(chatId, "❌ Email not found in message or session");
-        }
-
-        String result = emailFromMessageText != null ? emailFromMessageText : emailFromSession;
-
-        if (!result.equals(emailFromSession)) {
-            sessionService.put(chatId, "email", result);
-        }
-        return result;
-    }
-
-    private String ExtractEmailFromMessageText(String text) {
+    private String extractEmailFromMessageText(String text) {
         return Optional.ofNullable(text)
                 .map(String::trim)
                 .filter(t -> !t.isEmpty())
                 .filter(t -> EMAIL_PATTERN.matcher(t).matches())
                 .orElse(null);
+    }
+
+    private String getDataForKeyboard(Long chatId) {
+        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class)
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found in session."));
+
+        return switch (flowContext) {
+            case BOOKING_FLOW  -> DisplayBookingDetailsHandler.KEY;
+            case EDIT_BOOKING_FLOW -> EditBookingHandler.KEY;
+            case MY_BOOKINGS_FLOW -> EditMyBookingHandler.KEY;
+            default -> throw new InvalidStateException(chatId, "Unexpected flow context for current handler: " + flowContext);
+        };
     }
 }

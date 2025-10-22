@@ -4,9 +4,10 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
-import org.example.carrentalbot.handler.callback.AskForEmailHandler;
-import org.example.carrentalbot.handler.callback.DisplayBookingDetailsHandler;
+import org.example.carrentalbot.exception.InvalidStateException;
+import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.enums.FlowContext;
+import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -19,17 +20,20 @@ import java.util.regex.Pattern;
 @Component
 public class ConfirmPhoneHandler implements TextHandler {
 
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
     private static final Pattern PHONE_PATTERN =
             Pattern.compile("\\+?\\d[\\d\\s]{7,14}\\d");
 
+    private final BookingService bookingService;
     private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public ConfirmPhoneHandler(SessionService sessionService,
+    public ConfirmPhoneHandler(BookingService bookingService,
+                               SessionService sessionService,
                                KeyboardFactory keyboardFactory,
                                TelegramClient telegramClient) {
+        this.bookingService = bookingService;
         this.sessionService = sessionService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
@@ -48,18 +52,20 @@ public class ConfirmPhoneHandler implements TextHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
-        String phone = retrievePhone(chatId, message.getText());
+        String phone = extractPhoneFromMessageText(message.getText());
+        sessionService.put(chatId, "phone", phone);
 
         String text = String.format("""
-                You entered:
-                Phone number: <b>%s</b>
-
-                Please confirm or enter again.
+                Confirm your phone:
+                <b>%s</b>
+                
+                Press <b>OK</b> to continue
+                or enter a new number.
                 """, phone);
 
         String callbackKey = getDataForKeyboard(chatId);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildConfirmKeyboard(callbackKey);
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildOkKeyboard(callbackKey);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
@@ -67,24 +73,6 @@ public class ConfirmPhoneHandler implements TextHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-    }
-
-    private String retrievePhone(Long chatId, String text) {
-
-        String phoneFromMessageText = extractPhoneFromMessageText(text);
-
-        String phoneFromSession = sessionService.get(chatId, "phone", String.class).orElse(null);
-
-        if (phoneFromMessageText == null && phoneFromSession == null) {
-            throw new DataNotFoundException(chatId, "❌ Phone number not found in message or session");
-        }
-
-        String result = phoneFromMessageText != null ? phoneFromMessageText : phoneFromSession;
-
-        if (!result.equals(phoneFromSession)) {
-            sessionService.put(chatId, "phone", result);
-        }
-        return result;
     }
 
     private String extractPhoneFromMessageText(String text) {
@@ -98,12 +86,13 @@ public class ConfirmPhoneHandler implements TextHandler {
 
     private String getDataForKeyboard(Long chatId) {
         FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found."));
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found in session."));
 
         return switch (flowContext) {
             case BOOKING_FLOW -> AskForEmailHandler.KEY;
-            case EDIT_BOOKING_FLOW -> DisplayBookingDetailsHandler.KEY;
-            default -> throw new IllegalStateException("Unexpected flow context for ConfirmPhoneHandler: " + flowContext);
+            case MY_BOOKINGS_FLOW -> EditMyBookingHandler.KEY;
+            case EDIT_BOOKING_FLOW -> EditBookingHandler.KEY;
+            default -> throw new InvalidStateException(chatId, "Unexpected flow context for current handler: " + flowContext);
         };
     }
 }

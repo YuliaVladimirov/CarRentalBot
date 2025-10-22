@@ -54,21 +54,26 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
-        LocalDate[] rentalDates = updateRentalDatesInSession(chatId, message.getText());
+        LocalDate[] rentalDates = extractDatesFromMessageText(chatId, message.getText());
+
+        LocalDate startDate = rentalDates[0];
+        LocalDate endDate = rentalDates[1];
+
+        sessionService.put(chatId, "startDate", startDate);
+        sessionService.put(chatId, "endDate", endDate);
 
         String text;
-        InlineKeyboardMarkupDto replyMarkup = null;
+        InlineKeyboardMarkupDto replyMarkup;
         String callbackKey = getDataForKeyboard(chatId);
 
-        if (rentalDates.length == 2) {
-
-            LocalDate startDate = rentalDates[0];
-            LocalDate endDate = rentalDates[1];
+        if (validateRentalDates(startDate, endDate)) {
 
             text = String.format("""
-                    Rental dates <b>%s - %s</b> saved for this booking:
-
-                    Press <b>OK</b> to continue or enter a new email.
+                    Confirm your rental dates:
+                    <b>%s - %s</b>
+                
+                    Press <b>OK</b> to continue
+                     or enter new dates.
                     """, startDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                     endDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
@@ -84,6 +89,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                     
                     Please check your dates and re-enter:
                     """;
+            replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
         }
 
         telegramClient.sendMessage(SendMessageDto.builder()
@@ -94,30 +100,8 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                 .build());
     }
 
-    private LocalDate[] updateRentalDatesInSession(Long chatId, String text) {
-
-        LocalDate[] datesFromCallback = extractDatesFromMessageText(chatId, text);
-
-        LocalDate startDateFromSession = sessionService.get(chatId, "startDate", LocalDate.class).orElse(null);
-        LocalDate endDateFromSession = sessionService.get(chatId, "endDate", LocalDate.class).orElse(null);
-
-        if (datesFromCallback == null && (startDateFromSession == null || endDateFromSession == null)) {
-            throw new DataNotFoundException(chatId, "Rental dates not found in callback or session");
-        }
-
-        LocalDate startDate = (datesFromCallback != null) ? datesFromCallback[0] : startDateFromSession;
-        LocalDate endDate = (datesFromCallback != null) ? datesFromCallback[1] : endDateFromSession;
-
-        if (startDate.isBefore(LocalDate.now()) || endDate.isBefore(LocalDate.now()) || startDate.isAfter(endDate)) {
-            return new LocalDate[0];
-        }
-
-        if (datesFromCallback != null && (!startDate.equals(startDateFromSession) || !endDate.equals(endDateFromSession))) {
-            sessionService.put(chatId, "startDate", startDate);
-            sessionService.put(chatId, "endDate", endDate);
-        }
-
-        return new LocalDate[]{startDate, endDate};
+    private boolean validateRentalDates(LocalDate startDate, LocalDate endDate) {
+        return !startDate.isBefore(LocalDate.now()) && !endDate.isBefore(LocalDate.now()) && !startDate.isAfter(endDate);
     }
 
     private LocalDate[] extractDatesFromMessageText(Long chatId, String text) {

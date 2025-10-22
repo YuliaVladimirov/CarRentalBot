@@ -27,7 +27,7 @@ public class TelegramExceptionHandler {
 
                 You can try again or go back to the main menu.
                 """;
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBackMainMenuKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(exception.getChatId().toString())
@@ -48,7 +48,7 @@ public class TelegramExceptionHandler {
                 You can try again or go back to the main menu.
                 """;
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBackMainMenuKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(exception.getChatId().toString())
@@ -68,7 +68,7 @@ public class TelegramExceptionHandler {
                 You can try again or go back to the main menu.
                 """;
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBackMainMenuKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(exception.getChatId().toString())
@@ -82,7 +82,7 @@ public class TelegramExceptionHandler {
     public void handleInvalidFlowContext(InvalidFlowContextException exception) {
         log.warn("Invalid flow context for chat {}: {}", exception.getChatId(), exception.getMessage());
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBackMainMenuKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(exception.getChatId().toString())

@@ -85,7 +85,7 @@ public class BrowseAllCarsHandler implements CallbackHandler {
         CarBrowsingMode fromSession = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElse(null);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException(chatId, "❌ Car browsing mode not found in callback or session");
+            throw new DataNotFoundException(chatId, "Car browsing mode not found in callback or session");
         }
 
         CarBrowsingMode result = fromCallback != null ? fromCallback : fromSession;
@@ -104,7 +104,7 @@ public class BrowseAllCarsHandler implements CallbackHandler {
                     try {
                         return CarBrowsingMode.valueOf(categoryStr);
                     } catch (IllegalArgumentException e) {
-                        throw new InvalidDataException(chatId, "❌ Invalid car browsing mode: " + categoryStr);
+                        throw new InvalidDataException(chatId, "Invalid car browsing mode: " + categoryStr);
                     }
                 })
                 .orElse(null);

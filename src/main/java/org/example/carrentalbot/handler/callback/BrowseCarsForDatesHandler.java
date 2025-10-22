@@ -56,15 +56,15 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
 
         CarCategory carCategory = sessionService
                 .get(chatId, "carCategory", CarCategory.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found"));
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found in session"));
 
         LocalDate startDate = sessionService
                 .get(chatId, "startDate", LocalDate.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found"));
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
 
         LocalDate endDate = sessionService
                 .get(chatId, "endDate", LocalDate.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found"));
+                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
 
         List<Car> availableCars = carService.getAvailableCarsByCategoryAndDates(carCategory, startDate, endDate);
 

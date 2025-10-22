@@ -74,7 +74,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                 💰  Daily Rate:  €%s/day
                 """, car.getBrand(), car.getModel(), car.getDescription(), car.getDailyRate().setScale(0, RoundingMode.HALF_UP));
 
-        navigationService.push(chatId, KEY + ":" + car.getId());
+        navigationService.push(chatId, KEY);
 
         telegramClient.sendPhoto(SendPhotoDto.builder()
                 .chatId(chatId.toString())
@@ -91,7 +91,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
         UUID fromSession = sessionService.get(chatId, "carId", UUID.class).orElse(null);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException(chatId, "❌ Car id not found in callback or session");
+            throw new DataNotFoundException(chatId, "Car id not found in callback or session");
         }
 
         UUID result = (fromCallback != null) ? fromCallback : fromSession;
@@ -112,7 +112,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                     try {
                         return UUID.fromString(idStr);
                     } catch (IllegalArgumentException e) {
-                        throw new InvalidDataException(chatId, "❌ Invalid UUID format: " + idStr);
+                        throw new InvalidDataException(chatId, "Invalid UUID format: " + idStr);
                     }
                 })
                 .orElse(null);
@@ -120,11 +120,11 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
 
     private Map.Entry<String, String> getDataForKeyboard(Long chatId) {
         CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found"));
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found in session"));
 
         return switch (carBrowsingMode) {
             case ALL_CARS -> Map.entry(AskForRentalDatesHandler.KEY, "🕒 Check Availability");
-            case CARS_FOR_DATES -> Map.entry(AskForPhoneHandler.KEY, "📝 Start Booking");
+            case CARS_FOR_DATES -> Map.entry(StartBookingHandler.KEY, "📝 Start Booking");
         };
     }
 }

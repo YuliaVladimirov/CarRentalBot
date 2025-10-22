@@ -38,7 +38,7 @@ public class AskForPhoneHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         String text = """
-                Please enter your your phone number.
+                Please enter your phone.
                 
                 Example: +49 123 456789
                 """;

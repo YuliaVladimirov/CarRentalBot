@@ -20,7 +20,7 @@ import java.util.UUID;
 public class ConfirmBookingHandler implements CallbackHandler {
 
     public static final String KEY = "CONFIRM_BOOKING";
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW);
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     private final NavigationService navigationService;
     private final SessionService sessionService;
@@ -55,15 +55,15 @@ public class ConfirmBookingHandler implements CallbackHandler {
 
         UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
 
-        LocalDate startDate = sessionService.get(chatId, "startDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found"));
+        LocalDate startDate = sessionService.get(chatId, "startDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
 
-        LocalDate endDate = sessionService.get(chatId, "endDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "End date not found"));
+        LocalDate endDate = sessionService.get(chatId, "endDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
 
-        String phone = sessionService.get(chatId, "phone", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found"));
+        String phone = sessionService.get(chatId, "phone", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found in session"));
 
-        String email = sessionService.get(chatId, "email", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Email not found"));
+        String email = sessionService.get(chatId, "email", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Email not found in session"));
 
-        BigDecimal totalCost = sessionService.get(chatId, "totalCost", BigDecimal.class).orElseThrow(() -> new DataNotFoundException(chatId, "Total cost not found"));
+        BigDecimal totalCost = sessionService.get(chatId, "totalCost", BigDecimal.class).orElseThrow(() -> new DataNotFoundException(chatId, "Total cost not found in session"));
 
         Booking booking = bookingService.createBooking(chatId, carId, callbackQuery.getFrom().getId(),
                 startDate, endDate, totalCost,
@@ -75,16 +75,16 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 Your booking has been <b>successfully confirmed</b>.
                 Booking ID: <b>%s</b>
                 
-                An email with the full booking details has been sent to your email address:
-                <b>user@example.com</b>
-
+                The full booking info
+                has been sent to your email address: <b>%s</b>
+                
                 Thank you for choosing our service! 🚗
-                """, booking.getId());
+                """, booking.getId(), booking.getEmail());
 
         sessionService.clear(chatId);
         navigationService.push(chatId, KEY);
 
-        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBackMainMenuKeyboard();
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

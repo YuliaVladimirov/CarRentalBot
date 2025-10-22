@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
-public class AskForEmailHandler  implements CallbackHandler {
+public class AskForEmailHandler implements CallbackHandler {
 
     public static final String KEY = "ASK_FOR_EMAIL";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
@@ -38,10 +38,10 @@ public class AskForEmailHandler  implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         String text = """
-        Please enter your email address.
+                Please enter your email address.
 
-        Example: user@example.com
-        """;
+                Example: user@example.com
+                """;
 
         navigationService.push(chatId, KEY);
 

@@ -48,10 +48,10 @@ public class AskForRentalDatesHandler implements CallbackHandler {
         updateBrowsingModeInSession(chatId, callbackQuery.getData());
 
         String text = """
-        Please enter your rental period.
-        
-        Example: 05.10.2025 - 10.10.2025
-        """;
+                Please enter your rental period.
+                
+                Example: 05.10.2025 - 10.10.2025
+                """;
 
         navigationService.push(chatId, KEY);
 

@@ -68,6 +68,12 @@
 			<version>6.7.0</version>
 		</dependency>
 
+		<!-- Spring Data Redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
 		<!--Starter for using Java Bean Validation with Hibernate Validator-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -2,7 +2,7 @@ package org.example.carrentalbot.handler.command;
 
 import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
-import org.example.carrentalbot.handler.callback.GoToMainMenuHandler;
+import org.example.carrentalbot.handler.callback.MainMenuHandler;
 import org.example.carrentalbot.model.Customer;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CustomerService;
@@ -17,14 +17,14 @@ public class StartCommandHandler implements CommandHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     private final CustomerService customerService;
-    private final GoToMainMenuHandler goToMainMenuHandler;
+    private final MainMenuHandler mainMenuHandler;
     private final TelegramClient telegramClient;
 
     public StartCommandHandler(CustomerService customerService,
-                               GoToMainMenuHandler goToMainMenuHandler,
+                               MainMenuHandler mainMenuHandler,
                                TelegramClient telegramClient) {
         this.customerService = customerService;
-        this.goToMainMenuHandler = goToMainMenuHandler;
+        this.mainMenuHandler = mainMenuHandler;
         this.telegramClient = telegramClient;
     }
 
@@ -53,6 +53,6 @@ public class StartCommandHandler implements CommandHandler {
                 .parseMode("HTML")
                 .build());
 
-        goToMainMenuHandler.handle(chatId, null);
+        mainMenuHandler.handle(chatId, null);
     }
 }

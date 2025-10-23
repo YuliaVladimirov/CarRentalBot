@@ -14,7 +14,7 @@ public class GoBackHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     private final NavigationService navigationService;
-    private final GoToMainMenuHandler goToMainMenuHandler;
+    private final MainMenuHandler mainMenuHandler;
     private final BrowseCategoriesHandler browseCategoriesHandler;
     private final ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler;
     private final BrowseAllCarsHandler browseAllCarsHandler;
@@ -27,7 +27,7 @@ public class GoBackHandler implements CallbackHandler {
     private final DisplayBookingDetailsHandler displayBookingDetailsHandler;
 
     public GoBackHandler(NavigationService navigationService,
-                         GoToMainMenuHandler goToMainMenuHandler,
+                         MainMenuHandler mainMenuHandler,
                          BrowseCategoriesHandler browseCategoriesHandler,
                          BrowseAllCarsHandler browseAllCarsHandler,
                          AskForRentalDatesHandler askForRentalDatesHandler,
@@ -35,7 +35,7 @@ public class GoBackHandler implements CallbackHandler {
                          ChooseCarBrowsingModeHandler chooseCarBrowsingModeHandler,
                          BrowseCarsForDatesHandler browseCarsForDatesHandler, CheckCarAvailabilityHandler checkCarAvailabilityHandler, AskForPhoneHandler askForPhoneHandler, AskForEmailHandler askForEmailHandler, DisplayBookingDetailsHandler displayBookingDetailsHandler) {
         this.navigationService = navigationService;
-        this.goToMainMenuHandler = goToMainMenuHandler;
+        this.mainMenuHandler = mainMenuHandler;
         this.browseCategoriesHandler = browseCategoriesHandler;
         this.browseAllCarsHandler = browseAllCarsHandler;
         this.askForRentalDatesHandler = askForRentalDatesHandler;
@@ -64,7 +64,7 @@ public class GoBackHandler implements CallbackHandler {
         String previousState = navigationService.pop(chatId);
 
         if (previousState == null) {
-            goToMainMenuHandler.handle(chatId, callbackQuery);
+            mainMenuHandler.handle(chatId, callbackQuery);
             return;
         }
 
@@ -80,7 +80,7 @@ public class GoBackHandler implements CallbackHandler {
             case ChooseCarBrowsingModeHandler.KEY -> chooseCarBrowsingModeHandler.handle(chatId, callbackQuery);
             case BrowseCategoriesHandler.KEY -> browseCategoriesHandler.handle(chatId, callbackQuery);
 
-            default -> goToMainMenuHandler.handle(chatId, callbackQuery);
+            default -> mainMenuHandler.handle(chatId, callbackQuery);
         }
     }
 }

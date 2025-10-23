@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
-public class GoToMainMenuHandler implements CallbackHandler {
+public class MainMenuHandler implements CallbackHandler {
 
     public static final String KEY = "GO_TO_MAIN_MENU";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
@@ -21,9 +21,9 @@ public class GoToMainMenuHandler implements CallbackHandler {
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public GoToMainMenuHandler(NavigationService navigationService,
-                               KeyboardFactory keyboardFactory,
-                               TelegramClient telegramClient) {
+    public MainMenuHandler(NavigationService navigationService,
+                           KeyboardFactory keyboardFactory,
+                           TelegramClient telegramClient) {
         this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;

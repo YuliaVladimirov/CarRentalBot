@@ -16,6 +16,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -70,5 +72,28 @@ public class BookingService {
     public BigDecimal calculateTotalCost(BigDecimal dailyRate, long totalDays) {
         return dailyRate.multiply(BigDecimal.valueOf(totalDays))
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public List<Booking> getBookingsByCustomerTelegramId(Long chatId, Long telegramUserId) {
+        Customer customer = customerRepository.findByTelegramUserId(telegramUserId).orElseThrow(() -> new DataNotFoundException(chatId, String.format("Customer with id: %s, was not found.", telegramUserId)));
+        return bookingRepository.findByCustomerId(customer.getId());
+    }
+
+    public Booking getBookingById(Long chatId, UUID bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(() -> new DataNotFoundException(chatId, String.format("Booking with id: %s, was not found.", bookingId)));
+    }
+
+    public void cancelBooking(Long chatId, UUID bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new DataNotFoundException(chatId, String.format("Booking with id: %s, was not found.", bookingId)));
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.saveAndFlush(booking);
+    }
+    
+    public Booking updateBooking(Long chatId, UUID bookingId, String phone, String email) {
+        Booking existingBooking = bookingRepository.findById(bookingId).orElseThrow(() -> new DataNotFoundException(chatId, String.format("Booking with id: %s, was not found.", bookingId)));
+        Optional.ofNullable(phone).ifPresent(existingBooking::setPhone);
+        Optional.ofNullable(email).ifPresent(existingBooking::setEmail);
+
+        return bookingRepository.saveAndFlush(existingBooking);
     }
 }

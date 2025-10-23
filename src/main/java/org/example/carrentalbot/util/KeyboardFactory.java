@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -24,16 +25,16 @@ public class KeyboardFactory {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("🚗 Browse Categories")
+                                .text("🚗 Browse")
                                 .callbackData(BrowseCategoriesHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📒 My Bookings")
-                                .callbackData("MY_BOOKINGS")
+                                .callbackData(DisplayMyBookingsHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("📞 Help")
-                                .callbackData("HELP")
+                                .callbackData(HelpMenuHandler.KEY)
                                 .build())
                 ))
                 .build();
@@ -53,8 +54,8 @@ public class KeyboardFactory {
         }
 
         rows.add(List.of(InlineKeyboardButtonDto.builder()
-                .text("⬅️ BACK")
-                .callbackData(GoBackHandler.KEY)
+                .text("⬅️ To Main Menu")
+                .callbackData(MainMenuHandler.KEY)
                 .build()));
 
         return InlineKeyboardMarkupDto.builder()
@@ -85,8 +86,8 @@ public class KeyboardFactory {
                                 .callbackData(AskForRentalDatesHandler.KEY + ":" + CarBrowsingMode.CARS_FOR_DATES.name())
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ BACK")
-                                .callbackData(GoBackHandler.KEY)
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
                                 .build())
                 ))
                 .build();
@@ -105,12 +106,36 @@ public class KeyboardFactory {
         }
 
         rows.add(List.of(InlineKeyboardButtonDto.builder()
-                .text("⬅️ BACK")
-                .callbackData(GoBackHandler.KEY)
+                .text("⬅️ To Main Menu")
+                .callbackData(MainMenuHandler.KEY)
                 .build()));
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildOkKeyboard(String callbackKey) {
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of
+                        (List.of(InlineKeyboardButtonDto.builder()
+                        .text("✅ OK")
+                        .callbackData(callbackKey)
+                        .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildToMainMenuKeyboard() {
+
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
                 .build();
     }
 
@@ -123,20 +148,10 @@ public class KeyboardFactory {
                                 .callbackData(callbackKey)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ BACK")
-                                .callbackData(GoBackHandler.KEY)
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
                                 .build())
                 ))
-                .build();
-    }
-
-    public InlineKeyboardMarkupDto buildConfirmKeyboard(String callbackKey) {
-
-        return InlineKeyboardMarkupDto.builder()
-                .inlineKeyboard(List.of(List.of(InlineKeyboardButtonDto.builder()
-                        .text("✅ CONFIRM")
-                        .callbackData(callbackKey)
-                        .build())))
                 .build();
     }
 
@@ -145,12 +160,12 @@ public class KeyboardFactory {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("📝 Start Booking")
-                                .callbackData(AskForPhoneHandler.KEY)
+                                .text("🚀 Start Booking")
+                                .callbackData(StartBookingHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ BACK")
-                                .callbackData(GoBackHandler.KEY)
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
                                 .build())
                 ))
                 .build();
@@ -165,8 +180,23 @@ public class KeyboardFactory {
                                 .callbackData(AskForRentalDatesHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ Back To Cars")
-                                .callbackData(BrowseAllCarsHandler.KEY)
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildStartBookingKeyboard() {
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("✅ Ok")
+                                .callbackData(AskForPhoneHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
                                 .build())
                 ))
                 .build();
@@ -181,36 +211,16 @@ public class KeyboardFactory {
                                 .callbackData(ConfirmBookingHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("✏️ Edit Booking")
-                                .callbackData(EditBookingDetailsHandler.KEY)
-                                .build()),
-                        List.of(InlineKeyboardButtonDto.builder()
-                                .text("❌ Cancel Booking")
-                                .callbackData(CancelBookingHandler.KEY)
-                                .build())
-                ))
-                .build();
-    }
-
-    public InlineKeyboardMarkupDto buildEditBookingKeyboard() {
-        return InlineKeyboardMarkupDto.builder()
-                .inlineKeyboard(List.of(
-
-                        List.of(InlineKeyboardButtonDto.builder()
-                                .text("📞 Edit Phone")
-                                .callbackData(AskForPhoneHandler.KEY)
-                                .build()),
-                        List.of(InlineKeyboardButtonDto.builder()
-                                .text("📧 Edit Email")
-                                .callbackData(AskForEmailHandler.KEY)
+                                .text("✏️ Edit Contact Info")
+                                .callbackData(EditBookingHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("❌ Cancel Booking")
                                 .callbackData(CancelBookingHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ BACK")
-                                .callbackData(GoBackHandler.KEY)
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
                                 .build())
                 ))
                 .build();
@@ -227,18 +237,109 @@ public class KeyboardFactory {
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("⬅️ No, Go Back")
                                 .callbackData(DisplayBookingDetailsHandler.KEY)
-                                .build())))
+                                .build())
+                ))
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildBackMainMenuKeyboard() {
+    public InlineKeyboardMarkupDto buildMyBookingsKeyboard(UUID bookingId) {
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("ℹ️ Details")
+                                .callbackData(DisplayMyBookingDetailsHandler.KEY + ":" + bookingId)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildMyBookingDetailsKeyboard() {
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("✏️ Edit Contact Info")
+                                .callbackData(EditMyBookingHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("❌ Cancel Booking")
+                                .callbackData(CancelMyBookingHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildEditBookingKeyboard(String callbackKey) {
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("📞 Edit Phone")
+                                .callbackData(AskForPhoneHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("📧 Edit Email")
+                                .callbackData(AskForEmailHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("✅ Continue")
+                                .callbackData(callbackKey)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildCancelMyBookingKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ Back To Main Menu")
-                                .callbackData(GoToMainMenuHandler.KEY)
-                                .build())))
+                                .text("✅ Yes, Cancel")
+                                .callbackData(ConfirmCancelMyBookingHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ Back To Booking Details")
+                                .callbackData(DisplayMyBookingDetailsHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildHelpMenuKeyboard() {
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("🏠 Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("🚗 Browse Cars")
+                                .callbackData(BrowseCategoriesHandler.KEY)
+                                .build()),
+                        List.of (InlineKeyboardButtonDto.builder()
+                                .text("ℹ️ Help")
+                                .callbackData(HelpMenuHandler.KEY)
+                                .build()),
+                        List.of (InlineKeyboardButtonDto.builder()
+                                .text("📞 Contact Support")
+                                .url("https://example.com/support")
+                                .build())
+                ))
                 .build();
     }
 }

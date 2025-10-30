@@ -18,7 +18,8 @@ public class FlowContextHelper {
     }
 
     public void validateFlowContext(Long chatId, EnumSet<FlowContext> allowedContexts) {
-        FlowContext current = sessionService.get(chatId, "flowContext", FlowContext.class)
+        FlowContext current = sessionService
+                .getFlowContext(chatId, "flowContext")
                 .orElse(null);
 
         if (current != null && !allowedContexts.contains(current)) {
@@ -31,8 +32,8 @@ public class FlowContextHelper {
     }
 
     public FlowContext getFlowContext(Long chatId) {
-
-        return sessionService.get(chatId, "flowContext", FlowContext.class)
+        return sessionService
+                .getFlowContext(chatId, "flowContext")
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found."));
     }
 

@@ -1,57 +1,159 @@
 package org.example.carrentalbot.service;
 
+import lombok.extern.slf4j.Slf4j;
+import org.example.carrentalbot.model.enums.CarBrowsingMode;
+import org.example.carrentalbot.model.enums.CarCategory;
+import org.example.carrentalbot.model.enums.FlowContext;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class SessionService {
 
-    private final Map<Long, Map<String, Object>> sessionData = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String SESSION_PREFIX = "chat:";
+    private static final Duration DEFAULT_TTL = Duration.ofHours(1);
 
-    /**
-     * Stores a key-value pair in the user's session.
-     */
-    public void put(Long chatId, String key, Object value) {
-        sessionData
-                .computeIfAbsent(chatId, id -> new ConcurrentHashMap<>())
-                .put(key, value);
+    public SessionService(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
-    /**
-     * Retrieves a value safely cast to the given type, with optional default.
-     */
-    public <T> Optional<T> get(Long chatId, String key, Class<T> type) {
-        return Optional.ofNullable(sessionData.get(chatId))
-                .map(map -> map.get(key))
-                .filter(type::isInstance)
-                .map(type::cast);
+    private String key(Long chatId) {
+        return SESSION_PREFIX + chatId;
     }
 
-    /**
-     * Removes a key from the user's session.
-     */
-    public void remove(Long chatId, String key) {
-        Optional.ofNullable(sessionData.get(chatId))
-                .ifPresent(map -> map.remove(key));
+    // --------------------------------------------------------------------
+    // ✅ PUT METHODS
+    // --------------------------------------------------------------------
+    public void put(Long chatId, String field, Object value) {
+        if (value == null) return;
+
+        // Always store as String for consistency
+        if (value instanceof UUID || value instanceof LocalDate || value instanceof Enum<?> || value instanceof BigDecimal) {
+            value = value.toString();
+        }
+
+        redisTemplate.opsForHash().put(key(chatId), field, value.toString());
+        redisTemplate.expire(key(chatId), DEFAULT_TTL);
     }
 
-    /**
-     * Clears all session data for a user.
-     */
-    public void clear(Long chatId) {
-        sessionData.remove(chatId);
+    // --------------------------------------------------------------------
+    // ✅ GETTERS
+    // --------------------------------------------------------------------
+
+    public Optional<String> getString(Long chatId, String field) {
+        return Optional.ofNullable((String) redisTemplate.opsForHash().get(key(chatId), field));
     }
 
-    /**
-     * Checks if user has a specific key.
-     */
-    public boolean contains(Long chatId, String key) {
-        return Optional.ofNullable(sessionData.get(chatId))
-                .map(map -> map.containsKey(key))
-                .orElse(false);
+    public Optional<UUID> getUUID(Long chatId, String field) {
+        return getString(chatId, field)
+                .flatMap(val -> {
+                    try {
+                        return Optional.of(UUID.fromString(val));
+                    } catch (IllegalArgumentException ex) {
+                        log.error("Invalid UUID format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
+                        delete(chatId, field);
+                        return Optional.empty();
+                    }
+                });
     }
 
+    public Optional<LocalDate> getLocalDate(Long chatId, String field) {
+        return getString(chatId, field)
+                .flatMap(val -> {
+                    try {
+                        return Optional.of(LocalDate.parse(val));
+                    } catch (DateTimeParseException ex) {
+                        log.error("Invalid date format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
+                        delete(chatId, field);
+                        return Optional.empty();
+                    }
+                });
+    }
+
+    public Optional<BigDecimal> getBigDecimal(Long chatId, String field) {
+        return getString(chatId, field)
+                .flatMap(val -> {
+                    try {
+                        return Optional.of(new BigDecimal(val));
+                    } catch (DateTimeParseException ex) {
+                        log.error("Invalid big decimal format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
+                        delete(chatId, field);
+                        return Optional.empty();
+                    }
+                });
+    }
+
+    public Optional<CarCategory> getCarCategory(Long chatId, String field) {
+        return getString(chatId, field)
+                .flatMap(val -> {
+                    try {
+                        return Optional.of(CarCategory.valueOf(val));
+                    } catch (IllegalArgumentException ex) {
+                        log.error("Invalid CarCategory enum format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
+                        delete(chatId, field);
+                        return Optional.empty();
+                    }
+                });
+    }
+
+    public Optional<FlowContext> getFlowContext(Long chatId, String field) {
+        return getString(chatId, field)
+                .flatMap(val -> {
+                    try {
+                        return Optional.of(FlowContext.valueOf(val));
+                    } catch (IllegalArgumentException ex) {
+                        log.error("Invalid FlowContext enum format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
+                        delete(chatId, field);
+                        return Optional.empty();
+                    }
+                });
+    }
+
+    public Optional<CarBrowsingMode> getCarBrowsingMode(Long chatId, String field) {
+        return getString(chatId, field)
+                .flatMap(val -> {
+                    try {
+                        return Optional.of(CarBrowsingMode.valueOf(val));
+                    } catch (IllegalArgumentException ex) {
+                        log.error("Invalid CarBrowsingMode enum format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
+                        delete(chatId, field);
+                        return Optional.empty();
+                    }
+                });
+    }
+
+    // --------------------------------------------------------------------
+    // ✅ ADMIN METHODS
+    // --------------------------------------------------------------------
+    public Map<String, Object> getAll(Long chatId) {
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(key(chatId));
+        return entries.entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> (String) e.getKey(),
+                        Map.Entry::getValue
+                ));
+    }
+
+    private void delete(Long chatId, String field) {
+        redisTemplate.opsForHash().delete(key(chatId), field);
+    }
+
+    public void deleteAll(Long chatId) {
+        redisTemplate.delete(key(chatId));
+    }
+
+    public boolean exists(Long chatId) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key(chatId)));
+    }
 }

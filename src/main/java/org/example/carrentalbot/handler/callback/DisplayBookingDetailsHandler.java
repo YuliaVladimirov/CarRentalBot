@@ -6,10 +6,7 @@ import org.example.carrentalbot.dto.SendPhotoDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.CarService;
-import org.example.carrentalbot.service.NavigationService;
-import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.*;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -36,7 +33,9 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
     public DisplayBookingDetailsHandler(NavigationService navigationService,
                                         SessionService sessionService,
-                                        CarService carService, BookingService bookingService, KeyboardFactory keyboardFactory,
+                                        CarService carService,
+                                        BookingService bookingService,
+                                        KeyboardFactory keyboardFactory,
                                         TelegramClient telegramClient) {
         this.navigationService = navigationService;
         this.sessionService = sessionService;
@@ -59,15 +58,25 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
+        UUID carId = sessionService
+                .getUUID(chatId, "carId")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
 
-        LocalDate startDate = sessionService.get(chatId, "startDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found"));
+        LocalDate startDate = sessionService
+                .getLocalDate(chatId, "startDate")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found"));
 
-        LocalDate endDate = sessionService.get(chatId, "endDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "End date not found"));
+        LocalDate endDate = sessionService
+                .getLocalDate(chatId, "endDate")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found"));
 
-        String phone = sessionService.get(chatId, "phone", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found"));
+        String phone = sessionService
+                .getString(chatId, "phone")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found"));
 
-        String email = sessionService.get(chatId, "email", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Email not found"));
+        String email = sessionService
+                .getString(chatId, "email")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Email not found"));
 
         Car car = carService.getCar(chatId, carId);
 
@@ -75,6 +84,7 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
         long totalDays = bookingService.calculateTotalDays(startDate, endDate);
         BigDecimal totalCost = bookingService.calculateTotalCost(dailyRate, totalDays);
+
         sessionService.put(chatId, "totalCost", totalCost);
 
         String text = String.format("""

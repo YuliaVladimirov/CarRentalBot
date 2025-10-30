@@ -7,8 +7,8 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,6 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
         this.keyboardFactory = keyboardFactory;
     }
 
-
     @Override
     public String getKey() {
         return KEY;
@@ -57,10 +56,17 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        UUID bookingId = sessionService.get(chatId, "bookingId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Booking id not found in message or session"));
+        UUID bookingId = sessionService
+                .getUUID(chatId, "bookingId")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Booking id not found in message or session"));
 
-        String phone = sessionService.get(chatId, "phone", String.class).orElse(null);
-        String email = sessionService.get(chatId, "email", String.class).orElse(null);
+        String phone = sessionService
+                .getString(chatId, "phone")
+                .orElse(null);
+
+        String email = sessionService
+                .getString(chatId, "email")
+                .orElse(null);
 
         Booking booking = bookingService.updateBooking(chatId, bookingId, phone, email);
 
@@ -97,7 +103,7 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                 booking.getEmail(),
                 booking.getStatus());
 
-        sessionService.clear(chatId);
+        sessionService.deleteAll(chatId);
         navigationService.clear(chatId);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
@@ -108,9 +114,5 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
-
     }
-
-
-
 }

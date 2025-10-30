@@ -8,8 +8,8 @@ import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -35,10 +35,10 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
 
     public DisplayMyBookingDetailsHandler (BookingService bookingService,
-                                          SessionService sessionService,
-                                          NavigationService navigationService,
-                                          TelegramClient telegramClient,
-                                          KeyboardFactory keyboardFactory) {
+                                           SessionService sessionService,
+                                           NavigationService navigationService,
+                                           TelegramClient telegramClient,
+                                           KeyboardFactory keyboardFactory) {
         this.bookingService = bookingService;
         this.sessionService = sessionService;
         this.navigationService = navigationService;
@@ -108,9 +108,11 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
     }
 
     private UUID updateBookingIdInSession(Long chatId, String callbackData) {
-
         UUID fromCallback = extractBookingIdFromCallback(chatId, callbackData);
-        UUID fromSession = sessionService.get(chatId, "bookingId", UUID.class).orElse(null);
+
+        UUID fromSession = sessionService
+                .getUUID(chatId, "bookingId")
+                .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
             throw new DataNotFoundException(chatId, "Booking id not found in callback or session");

@@ -6,8 +6,8 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,8 @@ public class BrowseCategoriesHandler implements CallbackHandler {
     private final TelegramClient telegramClient;
 
     public BrowseCategoriesHandler(CarService carService,
-                                   NavigationService navigationService, SessionService sessionService,
+                                   NavigationService navigationService,
+                                   SessionService sessionService,
                                    KeyboardFactory keyboardFactory,
                                    TelegramClient telegramClient) {
         this.carService = carService;
@@ -50,7 +51,6 @@ public class BrowseCategoriesHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
-
         sessionService.put(chatId, "flowContext", FlowContext.BROWSING_FLOW);
 
         List<CarProjectionDto> carCategories = carService.getCarCategories();

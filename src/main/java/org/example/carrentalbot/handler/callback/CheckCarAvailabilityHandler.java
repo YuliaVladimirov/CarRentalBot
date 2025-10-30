@@ -6,8 +6,8 @@ import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -23,18 +23,19 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final BookingService bookingService;
-    private final NavigationService navigationService;
     private final SessionService sessionService;
+    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public CheckCarAvailabilityHandler(BookingService bookingService,
+                                       SessionService sessionService,
                                        NavigationService navigationService,
-                                       SessionService sessionService, KeyboardFactory keyboardFactory,
+                                       KeyboardFactory keyboardFactory,
                                        TelegramClient telegramClient) {
         this.bookingService = bookingService;
-        this.navigationService = navigationService;
         this.sessionService = sessionService;
+        this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -52,10 +53,17 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        UUID carId = sessionService
+                .getUUID(chatId, "carId")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found in session"));
 
-        UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found in session"));
-        LocalDate startDate = sessionService.get(chatId, "startDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
-        LocalDate endDate = sessionService.get(chatId, "endDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "End date id not found in session"));
+        LocalDate startDate = sessionService
+                .getLocalDate(chatId, "startDate")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
+
+        LocalDate endDate = sessionService
+                .getLocalDate(chatId, "endDate")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
 
         boolean available = bookingService.isCarAvailable(carId, startDate, endDate);
 

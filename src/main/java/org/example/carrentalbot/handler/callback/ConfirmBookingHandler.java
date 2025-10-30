@@ -22,20 +22,20 @@ public class ConfirmBookingHandler implements CallbackHandler {
     public static final String KEY = "CONFIRM_BOOKING";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
-    private final NavigationService navigationService;
     private final SessionService sessionService;
+    private final NavigationService navigationService;
     private final BookingService bookingService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
-    public ConfirmBookingHandler(NavigationService navigationService,
-                                 SessionService sessionService,
+    public ConfirmBookingHandler(SessionService sessionService,
+                                 NavigationService navigationService,
                                  BookingService bookingService,
-                                 TelegramClient telegramClient, KeyboardFactory keyboardFactory) {
-        this.navigationService = navigationService;
+                                 TelegramClient telegramClient,
+                                 KeyboardFactory keyboardFactory) {
         this.sessionService = sessionService;
+        this.navigationService = navigationService;
         this.bookingService = bookingService;
-
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
     }
@@ -52,18 +52,29 @@ public class ConfirmBookingHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        UUID carId = sessionService
+                .getUUID(chatId, "carId")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
 
-        UUID carId = sessionService.get(chatId, "carId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
+        LocalDate startDate = sessionService
+                .getLocalDate(chatId, "startDate")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
 
-        LocalDate startDate = sessionService.get(chatId, "startDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
+        LocalDate endDate = sessionService
+                .getLocalDate(chatId, "endDate")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
 
-        LocalDate endDate = sessionService.get(chatId, "endDate", LocalDate.class).orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
+        String phone = sessionService
+                .getString(chatId, "phone")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found in session"));
 
-        String phone = sessionService.get(chatId, "phone", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found in session"));
+        String email = sessionService
+                .getString(chatId, "email")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Email not found in session"));
 
-        String email = sessionService.get(chatId, "email", String.class).orElseThrow(() -> new DataNotFoundException(chatId, "Email not found in session"));
-
-        BigDecimal totalCost = sessionService.get(chatId, "totalCost", BigDecimal.class).orElseThrow(() -> new DataNotFoundException(chatId, "Total cost not found in session"));
+        BigDecimal totalCost = sessionService
+                .getBigDecimal(chatId, "totalCost")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Total cost not found in session"));
 
         Booking booking = bookingService.createBooking(chatId, carId, callbackQuery.getFrom().getId(),
                 startDate, endDate, totalCost,
@@ -81,7 +92,7 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 Thank you for choosing our service! 🚗
                 """, booking.getId(), booking.getEmail());
 
-        sessionService.clear(chatId);
+        sessionService.deleteAll(chatId);
         navigationService.push(chatId, KEY);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();

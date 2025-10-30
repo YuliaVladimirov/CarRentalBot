@@ -6,8 +6,8 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +20,15 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     public static final String KEY = "ASK_FOR_RENTAL_DAYS";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
-    private final NavigationService navigationService;
     private final SessionService sessionService;
+    private final NavigationService navigationService;
     private final TelegramClient telegramClient;
 
-    public AskForRentalDatesHandler(NavigationService navigationService,
-                                    SessionService sessionService,
+    public AskForRentalDatesHandler(SessionService sessionService,
+                                    NavigationService navigationService,
                                     TelegramClient telegramClient) {
-        this.navigationService = navigationService;
         this.sessionService = sessionService;
+        this.navigationService = navigationService;
         this.telegramClient = telegramClient;
     }
 
@@ -66,7 +66,10 @@ public class AskForRentalDatesHandler implements CallbackHandler {
 
     private void updateBrowsingModeInSession(Long chatId, String callbackData) {
         CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(chatId, callbackData);
-        CarBrowsingMode fromSession = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElse(null);
+
+        CarBrowsingMode fromSession = sessionService
+                .getCarBrowsingMode(chatId, "carBrowsingMode")
+                .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
             throw new DataNotFoundException(chatId, "❌ Car browsing mode not found in callback or session");

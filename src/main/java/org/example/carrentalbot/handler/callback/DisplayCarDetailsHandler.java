@@ -9,8 +9,8 @@ import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -28,18 +28,19 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final CarService carService;
-    private final NavigationService navigationService;
     private final SessionService sessionService;
+    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public DisplayCarDetailsHandler(CarService carService,
-                                    NavigationService navigationService, SessionService sessionService,
+                                    SessionService sessionService,
+                                    NavigationService navigationService,
                                     KeyboardFactory keyboardFactory,
                                     TelegramClient telegramClient) {
         this.carService = carService;
-        this.navigationService = navigationService;
         this.sessionService = sessionService;
+        this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -88,7 +89,10 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     private UUID updateCarIdInSession(Long chatId, String callbackData) {
 
         UUID fromCallback = extractCarIdFromCallback(chatId, callbackData);
-        UUID fromSession = sessionService.get(chatId, "carId", UUID.class).orElse(null);
+
+        UUID fromSession = sessionService
+                .getUUID(chatId, "carId")
+                .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
             throw new DataNotFoundException(chatId, "Car id not found in callback or session");
@@ -119,7 +123,8 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     private Map.Entry<String, String> getDataForKeyboard(Long chatId) {
-        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class)
+        CarBrowsingMode carBrowsingMode = sessionService
+                .getCarBrowsingMode(chatId, "carBrowsingMode")
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found in session"));
 
         return switch (carBrowsingMode) {

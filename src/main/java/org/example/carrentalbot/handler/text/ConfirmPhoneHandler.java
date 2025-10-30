@@ -81,7 +81,8 @@ public class ConfirmPhoneHandler implements TextHandler {
     }
 
     private String getDataForKeyboard(Long chatId) {
-        FlowContext flowContext = sessionService.get(chatId, "flowContext", FlowContext.class)
+        FlowContext flowContext = sessionService
+                .getFlowContext(chatId, "flowContext")
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found in session."));
 
         return switch (flowContext) {

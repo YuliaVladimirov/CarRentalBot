@@ -8,8 +8,8 @@ import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.BookingStatus;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -55,7 +55,10 @@ public class CancelMyBookingHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
-        UUID bookingId = sessionService.get(chatId, "bookingId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Booking id nor found in session"));
+        UUID bookingId = sessionService
+                .getUUID(chatId, "bookingId")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Booking id nor found in session"));
+
         Booking booking = bookingService.getBookingById(chatId, bookingId);
 
         LocalDate today = LocalDate.now();

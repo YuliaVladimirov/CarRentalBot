@@ -123,7 +123,8 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     }
 
     private String getDataForKeyboard(Long chatId) {
-        CarBrowsingMode carBrowsingMode = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class)
+        CarBrowsingMode carBrowsingMode = sessionService
+                .getCarBrowsingMode(chatId, "carBrowsingMode")
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found"));
 
         return switch (carBrowsingMode) {

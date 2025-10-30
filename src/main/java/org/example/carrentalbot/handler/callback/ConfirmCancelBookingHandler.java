@@ -4,8 +4,8 @@ import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -18,19 +18,19 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
     public static final String KEY = "CONFIRM_CANCEL_BOOKING";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.EDIT_BOOKING_FLOW);
 
-    private final TelegramClient telegramClient;
     private final SessionService sessionService;
     private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
+    private final TelegramClient telegramClient;
 
-    public ConfirmCancelBookingHandler(TelegramClient telegramClient,
-                                       SessionService sessionService,
+    public ConfirmCancelBookingHandler(SessionService sessionService,
                                        NavigationService navigationService,
-                                       KeyboardFactory keyboardFactory) {
-        this.telegramClient = telegramClient;
+                                       KeyboardFactory keyboardFactory,
+                                       TelegramClient telegramClient) {
         this.sessionService = sessionService;
         this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
+        this.telegramClient = telegramClient;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
                 You can start a new booking anytime from the main menu.
                 """;
 
-        sessionService.clear(chatId);
+        sessionService.deleteAll(chatId);
         navigationService.clear(chatId);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();

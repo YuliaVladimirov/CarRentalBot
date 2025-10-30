@@ -7,8 +7,8 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -22,13 +22,13 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     public static final String KEY = "CHOOSE_CAR_BROWSING_MODE";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
-    private final NavigationService navigationService;
     private final SessionService sessionService;
+    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public ChooseCarBrowsingModeHandler(NavigationService navigationService,
-                                        SessionService sessionService,
+    public ChooseCarBrowsingModeHandler(SessionService sessionService,
+                                        NavigationService navigationService,
                                         KeyboardFactory keyboardFactory,
                                         TelegramClient telegramClient) {
         this.navigationService = navigationService;
@@ -49,7 +49,6 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
-
         updateCategoryInSession(chatId, callbackQuery.getData());
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarBrowsingModeKeyboard();
@@ -67,9 +66,11 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     }
 
     private void updateCategoryInSession(Long chatId, String callbackData) {
-
         CarCategory fromCallback = extractCategoryFromCallback(chatId, callbackData);
-        CarCategory fromSession = sessionService.get(chatId, "carCategory", CarCategory.class).orElse(null);
+
+        CarCategory fromSession = sessionService
+                .getCarCategory(chatId, "carCategory")
+                .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
             throw new DataNotFoundException(chatId, "Car category not found in callback or session");

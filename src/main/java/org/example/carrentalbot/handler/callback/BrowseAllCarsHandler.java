@@ -10,8 +10,8 @@ import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -27,18 +27,19 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final CarService carService;
-    private final NavigationService navigationService;
     private final SessionService sessionService;
+    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public BrowseAllCarsHandler(CarService carService,
-                                NavigationService navigationService, SessionService sessionService,
+                                SessionService sessionService,
+                                NavigationService navigationService,
                                 KeyboardFactory keyboardFactory,
                                 TelegramClient telegramClient) {
         this.carService = carService;
-        this.navigationService = navigationService;
         this.sessionService = sessionService;
+        this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -55,11 +56,10 @@ public class BrowseAllCarsHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
-
         updateBrowsingModeInSession(chatId, callbackQuery.getData());
 
         CarCategory carCategory = sessionService
-                .get(chatId, "carCategory", CarCategory.class)
+                .getCarCategory(chatId, "carCategory")
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found"));
 
         List<Car> allCars = carService.getAllCarsByCategory(carCategory);
@@ -82,7 +82,10 @@ public class BrowseAllCarsHandler implements CallbackHandler {
 
     private void updateBrowsingModeInSession(Long chatId, String callbackData) {
         CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(chatId, callbackData);
-        CarBrowsingMode fromSession = sessionService.get(chatId, "carBrowsingMode", CarBrowsingMode.class).orElse(null);
+
+        CarBrowsingMode fromSession = sessionService
+                .getCarBrowsingMode(chatId, "carBrowsingMode")
+                .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
             throw new DataNotFoundException(chatId, "Car browsing mode not found in callback or session");

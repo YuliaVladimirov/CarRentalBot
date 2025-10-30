@@ -6,8 +6,8 @@ import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -27,8 +27,8 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
-
-    public ConfirmCancelMyBookingHandler(BookingService bookingService, SessionService sessionService,
+    public ConfirmCancelMyBookingHandler(BookingService bookingService,
+                                         SessionService sessionService,
                                          NavigationService navigationService,
                                          TelegramClient telegramClient,
                                          KeyboardFactory keyboardFactory) {
@@ -51,8 +51,10 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        UUID bookingId = sessionService
+                .getUUID(chatId, "bookingId")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Booking id not found in session"));
 
-        UUID bookingId = sessionService.get(chatId, "bookingId", UUID.class).orElseThrow(() -> new DataNotFoundException(chatId, "Booking id not found in session"));
         bookingService.cancelBooking(chatId,bookingId);
 
         String text = String.format("""
@@ -64,7 +66,7 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildMainMenuKeyboard();
 
-        sessionService.clear(chatId);
+        sessionService.deleteAll(chatId);
         navigationService.clear(chatId);
 
         telegramClient.sendMessage(SendMessageDto.builder()

@@ -8,8 +8,8 @@ import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,8 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
 
     public BrowseCarsForDatesHandler(CarService carService,
                                      NavigationService navigationService,
-                                     SessionService sessionService, KeyboardFactory keyboardFactory,
+                                     SessionService sessionService,
+                                     KeyboardFactory keyboardFactory,
                                      TelegramClient telegramClient) {
         this.carService = carService;
         this.navigationService = navigationService;
@@ -55,15 +56,15 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         CarCategory carCategory = sessionService
-                .get(chatId, "carCategory", CarCategory.class)
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found in session"));
+                .getCarCategory(chatId, "carCategory")
+                .orElseThrow(() -> new DataNotFoundException(chatId, "Category not found"));
 
         LocalDate startDate = sessionService
-                .get(chatId, "startDate", LocalDate.class)
+                .getLocalDate(chatId, "startDate")
                 .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
 
         LocalDate endDate = sessionService
-                .get(chatId, "endDate", LocalDate.class)
+                .getLocalDate(chatId, "endDate")
                 .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
 
         List<Car> availableCars = carService.getAvailableCarsByCategoryAndDates(carCategory, startDate, endDate);

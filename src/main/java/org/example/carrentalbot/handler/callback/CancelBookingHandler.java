@@ -4,8 +4,8 @@ import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,8 @@ public class CancelBookingHandler implements CallbackHandler {
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
-    public CancelBookingHandler(SessionService sessionService, NavigationService navigationService,
+    public CancelBookingHandler(SessionService sessionService,
+                                NavigationService navigationService,
                                 TelegramClient telegramClient,
                                 KeyboardFactory keyboardFactory) {
         this.sessionService = sessionService;
@@ -44,7 +45,6 @@ public class CancelBookingHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
-
         sessionService.put(chatId, "flowContext", FlowContext.EDIT_BOOKING_FLOW);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCancelBookingKeyboard();

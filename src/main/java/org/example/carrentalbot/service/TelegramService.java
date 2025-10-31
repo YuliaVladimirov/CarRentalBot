@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.*;
 import org.example.carrentalbot.handler.callback.CallbackHandler;
 import org.example.carrentalbot.handler.command.CommandHandler;
-import org.example.carrentalbot.handler.text.FallbackTextHandler;
 import org.example.carrentalbot.handler.text.TextHandler;
 import org.example.carrentalbot.util.FlowContextHelper;
+import org.example.carrentalbot.util.HandlerRegistry;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Service;
 
@@ -18,78 +18,32 @@ import java.util.*;
 public class TelegramService {
 
     private final TelegramClient telegramClient;
-    private final Map<String, CallbackHandler> callbackHandlerMap;
-    private final Map<String, CommandHandler> commandHandlerMap;
-    private final List<TextHandler> textHandlerList;
-    private final CommandHandler fallbackCommandHandler;
-    private final CallbackHandler fallbackCallbackHandler;
-    private final TextHandler fallbackTextHandler;
     private final FlowContextHelper flowContextHelper;
 
+    private final Map<String, CallbackHandler> callbackHandlerMap;
+    private final CallbackHandler fallbackCallbackHandler;
+
+    private final Map<String, CommandHandler> commandHandlerMap;
+    private final CommandHandler fallbackCommandHandler;
+
+    private final List<TextHandler> textHandlerList;
+    private final TextHandler fallbackTextHandler;
+
+
     public TelegramService(TelegramClient telegramClient,
-                           List<CallbackHandler> callbackHandlerList,
-                           List<CommandHandler> commandHandlerList,
-                           List<TextHandler> textHandlerList,
-                           FlowContextHelper flowContextHelper) {
+                           FlowContextHelper flowContextHelper,
+                           HandlerRegistry handlerRegistry) {
         this.telegramClient = telegramClient;
         this.flowContextHelper = flowContextHelper;
 
-        CallbackHandler tempFallbackCallbackHandler = null;
-        Map<String, CallbackHandler> tempCallbackHandlers = new HashMap<>();
+        this.callbackHandlerMap = handlerRegistry.getCallbackHandlers();
+        this.fallbackCallbackHandler = handlerRegistry.getFallbackCallbackHandler();
 
-        for (CallbackHandler callbackHandler : callbackHandlerList) {
-            if ("__FALLBACK__".equals(callbackHandler.getKey())) {
-                tempFallbackCallbackHandler = callbackHandler;
-            } else {
-                tempCallbackHandlers.put(callbackHandler.getKey(), callbackHandler);
-                log.info("Registered callback handler: {}", callbackHandler.getClass().getSimpleName());
-            }
-        }
+        this.commandHandlerMap = handlerRegistry.getCommandHandlers();
+        this.fallbackCommandHandler = handlerRegistry.getFallbackCommandHandler();
 
-        if (tempFallbackCallbackHandler == null) {
-            throw new IllegalStateException("No fallback callback handler defined!");
-        }
-
-        this.fallbackCallbackHandler = tempFallbackCallbackHandler;
-        this.callbackHandlerMap = tempCallbackHandlers;
-
-        CommandHandler tempFallbackCommandHandler = null;
-        Map<String, CommandHandler> tempCommandHandlers = new HashMap<>();
-
-        for (CommandHandler commandHandler : commandHandlerList) {
-            if ("__FALLBACK__".equals(commandHandler.getCommand())) {
-                tempFallbackCommandHandler = commandHandler;
-            } else {
-                tempCommandHandlers.put(commandHandler.getCommand(), commandHandler);
-                log.info("Registered command handler: {}", commandHandler.getClass().getSimpleName());
-            }
-        }
-
-        if (tempFallbackCommandHandler == null) {
-            throw new IllegalStateException("No fallback command handler defined!");
-        }
-
-        this.fallbackCommandHandler = tempFallbackCommandHandler;
-        this.commandHandlerMap = tempCommandHandlers;
-
-        FallbackTextHandler tempFallbackTextHandler = null;
-        List<TextHandler> tempTextHandlers = new ArrayList<>();
-
-        for (TextHandler textHandler : textHandlerList) {
-            if (textHandler instanceof FallbackTextHandler fallback) {
-                tempFallbackTextHandler = fallback;
-            } else {
-                tempTextHandlers.add(textHandler);
-                log.info("Registered text handler: {}", textHandler.getClass().getSimpleName());
-            }
-        }
-
-        if (tempFallbackTextHandler == null) {
-            throw new IllegalStateException("FallbackTextHandler not found");
-        }
-
-        this.fallbackTextHandler = tempFallbackTextHandler;
-        this.textHandlerList = tempTextHandlers;
+        this.textHandlerList = handlerRegistry.getTextHandlers();
+        this.fallbackTextHandler = handlerRegistry.getFallbackTextHandler();
     }
 
     public void handleUpdate(UpdateDto update) {

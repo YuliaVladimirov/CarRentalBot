@@ -74,26 +74,35 @@ public class BookingService {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByCustomerTelegramId(Long telegramUserId) {
         Customer customer = customerRepository.findByTelegramUserId(telegramUserId).orElseThrow(() -> new DataNotFoundException(String.format("Customer with id: %s, was not found.", telegramUserId)));
         return bookingRepository.findByCustomerId(customer.getId());
     }
 
+    @Transactional(readOnly = true)
     public Booking getBookingById(UUID bookingId) {
-        return bookingRepository.findById(bookingId).orElseThrow(() -> new DataNotFoundException(String.format("Booking with id: %s, was not found.", bookingId)));
+        return bookingRepository.findByIdWithCar(bookingId).orElseThrow(() -> new DataNotFoundException(String.format("Booking with id: %s, was not found.", bookingId)));
     }
 
+    @Transactional
     public void cancelBooking(UUID bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new DataNotFoundException(String.format("Booking with id: %s, was not found.", bookingId)));
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.saveAndFlush(booking);
     }
-    
+
+    @Transactional
     public Booking updateBooking(UUID bookingId, String phone, String email) {
         Booking existingBooking = bookingRepository.findById(bookingId).orElseThrow(() -> new DataNotFoundException(String.format("Booking with id: %s, was not found.", bookingId)));
         Optional.ofNullable(phone).ifPresent(existingBooking::setPhone);
         Optional.ofNullable(email).ifPresent(existingBooking::setEmail);
 
-        return bookingRepository.saveAndFlush(existingBooking);
+        bookingRepository.saveAndFlush(existingBooking);
+
+        return bookingRepository.findByIdWithCar(bookingId)
+                .orElseThrow(() -> new DataNotFoundException(
+                        String.format("Booking with id: %s, was not found after update.", bookingId)
+                ));
     }
 }

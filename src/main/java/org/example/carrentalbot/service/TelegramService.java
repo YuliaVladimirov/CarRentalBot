@@ -9,6 +9,7 @@ import org.example.carrentalbot.handler.text.TextHandler;
 import org.example.carrentalbot.util.FlowContextHelper;
 import org.example.carrentalbot.util.HandlerRegistry;
 import org.example.carrentalbot.util.TelegramClient;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -50,6 +51,7 @@ public class TelegramService {
         this.telegramExceptionHandler = telegramExceptionHandler;
     }
 
+    @Async
     public void handleUpdate(UpdateDto update) {
         if (update == null) {
             log.warn("Received null update");

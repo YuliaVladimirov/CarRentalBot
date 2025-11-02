@@ -32,9 +32,16 @@ public class FallbackCallbackHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
+        String text = """
+                ⚠️ Sorry, this button is not supported.
+                
+                Please return to the main menu (or type /main).
+                For other available options type /help.
+                """;
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("⚠️ This button is not supported. Please use the main menu (/menu).")
+                .text(text)
                 .parseMode("HTML")
                 .build());
     }

@@ -60,7 +60,7 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         UUID bookingId = updateBookingIdInSession(chatId, callbackQuery.getData());
-        Booking booking = bookingService.getBookingById(chatId, bookingId);
+        Booking booking = bookingService.getBookingById(bookingId);
 
         BigDecimal dailyRate = booking.getCar().getDailyRate().setScale(0, RoundingMode.HALF_UP);
         long totalDays = bookingService.calculateTotalDays(booking.getStartDate(), booking.getEndDate());
@@ -108,14 +108,14 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
     }
 
     private UUID updateBookingIdInSession(Long chatId, String callbackData) {
-        UUID fromCallback = extractBookingIdFromCallback(chatId, callbackData);
+        UUID fromCallback = extractBookingIdFromCallback(callbackData);
 
         UUID fromSession = sessionService
                 .getUUID(chatId, "bookingId")
                 .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException(chatId, "Booking id not found in callback or session");
+            throw new DataNotFoundException("Booking id not found in callback or session");
         }
 
         UUID result = (fromCallback != null) ? fromCallback : fromSession;
@@ -127,7 +127,7 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
         return result;
     }
 
-    private UUID extractBookingIdFromCallback(Long chatId, String callbackData) {
+    private UUID extractBookingIdFromCallback(String callbackData) {
 
         return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
@@ -136,7 +136,7 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
                     try {
                         return UUID.fromString(idStr);
                     } catch (IllegalArgumentException e) {
-                        throw new InvalidDataException(chatId, "Invalid UUID format: " + idStr);
+                        throw new InvalidDataException("Invalid UUID format: " + idStr);
                     }
                 })
                 .orElse(null);

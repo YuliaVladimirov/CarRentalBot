@@ -57,9 +57,9 @@ public class CancelMyBookingHandler implements CallbackHandler {
 
         UUID bookingId = sessionService
                 .getUUID(chatId, "bookingId")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Booking id nor found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Booking id nor found in session"));
 
-        Booking booking = bookingService.getBookingById(chatId, bookingId);
+        Booking booking = bookingService.getBookingById(bookingId);
 
         LocalDate today = LocalDate.now();
         LocalDate cancelDeadline = booking.getStartDate().minusDays(2);

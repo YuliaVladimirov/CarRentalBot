@@ -2,6 +2,7 @@ package org.example.carrentalbot.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.*;
+import org.example.carrentalbot.exception.TelegramExceptionHandler;
 import org.example.carrentalbot.handler.callback.CallbackHandler;
 import org.example.carrentalbot.handler.command.CommandHandler;
 import org.example.carrentalbot.handler.text.TextHandler;
@@ -29,10 +30,12 @@ public class TelegramService {
     private final List<TextHandler> textHandlerList;
     private final TextHandler fallbackTextHandler;
 
+    private final TelegramExceptionHandler telegramExceptionHandler;
 
     public TelegramService(TelegramClient telegramClient,
                            FlowContextHelper flowContextHelper,
-                           HandlerRegistry handlerRegistry) {
+                           HandlerRegistry handlerRegistry,
+                           TelegramExceptionHandler telegramExceptionHandler) {
         this.telegramClient = telegramClient;
         this.flowContextHelper = flowContextHelper;
 
@@ -44,6 +47,7 @@ public class TelegramService {
 
         this.textHandlerList = handlerRegistry.getTextHandlers();
         this.fallbackTextHandler = handlerRegistry.getFallbackTextHandler();
+        this.telegramExceptionHandler = telegramExceptionHandler;
     }
 
     public void handleUpdate(UpdateDto update) {
@@ -51,18 +55,21 @@ public class TelegramService {
             log.warn("Received null update");
             return;
         }
-        if (update.getMessage() != null) {
-            handleMessage(update.getMessage());
-        } else if (update.getCallbackQuery() != null) {
-            handleCallbackQuery(update.getCallbackQuery());
-        } else {
+        try{
+            if (update.getMessage() != null) {
+                handleMessage(update.getMessage());
+            } else if (update.getCallbackQuery() != null) {
+                handleCallbackQuery(update.getCallbackQuery());
+            } else {
 
-            log.warn("Unhandled update: {}", update);
+                log.warn("Unhandled update: {}", update);
+            }
+        } catch (Exception exception) {
+            telegramExceptionHandler.handleException(exception, update);
         }
     }
 
     public void handleMessage(MessageDto message) {
-
         if (message.getChat() == null) {
             log.warn("No chat id received in message: {}", message);
             return;
@@ -101,7 +108,6 @@ public class TelegramService {
     }
 
     public void handleCallbackQuery(CallbackQueryDto callbackQuery) {
-
         if (callbackQuery.getMessage() == null || callbackQuery.getMessage().getChat() == null) {
             log.warn("Invalid callbackQuery received: {}", callbackQuery);
             return;

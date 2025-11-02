@@ -60,25 +60,25 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
         UUID carId = sessionService
                 .getUUID(chatId, "carId")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
+                .orElseThrow(() -> new DataNotFoundException("Car id not found in session"));
 
         LocalDate startDate = sessionService
                 .getLocalDate(chatId, "startDate")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found"));
+                .orElseThrow(() -> new DataNotFoundException("Start date not found in session"));
 
         LocalDate endDate = sessionService
                 .getLocalDate(chatId, "endDate")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found"));
+                .orElseThrow(() -> new DataNotFoundException("End date not found in session"));
 
         String phone = sessionService
                 .getString(chatId, "phone")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found"));
+                .orElseThrow(() -> new DataNotFoundException("Phone not found in session"));
 
         String email = sessionService
                 .getString(chatId, "email")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Email not found"));
+                .orElseThrow(() -> new DataNotFoundException("Email not found in session"));
 
-        Car car = carService.getCar(chatId, carId);
+        Car car = carService.getCar(carId);
 
         BigDecimal dailyRate = car.getDailyRate().setScale(0, RoundingMode.HALF_UP);
 

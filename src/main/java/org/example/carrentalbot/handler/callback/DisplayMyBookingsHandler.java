@@ -56,7 +56,7 @@ public class DisplayMyBookingsHandler implements CallbackHandler  {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         sessionService.put(chatId, "flowContext", FlowContext.MY_BOOKINGS_FLOW);
 
-        List<Booking> bookings = bookingService.getBookingsByCustomerTelegramId(chatId, callbackQuery.getFrom().getId());
+        List<Booking> bookings = bookingService.getBookingsByCustomerTelegramId(callbackQuery.getFrom().getId());
 
         if (bookings.isEmpty()) {
             telegramClient.sendMessage(SendMessageDto.builder()

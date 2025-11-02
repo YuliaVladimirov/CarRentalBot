@@ -65,14 +65,14 @@ public class AskForRentalDatesHandler implements CallbackHandler {
 
 
     private void updateBrowsingModeInSession(Long chatId, String callbackData) {
-        CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(chatId, callbackData);
+        CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(callbackData);
 
         CarBrowsingMode fromSession = sessionService
                 .getCarBrowsingMode(chatId, "carBrowsingMode")
                 .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException(chatId, "❌ Car browsing mode not found in callback or session");
+            throw new DataNotFoundException("Car browsing mode not found in callback or session");
         }
 
         CarBrowsingMode result = fromCallback != null ? fromCallback : fromSession;
@@ -83,7 +83,7 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     }
 
 
-    private CarBrowsingMode extractBrowsingModeFromCallback(Long chatId, String callbackData) {
+    private CarBrowsingMode extractBrowsingModeFromCallback(String callbackData) {
         return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
                 .map(data -> data.split(":", 2)[1])
@@ -92,7 +92,7 @@ public class AskForRentalDatesHandler implements CallbackHandler {
                     try {
                         return CarBrowsingMode.valueOf(categoryStr);
                     } catch (IllegalArgumentException e) {
-                        throw new InvalidDataException(chatId, "❌ Invalid car browsing mode: " + categoryStr);
+                        throw new InvalidDataException("Invalid car browsing mode: " + categoryStr);
                     }
                 })
                 .orElse(null);

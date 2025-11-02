@@ -26,8 +26,8 @@ public class CarService {
     public List<Car> getAllCarsByCategory(CarCategory carCategory) {
         return carRepository.findByCategory(carCategory);
     }
-    public Car getCar(Long chatId, UUID carId) {
-        return carRepository.findById(carId).orElseThrow(() -> new DataNotFoundException(chatId, String.format("Car with id: %s, was not found.", carId)));
+    public Car getCar(UUID carId) {
+        return carRepository.findById(carId).orElseThrow(() -> new DataNotFoundException(String.format("Car with id: %s, was not found.", carId)));
     }
     public List<Car> getAvailableCarsByCategoryAndDates(CarCategory carCategory, LocalDate startDate, LocalDate endDate) {
         return  carRepository.findAvailableCarsByCategoryAndDates(carCategory, startDate, endDate);

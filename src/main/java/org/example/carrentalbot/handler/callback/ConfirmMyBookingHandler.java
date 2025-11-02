@@ -58,7 +58,7 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
 
         UUID bookingId = sessionService
                 .getUUID(chatId, "bookingId")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Booking id not found in message or session"));
+                .orElseThrow(() -> new DataNotFoundException("Booking id not found in message or session"));
 
         String phone = sessionService
                 .getString(chatId, "phone")
@@ -68,7 +68,7 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                 .getString(chatId, "email")
                 .orElse(null);
 
-        Booking booking = bookingService.updateBooking(chatId, bookingId, phone, email);
+        Booking booking = bookingService.updateBooking(bookingId, phone, email);
 
         BigDecimal dailyRate = booking.getCar().getDailyRate().setScale(0, RoundingMode.HALF_UP);
         long totalDays = bookingService.calculateTotalDays(booking.getStartDate(), booking.getEndDate());

@@ -54,7 +54,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
-        LocalDate[] rentalDates = extractDatesFromMessageText(chatId, message.getText());
+        LocalDate[] rentalDates = extractDatesFromMessageText(message.getText());
 
         LocalDate startDate = rentalDates[0];
         LocalDate endDate = rentalDates[1];
@@ -104,7 +104,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
         return !startDate.isBefore(LocalDate.now()) && !endDate.isBefore(LocalDate.now()) && !startDate.isAfter(endDate);
     }
 
-    private LocalDate[] extractDatesFromMessageText(Long chatId, String text) {
+    private LocalDate[] extractDatesFromMessageText(String text) {
 
         return Optional.ofNullable(text)
                 .map(datePart -> Arrays.stream(datePart.split("-"))
@@ -113,7 +113,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
                             try {
                                 return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
                             } catch (DateTimeParseException e) {
-                                throw new InvalidDataException(chatId, "Invalid date format: " + datePart);
+                                throw new InvalidDataException("Invalid date format: " + datePart);
                             }
                         })
                         .toArray(LocalDate[]::new)
@@ -125,7 +125,7 @@ public class ConfirmRentalDatesHandler implements TextHandler {
     private String getDataForKeyboard(Long chatId) {
         CarBrowsingMode carBrowsingMode = sessionService
                 .getCarBrowsingMode(chatId, "carBrowsingMode")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found"));
+                .orElseThrow(() -> new DataNotFoundException("Car browsing mode not found in session"));
 
         return switch (carBrowsingMode) {
             case ALL_CARS -> CheckCarAvailabilityHandler.KEY;

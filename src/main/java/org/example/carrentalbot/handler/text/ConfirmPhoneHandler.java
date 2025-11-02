@@ -83,13 +83,13 @@ public class ConfirmPhoneHandler implements TextHandler {
     private String getDataForKeyboard(Long chatId) {
         FlowContext flowContext = sessionService
                 .getFlowContext(chatId, "flowContext")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Flow context not found in session."));
+                .orElseThrow(() -> new DataNotFoundException("Flow context not found in session."));
 
         return switch (flowContext) {
             case BOOKING_FLOW -> AskForEmailHandler.KEY;
             case MY_BOOKINGS_FLOW -> EditMyBookingHandler.KEY;
             case EDIT_BOOKING_FLOW -> EditBookingHandler.KEY;
-            default -> throw new InvalidStateException(chatId, "Unexpected flow context for current handler: " + flowContext);
+            default -> throw new InvalidStateException("Unexpected flow context for current handler: " + flowContext);
         };
     }
 }

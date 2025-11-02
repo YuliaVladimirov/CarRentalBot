@@ -31,9 +31,16 @@ public class FallbackTextHandler implements TextHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
+        String text = """
+                ⚠️ Sorry, I did not understand that text.
+                
+                Please reenter or return to the main menu (or type /main)
+                For other available options type /help.
+                """;
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("❓ I did not understand that. Please choose an option or type /help.")
+                .text(text)
                 .parseMode("HTML")
                 .build());
     }

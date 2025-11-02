@@ -55,15 +55,15 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         UUID carId = sessionService
                 .getUUID(chatId, "carId")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Car id not found in session"));
 
         LocalDate startDate = sessionService
                 .getLocalDate(chatId, "startDate")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Start date not found in session"));
 
         LocalDate endDate = sessionService
                 .getLocalDate(chatId, "endDate")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("End date not found in session"));
 
         boolean available = bookingService.isCarAvailable(carId, startDate, endDate);
 

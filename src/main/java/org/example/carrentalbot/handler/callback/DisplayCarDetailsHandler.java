@@ -60,7 +60,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
 
         UUID carId = updateCarIdInSession(chatId, callbackQuery.getData());
-        Car car = carService.getCar(chatId, carId);
+        Car car = carService.getCar(carId);
 
         Map.Entry<String, String> data = getDataForKeyboard(chatId);
 
@@ -88,14 +88,14 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
 
     private UUID updateCarIdInSession(Long chatId, String callbackData) {
 
-        UUID fromCallback = extractCarIdFromCallback(chatId, callbackData);
+        UUID fromCallback = extractCarIdFromCallback(callbackData);
 
         UUID fromSession = sessionService
                 .getUUID(chatId, "carId")
                 .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException(chatId, "Car id not found in callback or session");
+            throw new DataNotFoundException("Car id not found in callback or session");
         }
 
         UUID result = (fromCallback != null) ? fromCallback : fromSession;
@@ -107,7 +107,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
         return result;
     }
 
-    private UUID extractCarIdFromCallback (Long chatId, String callbackData) {
+    private UUID extractCarIdFromCallback (String callbackData) {
 
         return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
@@ -116,7 +116,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                     try {
                         return UUID.fromString(idStr);
                     } catch (IllegalArgumentException e) {
-                        throw new InvalidDataException(chatId, "Invalid UUID format: " + idStr);
+                        throw new InvalidDataException("Invalid UUID format: " + idStr);
                     }
                 })
                 .orElse(null);
@@ -125,7 +125,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     private Map.Entry<String, String> getDataForKeyboard(Long chatId) {
         CarBrowsingMode carBrowsingMode = sessionService
                 .getCarBrowsingMode(chatId, "carBrowsingMode")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Car browsing mode not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Car browsing mode not found in session"));
 
         return switch (carBrowsingMode) {
             case ALL_CARS -> Map.entry(AskForRentalDatesHandler.KEY, "🕒 Check Availability");

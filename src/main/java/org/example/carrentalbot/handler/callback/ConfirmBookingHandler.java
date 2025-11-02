@@ -54,29 +54,29 @@ public class ConfirmBookingHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         UUID carId = sessionService
                 .getUUID(chatId, "carId")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Car id not found"));
+                .orElseThrow(() -> new DataNotFoundException("Car id not found in session"));
 
         LocalDate startDate = sessionService
                 .getLocalDate(chatId, "startDate")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Start date not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Start date not found in session"));
 
         LocalDate endDate = sessionService
                 .getLocalDate(chatId, "endDate")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "End date not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("End date not found in session"));
 
         String phone = sessionService
                 .getString(chatId, "phone")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Phone not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Phone not found in session"));
 
         String email = sessionService
                 .getString(chatId, "email")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Email not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Email not found in session"));
 
         BigDecimal totalCost = sessionService
                 .getBigDecimal(chatId, "totalCost")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Total cost not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Total cost not found in session"));
 
-        Booking booking = bookingService.createBooking(chatId, carId, callbackQuery.getFrom().getId(),
+        Booking booking = bookingService.createBooking(carId, callbackQuery.getFrom().getId(),
                 startDate, endDate, totalCost,
                 phone, email);
 

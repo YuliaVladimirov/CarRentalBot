@@ -61,6 +61,6 @@ public class HandlerRegistry {
                 .filter(textHandler -> textHandler instanceof FallbackTextHandler)
                 .map(textHandler -> (FallbackTextHandler) textHandler)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("FallbackTextHandler not found"));
+                .orElseThrow(() -> new IllegalStateException("No fallback text handler defined!"));
     }
 }

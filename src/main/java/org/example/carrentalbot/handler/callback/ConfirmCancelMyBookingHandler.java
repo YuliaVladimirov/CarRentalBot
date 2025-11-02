@@ -53,9 +53,9 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         UUID bookingId = sessionService
                 .getUUID(chatId, "bookingId")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Booking id not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Booking id not found in session"));
 
-        bookingService.cancelBooking(chatId,bookingId);
+        bookingService.cancelBooking(bookingId);
 
         String text = String.format("""
                     ✅ Booking successfully canceled.

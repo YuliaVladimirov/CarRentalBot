@@ -32,9 +32,16 @@ public class FallbackCommandHandler implements CommandHandler {
     @Override
     public void handle(Long chatId, MessageDto message) {
 
+        String text = """
+                ⚠️ Sorry, I did not understand that command.
+                
+                Please reenter or return to the main menu (or type /main)
+                For other available options type /help.
+                """;
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text("❓ Sorry, I did not understand that command. Type /help for available options.")
+                .text(text)
                 .parseMode("HTML")
                 .build());
     }

@@ -49,7 +49,7 @@ public class EditBookingHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         FlowContext flowContext = sessionService
                 .getFlowContext(chatId, "flowContext")
-                .orElseThrow(() -> new DataNotFoundException(chatId, String.format("Flow context not found in session for chat: %s", chatId)));
+                .orElseThrow(() -> new DataNotFoundException("Flow context not found in session"));
 
         if (flowContext == FlowContext.BOOKING_FLOW) {
             sessionService.put(chatId, "flowContext", FlowContext.EDIT_BOOKING_FLOW);

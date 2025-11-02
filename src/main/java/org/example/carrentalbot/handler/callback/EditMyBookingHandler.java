@@ -56,9 +56,9 @@ public class EditMyBookingHandler implements CallbackHandler {
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         UUID bookingId = sessionService
                 .getUUID(chatId, "bookingId")
-                .orElseThrow(() -> new DataNotFoundException(chatId, "Booking id not found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Booking id not found in session"));
 
-        Booking booking = bookingService.getBookingById(chatId, bookingId);
+        Booking booking = bookingService.getBookingById(bookingId);
 
         LocalDate today = LocalDate.now();
 

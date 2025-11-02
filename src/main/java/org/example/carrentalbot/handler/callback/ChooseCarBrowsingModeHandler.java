@@ -66,14 +66,14 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     }
 
     private void updateCategoryInSession(Long chatId, String callbackData) {
-        CarCategory fromCallback = extractCategoryFromCallback(chatId, callbackData);
+        CarCategory fromCallback = extractCategoryFromCallback(callbackData);
 
         CarCategory fromSession = sessionService
                 .getCarCategory(chatId, "carCategory")
                 .orElse(null);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException(chatId, "Car category not found in callback or session");
+            throw new DataNotFoundException("Car category not found in callback or session");
         }
 
         CarCategory result = fromCallback != null ? fromCallback : fromSession;
@@ -83,7 +83,7 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
         }
     }
 
-    private CarCategory extractCategoryFromCallback(Long chatId, String callbackData) {
+    private CarCategory extractCategoryFromCallback(String callbackData) {
         return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
                 .map(data -> data.split(":", 2)[1])
@@ -92,7 +92,7 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
                     try {
                         return CarCategory.valueOf(categoryStr);
                     } catch (IllegalArgumentException e) {
-                        throw new InvalidDataException(chatId, "Invalid category: " + categoryStr);
+                        throw new InvalidDataException("Invalid category: " + categoryStr);
                     }
                 })
                 .orElse(null);

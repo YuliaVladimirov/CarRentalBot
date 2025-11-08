@@ -309,7 +309,7 @@ public class KeyboardFactory {
                                 .callbackData(ConfirmCancelMyBookingHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
-                                .text("⬅️ Back To Booking Details")
+                                .text("⬅️ To Booking Details")
                                 .callbackData(DisplayMyBookingDetailsHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()

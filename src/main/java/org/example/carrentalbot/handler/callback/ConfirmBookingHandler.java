@@ -6,7 +6,8 @@ import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.*;
+import org.example.carrentalbot.service.BookingService;
+import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -23,18 +24,15 @@ public class ConfirmBookingHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final BookingService bookingService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
     public ConfirmBookingHandler(SessionService sessionService,
-                                 NavigationService navigationService,
                                  BookingService bookingService,
                                  TelegramClient telegramClient,
                                  KeyboardFactory keyboardFactory) {
         this.sessionService = sessionService;
-        this.navigationService = navigationService;
         this.bookingService = bookingService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
@@ -93,7 +91,6 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 """, booking.getId(), booking.getEmail());
 
         sessionService.deleteAll(chatId);
-        navigationService.push(chatId, KEY);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 

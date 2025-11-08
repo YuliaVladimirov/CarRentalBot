@@ -7,7 +7,6 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -24,18 +23,15 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
 
     private final BookingService bookingService;
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public CheckCarAvailabilityHandler(BookingService bookingService,
                                        SessionService sessionService,
-                                       NavigationService navigationService,
                                        KeyboardFactory keyboardFactory,
                                        TelegramClient telegramClient) {
         this.bookingService = bookingService;
         this.sessionService = sessionService;
-        this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -82,8 +78,6 @@ public class CheckCarAvailabilityHandler implements CallbackHandler {
         String text = available ? carAvailable : carUnavailable;
 
         InlineKeyboardMarkupDto replyMarkup = available ? keyboardFactory.buildCarAvailableKeyboard() : keyboardFactory.buildCarUnavailableKeyboard();
-
-        navigationService.push(chatId, KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

@@ -5,7 +5,6 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -19,16 +18,13 @@ public class StartBookingHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public StartBookingHandler(SessionService sessionService,
-                               NavigationService navigationService,
                                KeyboardFactory keyboardFactory,
                                TelegramClient telegramClient) {
         this.sessionService = sessionService;
-        this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -53,8 +49,6 @@ public class StartBookingHandler implements CallbackHandler {
                 """;
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildStartBookingKeyboard();
-
-        navigationService.push(chatId, KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

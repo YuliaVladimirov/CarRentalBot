@@ -24,20 +24,17 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
     public static final String KEY = "DISPLAY_BOOKING_DETAILS";
 
-    private final NavigationService navigationService;
     private final SessionService sessionService;
     private final CarService carService;
     private final BookingService bookingService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public DisplayBookingDetailsHandler(NavigationService navigationService,
-                                        SessionService sessionService,
+    public DisplayBookingDetailsHandler(SessionService sessionService,
                                         CarService carService,
                                         BookingService bookingService,
                                         KeyboardFactory keyboardFactory,
                                         TelegramClient telegramClient) {
-        this.navigationService = navigationService;
         this.sessionService = sessionService;
         this.carService = carService;
         this.bookingService = bookingService;
@@ -108,8 +105,6 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
                 phone, email);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildBookingDetailsKeyboard();
-
-        navigationService.push(chatId, KEY);
 
         telegramClient.sendPhoto(SendPhotoDto.builder()
                 .chatId(chatId.toString())

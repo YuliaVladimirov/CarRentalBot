@@ -8,7 +8,6 @@ import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -23,15 +22,12 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public ChooseCarBrowsingModeHandler(SessionService sessionService,
-                                        NavigationService navigationService,
                                         KeyboardFactory keyboardFactory,
                                         TelegramClient telegramClient) {
-        this.navigationService = navigationService;
         this.sessionService = sessionService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
@@ -52,8 +48,6 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
         updateCategoryInSession(chatId, callbackQuery.getData());
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarBrowsingModeKeyboard();
-
-        navigationService.push(chatId, KEY);
 
         SendMessageDto message = SendMessageDto.builder()
                 .chatId(chatId.toString())

@@ -3,7 +3,6 @@ package org.example.carrentalbot.handler.callback;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
@@ -15,12 +14,9 @@ public class AskForEmailHandler implements CallbackHandler {
     public static final String KEY = "ASK_FOR_EMAIL";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
-    private final NavigationService navigationService;
     private final TelegramClient telegramClient;
 
-    public AskForEmailHandler(NavigationService navigationService,
-                              TelegramClient telegramClient) {
-        this.navigationService = navigationService;
+    public AskForEmailHandler(TelegramClient telegramClient) {
         this.telegramClient = telegramClient;
     }
 
@@ -42,8 +38,6 @@ public class AskForEmailHandler implements CallbackHandler {
 
                 Example: user@example.com
                 """;
-
-        navigationService.push(chatId, KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

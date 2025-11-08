@@ -11,7 +11,6 @@ import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -28,18 +27,15 @@ public class BrowseAllCarsHandler implements CallbackHandler {
 
     private final CarService carService;
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public BrowseAllCarsHandler(CarService carService,
                                 SessionService sessionService,
-                                NavigationService navigationService,
                                 KeyboardFactory keyboardFactory,
                                 TelegramClient telegramClient) {
         this.carService = carService;
         this.sessionService = sessionService;
-        this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -69,8 +65,6 @@ public class BrowseAllCarsHandler implements CallbackHandler {
         String text = String.format("""
                         <b>All cars in category '%s':</b>
                         """, carCategory.getValue());
-
-        navigationService.push(chatId, KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

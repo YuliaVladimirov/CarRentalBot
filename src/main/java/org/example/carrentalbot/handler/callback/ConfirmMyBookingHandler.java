@@ -8,7 +8,6 @@ import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -27,17 +26,14 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
 
     private final BookingService bookingService;
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
     public ConfirmMyBookingHandler(BookingService bookingService,
-                                   NavigationService navigationService,
                                    SessionService sessionService,
                                    TelegramClient telegramClient,
                                    KeyboardFactory keyboardFactory) {
         this.bookingService = bookingService;
-        this.navigationService = navigationService;
         this.sessionService = sessionService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
@@ -104,7 +100,6 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                 booking.getStatus());
 
         sessionService.deleteAll(chatId);
-        navigationService.clear(chatId);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 

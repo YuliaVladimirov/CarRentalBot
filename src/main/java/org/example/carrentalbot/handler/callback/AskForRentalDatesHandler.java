@@ -7,7 +7,6 @@ import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +20,11 @@ public class AskForRentalDatesHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final TelegramClient telegramClient;
 
     public AskForRentalDatesHandler(SessionService sessionService,
-                                    NavigationService navigationService,
                                     TelegramClient telegramClient) {
         this.sessionService = sessionService;
-        this.navigationService = navigationService;
         this.telegramClient = telegramClient;
     }
 
@@ -52,8 +48,6 @@ public class AskForRentalDatesHandler implements CallbackHandler {
                 
                 Example: 05.10.2025 - 10.10.2025
                 """;
-
-        navigationService.push(chatId, KEY);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

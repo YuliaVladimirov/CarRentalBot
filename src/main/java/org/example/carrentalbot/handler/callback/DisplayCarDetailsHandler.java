@@ -10,7 +10,6 @@ import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -29,18 +28,15 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
 
     private final CarService carService;
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     public DisplayCarDetailsHandler(CarService carService,
                                     SessionService sessionService,
-                                    NavigationService navigationService,
                                     KeyboardFactory keyboardFactory,
                                     TelegramClient telegramClient) {
         this.carService = carService;
         this.sessionService = sessionService;
-        this.navigationService = navigationService;
         this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
@@ -74,8 +70,6 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                 📝  Description:  %s
                 💰  Daily Rate:  €%s/day
                 """, car.getBrand(), car.getModel(), car.getDescription(), car.getDailyRate().setScale(0, RoundingMode.HALF_UP));
-
-        navigationService.push(chatId, KEY);
 
         telegramClient.sendPhoto(SendPhotoDto.builder()
                 .chatId(chatId.toString())

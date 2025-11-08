@@ -7,7 +7,6 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.SessionService;
-import org.example.carrentalbot.service.NavigationService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -23,18 +22,15 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
 
     private final BookingService bookingService;
     private final SessionService sessionService;
-    private final NavigationService navigationService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
     public ConfirmCancelMyBookingHandler(BookingService bookingService,
                                          SessionService sessionService,
-                                         NavigationService navigationService,
                                          TelegramClient telegramClient,
                                          KeyboardFactory keyboardFactory) {
         this.bookingService = bookingService;
         this.sessionService = sessionService;
-        this.navigationService = navigationService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
     }
@@ -67,7 +63,6 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildMainMenuKeyboard();
 
         sessionService.deleteAll(chatId);
-        navigationService.clear(chatId);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

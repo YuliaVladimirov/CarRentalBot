@@ -30,7 +30,6 @@ public class MainCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Long chatId, MessageDto message) {
-
         mainMenuHandler.handle(chatId, null);
     }
 }

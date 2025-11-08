@@ -30,7 +30,6 @@ public class BrowseCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Long chatId, MessageDto message) {
-
         browseCategoriesHandler.handle(chatId, null);
     }
 }

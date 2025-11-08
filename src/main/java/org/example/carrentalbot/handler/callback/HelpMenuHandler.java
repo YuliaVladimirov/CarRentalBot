@@ -58,7 +58,6 @@ public class HelpMenuHandler implements CallbackHandler {
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildHelpMenuKeyboard();
 
-
         telegramClient.sendMessage(
                 SendMessageDto.builder()
                         .chatId(chatId.toString())

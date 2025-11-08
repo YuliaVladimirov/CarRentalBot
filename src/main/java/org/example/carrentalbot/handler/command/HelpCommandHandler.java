@@ -31,7 +31,6 @@ public class HelpCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Long chatId, MessageDto message) {
-
         helpMenuHandler.handle(chatId,null);
     }
 }

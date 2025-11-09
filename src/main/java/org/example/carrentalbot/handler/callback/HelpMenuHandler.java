@@ -49,6 +49,7 @@ public class HelpMenuHandler implements CallbackHandler {
                 <b>/main</b> — Return to the main menu
                 <b>/help</b> — Show this help message
                 <b>/browse</b> — Browse available cars for rental
+                <b>/bookings</b> - See all your bookings
 
                 Use the on-screen buttons to navigate — no need to type commands manually.
                 Changes can be made up to one day before your rental begins.

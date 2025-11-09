@@ -58,7 +58,6 @@ public class CancelMyBookingHandler implements CallbackHandler {
         Booking booking = bookingService.getBookingById(bookingId);
 
         LocalDate today = LocalDate.now();
-        LocalDate cancelDeadline = booking.getStartDate().minusDays(2);
 
         String text;
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
@@ -69,18 +68,12 @@ public class CancelMyBookingHandler implements CallbackHandler {
                     
                     You can return to the main menu.
                     """;
-        } else if (!today.isBefore(booking.getStartDate())) {
-            text = """
-                    ⚠️ This booking can no longer be canceled.
-                    
-                     The rental period has already ended.
-                    """;
-        } else if (!today.isBefore(cancelDeadline)) {
+        } else if (today.isEqual(booking.getStartDate()) || today.isAfter(booking.getStartDate())) {
             text = """
                     ⚠️ This booking can no longer be canceled.
                     
                     Cancellations are allowed
-                    up to 2 days before the rental start date.
+                    up to 1 day before the rental start date.
                     """;
         } else {
             text = "Are you sure you want to cancel this booking?";

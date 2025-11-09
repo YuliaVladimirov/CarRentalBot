@@ -86,10 +86,15 @@ public class BookingService {
     }
 
     @Transactional
-    public void cancelBooking(UUID bookingId) {
+    public Booking cancelBooking(UUID bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new DataNotFoundException(String.format("Booking with id: %s, was not found.", bookingId)));
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.saveAndFlush(booking);
+
+        return bookingRepository.findByIdWithCar(bookingId)
+                .orElseThrow(() -> new DataNotFoundException(
+                        String.format("Booking with id: %s, was not found after update.", bookingId)
+                ));
     }
 
     @Transactional

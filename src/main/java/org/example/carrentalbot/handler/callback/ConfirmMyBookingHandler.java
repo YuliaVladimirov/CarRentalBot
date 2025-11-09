@@ -7,6 +7,7 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
+import org.example.carrentalbot.service.EmailService;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -26,15 +27,18 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
 
     private final BookingService bookingService;
     private final SessionService sessionService;
+    private final EmailService emailService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
     public ConfirmMyBookingHandler(BookingService bookingService,
                                    SessionService sessionService,
+                                   EmailService emailService,
                                    TelegramClient telegramClient,
                                    KeyboardFactory keyboardFactory) {
         this.bookingService = bookingService;
         this.sessionService = sessionService;
+        this.emailService = emailService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
     }
@@ -85,6 +89,9 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                         📧  Email:  %s
                         
                         📦  Status: %s
+                        
+                        The updated booking info
+                        has been sent to your email address.
                         """,
                 booking.getId(),
                 booking.getCar().getBrand(),
@@ -109,5 +116,7 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
+
+        emailService.sendBookingConfirmation(booking, "Booking Updated ✅", "successfully updated!");
     }
 }

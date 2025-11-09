@@ -4,8 +4,10 @@ import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
+import org.example.carrentalbot.service.EmailService;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -22,15 +24,18 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
 
     private final BookingService bookingService;
     private final SessionService sessionService;
+    private final EmailService emailService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
     public ConfirmCancelMyBookingHandler(BookingService bookingService,
                                          SessionService sessionService,
+                                         EmailService emailService,
                                          TelegramClient telegramClient,
                                          KeyboardFactory keyboardFactory) {
         this.bookingService = bookingService;
         this.sessionService = sessionService;
+        this.emailService = emailService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
     }
@@ -51,14 +56,17 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
                 .getUUID(chatId, "bookingId")
                 .orElseThrow(() -> new DataNotFoundException("Booking id not found in session"));
 
-        bookingService.cancelBooking(bookingId);
+        Booking booking = bookingService.cancelBooking(bookingId);
 
         String text = String.format("""
                     ✅ Booking successfully canceled.
                     Booking id: %s
                     
+                    A confirmation of your booking cancellation
+                    has been sent to your email address: <b>%s</b>
+                    
                     You can start a new booking anytime from the main menu.
-                    """, bookingId);
+                    """, booking.getId(), booking.getEmail());
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildMainMenuKeyboard();
 
@@ -70,5 +78,7 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
                 .build());
+
+        emailService.sendBookingConfirmation(booking, "Booking Canceled ✅", "successfully canceled!");
     }
 }

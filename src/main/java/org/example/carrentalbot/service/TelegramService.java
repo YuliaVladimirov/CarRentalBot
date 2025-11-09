@@ -51,7 +51,7 @@ public class TelegramService {
         this.telegramExceptionHandler = telegramExceptionHandler;
     }
 
-    @Async
+    @Async("telegramExecutor")
     public void handleUpdate(UpdateDto update) {
         if (update == null) {
             log.warn("Received null update");

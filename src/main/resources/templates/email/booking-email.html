@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Confirmation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="margin:0; padding:0; background-color:#ffffff; font-family: Arial, Helvetica, sans-serif; color:#444;">
+
+<!-- Outer wrapper -->
+<table role="presentation" style="width:100%; border-collapse:collapse; background-color:#ffffff; margin:0; padding:0;">
+    <tr>
+        <td style="padding:20px;">
+
+            <!-- Main container -->
+            <table role="presentation" style="width:600px; max-width:100%; border-collapse:collapse; background-color:#ffffff; border-radius:12px; padding:20px;">
+
+                <!-- Header -->
+                <tr>
+                    <td style="font-size:22px; font-weight:bold; color:#333; padding-bottom:10px;">
+                        [[${title}]]
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="font-size:15px; color:#555; padding-bottom:20px; line-height:1.4;">
+                        Your booking has been <strong>[[${message}]]</strong>.
+                    </td>
+                </tr>
+
+                <!-- Booking details -->
+                <tr>
+                    <td>
+
+                        <table role="presentation" style="width:100%; border-collapse:collapse;">
+
+                            <!-- Booking ID -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    🆔 Booking ID
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    [[${bookingId}]]
+                                </td>
+                            </tr>
+
+                            <!-- Car -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    🚗 Car
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    [[${brand}]] ([[${model}]])
+                                </td>
+                            </tr>
+
+                            <!-- Category -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    🏷️ Category
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    [[${category}]]
+                                </td>
+                            </tr>
+
+                            <!-- Rental period -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    📅 Rental Period
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    [[${startDate}]] – [[${endDate}]]
+                                </td>
+                            </tr>
+
+                            <!-- Total days -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    📆 Total Days
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    [[${totalDays}]]
+                                </td>
+                            </tr>
+
+                            <!-- Daily rate -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    💰 Daily Rate
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    €[[${dailyRate}]]/day
+                                </td>
+                            </tr>
+
+                            <!-- Total cost -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    💳 Total Cost
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    €[[${totalCost}]]
+                                </td>
+                            </tr>
+
+                            <!-- Phone -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    📞 Phone
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    [[${phone}]]
+                                </td>
+                            </tr>
+
+                            <!-- Email -->
+                            <tr>
+                                <td style="padding:6px 0; font-size:14px; color:#555; width:40%; font-weight:500;">
+                                    📧 Email
+                                </td>
+                                <td style="padding:6px 0; font-size:14px; color:#333; font-weight:bold; text-align:right;">
+                                    [[${email}]]
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding-top:25px; font-size:15px; color:#666; line-height:1.4;">
+                        <strong>Thank you for choosing our service!</strong>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding-top:10px; font-size:14px; color:#666; line-height:1.5;">
+                        Best regards,<br>
+                        Your Booking Team
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -32,24 +32,45 @@ public class SessionService {
         return SESSION_PREFIX + chatId;
     }
 
-    // --------------------------------------------------------------------
-    // ✅ PUT METHODS
-    // --------------------------------------------------------------------
     public void put(Long chatId, String field, Object value) {
-        if (value == null) return;
-
-        // Always store as String for consistency
-        if (value instanceof UUID || value instanceof LocalDate || value instanceof Enum<?> || value instanceof BigDecimal) {
-            value = value.toString();
+        if (chatId == null) {
+            throw new IllegalArgumentException("chatId cannot be null");
         }
+        if (field == null) {
+            throw new IllegalArgumentException("field cannot be null");
+        }
+        if (value == null) {
+            return;
+        }
+        String serialized = (value instanceof String) ? (String) value : serializeValue(value);
+        String redisKey = key(chatId);
 
-        redisTemplate.opsForHash().put(key(chatId), field, value.toString());
-        redisTemplate.expire(key(chatId), DEFAULT_TTL);
+        redisTemplate.opsForHash().put(redisKey, field, serialized);
+        redisTemplate.expire(redisKey, DEFAULT_TTL);
     }
 
-    // --------------------------------------------------------------------
-    // ✅ GETTERS
-    // --------------------------------------------------------------------
+    private String serializeValue(Object value) {
+
+        if (value instanceof Enum<?>) {
+            return ((Enum<?>) value).name();
+        }
+
+        if (value instanceof UUID) {
+            return value.toString();
+        }
+
+        if (value instanceof LocalDate) {
+            return value.toString();
+        }
+
+        if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).toPlainString();
+        }
+
+        throw new IllegalArgumentException(
+                "Unsupported value type: " + value.getClass().getName()
+        );
+    }
 
     public Optional<String> getString(Long chatId, String field) {
         return Optional.ofNullable((String) redisTemplate.opsForHash().get(key(chatId), field));
@@ -133,9 +154,6 @@ public class SessionService {
                 });
     }
 
-    // --------------------------------------------------------------------
-    // ✅ ADMIN METHODS
-    // --------------------------------------------------------------------
     public Map<String, Object> getAll(Long chatId) {
         Map<Object, Object> entries = redisTemplate.opsForHash().entries(key(chatId));
         return entries.entrySet().stream()

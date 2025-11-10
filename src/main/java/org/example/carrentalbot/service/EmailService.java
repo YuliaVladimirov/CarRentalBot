@@ -3,6 +3,7 @@ package org.example.carrentalbot.service;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.model.Booking;
+import org.example.carrentalbot.model.enums.BookingNotification;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -26,10 +27,10 @@ public class EmailService {
     }
 
     @Async("emailExecutor")
-    public void sendBookingConfirmation(Booking booking, String emailTitle, String emailMessage){
+    public void sendBookingNotification(Booking booking, BookingNotification bookingNotification){
 
         try {
-            String htmlBody = emailTemplateService.buildBookingConfirmationEmail(booking, emailTitle, emailMessage);
+            String htmlBody = emailTemplateService.buildBookingConfirmationEmail(booking, bookingNotification.getTitle(), bookingNotification.getMessage());
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -40,6 +41,7 @@ public class EmailService {
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
+            log.info("Booking email [{}] sent to {} for booking {}", bookingNotification.name(), booking.getEmail(), booking.getId());
         } catch (Exception exception) {
             log.error("Failed to send email to {} for booking {}: {}", booking.getEmail(), booking.getId(), exception.getMessage(), exception);
         }

@@ -5,9 +5,11 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
+import org.example.carrentalbot.model.enums.BookingNotification;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.EmailService;
+import org.example.carrentalbot.service.ReminderService;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -29,17 +31,19 @@ public class ConfirmBookingHandler implements CallbackHandler {
     private final EmailService emailService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
+    private final ReminderService reminderService;
 
     public ConfirmBookingHandler(SessionService sessionService,
                                  BookingService bookingService,
                                  EmailService emailService,
                                  TelegramClient telegramClient,
-                                 KeyboardFactory keyboardFactory) {
+                                 KeyboardFactory keyboardFactory, ReminderService reminderService) {
         this.sessionService = sessionService;
         this.bookingService = bookingService;
         this.emailService = emailService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
+        this.reminderService = reminderService;
     }
 
     @Override
@@ -82,6 +86,8 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 startDate, endDate, totalCost,
                 phone, email);
 
+        reminderService.createReminder(booking);
+
         String text = String.format("""
                 Your booking has been <b>successfully confirmed</b>.
                 Booking ID: <b>%s</b>
@@ -103,6 +109,6 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 .replyMarkup(replyMarkup)
                 .build());
 
-        emailService.sendBookingConfirmation(booking, "Booking Confirmed ✅", "successfully confirmed!");
+        emailService.sendBookingNotification(booking, BookingNotification.CONFIRMATION);
     }
 }

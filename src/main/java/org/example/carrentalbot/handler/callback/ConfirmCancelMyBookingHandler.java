@@ -5,10 +5,11 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
-import org.example.carrentalbot.model.enums.BookingNotification;
+import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.EmailService;
+import org.example.carrentalbot.service.ReminderService;
 import org.example.carrentalbot.service.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
@@ -26,17 +27,20 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
     private final BookingService bookingService;
     private final SessionService sessionService;
     private final EmailService emailService;
+    private final ReminderService reminderService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 
     public ConfirmCancelMyBookingHandler(BookingService bookingService,
                                          SessionService sessionService,
                                          EmailService emailService,
+                                         ReminderService reminderService,
                                          TelegramClient telegramClient,
                                          KeyboardFactory keyboardFactory) {
         this.bookingService = bookingService;
         this.sessionService = sessionService;
         this.emailService = emailService;
+        this.reminderService = reminderService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
     }
@@ -59,6 +63,8 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
 
         Booking booking = bookingService.cancelBooking(bookingId);
 
+        reminderService.cancelReminders(booking);
+
         String text = String.format("""
                     ✅ Booking successfully canceled.
                     Booking id: %s
@@ -80,6 +86,7 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
                 .replyMarkup(replyMarkup)
                 .build());
 
-        emailService.sendBookingNotification(booking, BookingNotification.CANCELLATION);
+        emailService.sendBookingNotification(booking, NotificationType.CANCELLATION);
+
     }
 }

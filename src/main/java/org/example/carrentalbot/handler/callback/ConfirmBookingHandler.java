@@ -5,7 +5,7 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
-import org.example.carrentalbot.model.enums.BookingNotification;
+import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.EmailService;
@@ -29,21 +29,22 @@ public class ConfirmBookingHandler implements CallbackHandler {
     private final SessionService sessionService;
     private final BookingService bookingService;
     private final EmailService emailService;
+    private final ReminderService reminderService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
-    private final ReminderService reminderService;
 
     public ConfirmBookingHandler(SessionService sessionService,
                                  BookingService bookingService,
                                  EmailService emailService,
+                                 ReminderService reminderService,
                                  TelegramClient telegramClient,
-                                 KeyboardFactory keyboardFactory, ReminderService reminderService) {
+                                 KeyboardFactory keyboardFactory) {
         this.sessionService = sessionService;
         this.bookingService = bookingService;
         this.emailService = emailService;
+        this.reminderService = reminderService;
         this.telegramClient = telegramClient;
         this.keyboardFactory = keyboardFactory;
-        this.reminderService = reminderService;
     }
 
     @Override
@@ -86,7 +87,7 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 startDate, endDate, totalCost,
                 phone, email);
 
-        reminderService.createReminder(booking);
+        reminderService.createReminders(booking);
 
         String text = String.format("""
                 Your booking has been <b>successfully confirmed</b>.
@@ -109,6 +110,6 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 .replyMarkup(replyMarkup)
                 .build());
 
-        emailService.sendBookingNotification(booking, BookingNotification.CONFIRMATION);
+        emailService.sendBookingNotification(booking, NotificationType.CONFIRMATION);
     }
 }

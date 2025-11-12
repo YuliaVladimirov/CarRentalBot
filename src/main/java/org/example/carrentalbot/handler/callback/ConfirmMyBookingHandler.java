@@ -5,7 +5,7 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
-import org.example.carrentalbot.model.enums.BookingNotification;
+import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.EmailService;
@@ -118,6 +118,6 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                 .replyMarkup(replyMarkup)
                 .build());
 
-        emailService.sendBookingNotification(booking, BookingNotification.UPDATE);
+        emailService.sendBookingNotification(booking, NotificationType.UPDATE);
     }
 }

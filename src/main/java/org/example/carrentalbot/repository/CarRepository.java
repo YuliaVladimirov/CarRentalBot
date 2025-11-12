@@ -14,25 +14,23 @@ import java.util.UUID;
 public interface CarRepository extends JpaRepository<Car, UUID> {
 
     @Query("""
-            SELECT new org.example.carrentalbot.dto.CarProjectionDto(
-                        c.category, MIN(c.dailyRate))
-                        FROM Car c
-                        GROUP BY c.category
+            SELECT new org.example.carrentalbot.dto.CarProjectionDto(c.category, MIN(c.dailyRate))
+            FROM Car c
+            GROUP BY c.category
             """)
     List<CarProjectionDto> getCarCategories();
 
     List<Car> findByCategory(CarCategory carCategory);
 
     @Query("""
-    SELECT c FROM Car c
-    WHERE c.category = :category
-      AND c.id NOT IN (
-          SELECT b.car.id FROM Booking b
-          WHERE b.startDate <= :endDate
+            SELECT c FROM Car c
+            WHERE c.category = :category
+            AND c.id NOT IN (
+            SELECT b.car.id FROM Booking b
+            WHERE b.startDate <= :endDate
             AND b.endDate >= :startDate
-            AND b.status = org.example.carrentalbot.model.enums.BookingStatus.CONFIRMED
-      )
-""")
+            AND b.status = org.example.carrentalbot.model.enums.BookingStatus.CONFIRMED)
+            """)
     List<Car> findAvailableCarsByCategoryAndDates(
             @Param("category") CarCategory category,
             @Param("startDate") LocalDate startDate,

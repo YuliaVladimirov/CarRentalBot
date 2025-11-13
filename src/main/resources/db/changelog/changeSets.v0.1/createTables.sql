@@ -81,23 +81,20 @@ CREATE INDEX index_bookings_status ON bookings(status);
 -- ========================================
 CREATE TABLE reminders (
                               id SERIAL PRIMARY KEY,
-                              customer_id UUID NOT NULL,
                               booking_id UUID NOT NULL,
                               sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              message VARCHAR(600) NOT NULL,
+                              reminder_type VARCHAR(30) NOT NULL CHECK (reminder_type IN ('START_DAY_BEFORE', 'START_DAY_OF', 'END_DAY_BEFORE', 'END_DAY_OF')),
                               due_at TIMESTAMP NOT NULL,
-                              sent BOOLEAN NOT NULL DEFAULT FALSE,
+                              reminder_status VARCHAR(20) NOT NULL CHECK (reminder_status IN ('PENDING', 'SENT', 'FAILED', 'PERMANENTLY_FAILED','CANCELLED')),
+                              retry_count INT NOT NULL,
                               created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                              CONSTRAINT fk_reminders_customers FOREIGN KEY (customer_id) REFERENCES customers (id),
                               CONSTRAINT fk_reminders_bookings FOREIGN KEY (booking_id) REFERENCES bookings (id)
 );
 
---changeset yulia:2025-09-06-index-reminders-customer-id
-CREATE INDEX index_reminders_customer_id ON reminders(customer_id);
 --changeset yulia:2025-09-06-index-reminders-booking-id
 CREATE INDEX index_reminders_booking_id ON reminders(booking_id);
 --changeset yulia:2025-09-06-index-reminders-due-at
 CREATE INDEX idx_reminder_due_at ON reminders(due_at);
 --changeset yulia:2025-09-06-index-reminders-sent
-CREATE INDEX idx_reminder_sent ON reminders(sent);
+CREATE INDEX idx_reminder_reminder_status ON reminders(reminder_status);
 

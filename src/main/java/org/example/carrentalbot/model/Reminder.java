@@ -2,6 +2,8 @@ package org.example.carrentalbot.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.carrentalbot.model.enums.ReminderStatus;
+import org.example.carrentalbot.model.enums.ReminderType;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -21,25 +23,26 @@ public class Reminder {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    @Column(name = "message", nullable = false, length = 600)
-    private String message;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reminder_type", nullable = false, length = 30)
+    private ReminderType reminderType;
 
     @Column(name = "due_at", nullable = false)
     private LocalDateTime dueAt;
 
-    @Column(name = "sent", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reminder_status", nullable = false, length = 20)
     @Builder.Default
-    private Boolean sent = false;
+    private ReminderStatus status = ReminderStatus.PENDING;
+
+    @Column(name = "retry_count", nullable = false)
+    @Builder.Default
+    private int retryCount = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
 }

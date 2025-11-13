@@ -3,7 +3,8 @@ package org.example.carrentalbot.service;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.model.Booking;
-import org.example.carrentalbot.model.enums.BookingNotification;
+import org.example.carrentalbot.model.Reminder;
+import org.example.carrentalbot.model.enums.NotificationType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -27,23 +28,43 @@ public class EmailService {
     }
 
     @Async("emailExecutor")
-    public void sendBookingNotification(Booking booking, BookingNotification bookingNotification){
+    public void sendBookingNotification(Booking booking, NotificationType notificationType){
 
         try {
-            String htmlBody = emailTemplateService.buildBookingConfirmationEmail(booking, bookingNotification.getTitle(), bookingNotification.getMessage());
+            String htmlBody = emailTemplateService.buildNotificationHtmlBody(booking, notificationType.getTitle(), notificationType.getMessage());
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(booking.getEmail().trim());
             helper.setFrom(userName);
-            helper.setSubject("Booking Details");
+            helper.setSubject(notificationType.getSubject());
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            log.info("Booking email [{}] sent to {} for booking {}", bookingNotification.name(), booking.getEmail(), booking.getId());
+            log.info("Booking notification email [{}] sent to {} for booking {}", notificationType.name(), booking.getEmail(), booking.getId());
         } catch (Exception exception) {
-            log.error("Failed to send email to {} for booking {}: {}", booking.getEmail(), booking.getId(), exception.getMessage(), exception);
+            log.error("Failed to send notification email [{}] to {} for booking {}: {}", notificationType.name(), booking.getEmail(), booking.getId(), exception.getMessage(), exception);
+        }
+    }
+
+    @Async("emailExecutor")
+    public void sendBookingReminder(Reminder reminder) {
+        try{
+            String htmlBody = emailTemplateService.buildReminderHtmlBody(reminder.getBooking(), reminder.getReminderType().getTitle(), reminder.getReminderType().getMessage());
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(reminder.getBooking().getEmail().trim());
+            helper.setFrom(userName);
+            helper.setSubject("Booking Reminder");
+            helper.setText(htmlBody, true);
+
+            mailSender.send(message);
+            log.info("Booking reminder email sent to {} for booking {}", reminder.getBooking().getEmail(), reminder.getBooking().getId());
+        } catch (Exception exception) {
+            log.error("Failed to send email to {} for booking {}: {}", reminder.getBooking().getEmail(), reminder.getBooking().getId(), exception.getMessage(), exception);
         }
     }
 }

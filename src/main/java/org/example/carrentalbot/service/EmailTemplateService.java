@@ -21,14 +21,14 @@ public class EmailTemplateService {
         this.bookingService = bookingService;
     }
 
-    public String buildBookingConfirmationEmail(Booking booking, String emailTitle, String emailMessage) {
+    public String buildNotificationHtmlBody(Booking booking, String title, String message) {
 
         BigDecimal dailyRate = booking.getCar().getDailyRate().setScale(0, RoundingMode.HALF_UP);
         long totalDays = bookingService.calculateTotalDays(booking.getStartDate(), booking.getEndDate());
 
         Context context = new Context();
-        context.setVariable("title", emailTitle);
-        context.setVariable("message", emailMessage);
+        context.setVariable("title", title);
+        context.setVariable("message", message);
         context.setVariable("bookingId", booking.getId());
         context.setVariable("brand", booking.getCar().getBrand());
         context.setVariable("model", booking.getCar().getModel());
@@ -41,6 +41,23 @@ public class EmailTemplateService {
         context.setVariable("phone", booking.getPhone());
         context.setVariable("email", booking.getEmail());
 
-        return templateEngine.process("email/booking-email.html", context);
+        return templateEngine.process("email/notification.html", context);
+    }
+
+    public String buildReminderHtmlBody(Booking booking, String title, String message) {
+
+        long totalDays = bookingService.calculateTotalDays(booking.getStartDate(), booking.getEndDate());
+
+        Context context = new Context();
+        context.setVariable("title", title);
+        context.setVariable("message", message);
+        context.setVariable("bookingId", booking.getId());
+        context.setVariable("startDate", booking.getStartDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+        context.setVariable("endDate", booking.getEndDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+        context.setVariable("totalDays", totalDays);
+        context.setVariable("brand", booking.getCar().getBrand());
+        context.setVariable("model", booking.getCar().getModel());
+
+        return templateEngine.process("email/reminder.html", context);
     }
 }

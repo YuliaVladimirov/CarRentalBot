@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface CarRepository extends JpaRepository<Car, UUID> {
 
-    @Query("""
+    @Query(value = """
             SELECT new org.example.carrentalbot.dto.CarProjectionDto(c.category, MIN(c.dailyRate))
             FROM Car c
             GROUP BY c.category
@@ -22,7 +22,7 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
 
     List<Car> findByCategory(CarCategory carCategory);
 
-    @Query("""
+    @Query(value = """
             SELECT c FROM Car c
             WHERE c.category = :category
             AND c.id NOT IN (

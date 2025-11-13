@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
 
-    @Query("""
+    @Query(value = """
                 SELECT COUNT(b) > 0
                 FROM Booking b
                 WHERE b.car.id = :carId
@@ -30,7 +30,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     List<Booking> findByCustomerId(UUID id);
 
     @EntityGraph(attributePaths = {"car"})
-    @Query("""
+    @Query(value = """
             SELECT b FROM Booking b WHERE b.id = :id
             """)
     Optional<Booking> findByIdWithCar(@Param("id") UUID id);

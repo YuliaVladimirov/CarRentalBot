@@ -1,6 +1,9 @@
 package org.example.carrentalbot.handler;
 
+import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Reminder;
 import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.EmailService;
@@ -8,6 +11,7 @@ import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class ReminderDeliveryHandler {
 
@@ -58,6 +62,12 @@ public class ReminderDeliveryHandler {
     }
 
     private void sendViaEmail(Reminder reminder) {
-        emailService.sendBookingReminder(reminder);
+
+        try {
+            emailService.sendBookingReminder(reminder);
+        } catch (MessagingException exception) {
+            log.error("CRITICAL: Failed to initiate email send for booking {}.", reminder.getBooking().getId(), exception);
+            throw new EmailException("Failed to initiate email send.", exception);
+        }
     }
 }

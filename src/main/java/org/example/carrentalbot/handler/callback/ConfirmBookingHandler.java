@@ -1,9 +1,12 @@
 package org.example.carrentalbot.handler.callback;
 
+import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
+import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
@@ -20,6 +23,7 @@ import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class ConfirmBookingHandler implements CallbackHandler {
 
@@ -110,6 +114,11 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 .replyMarkup(replyMarkup)
                 .build());
 
-        emailService.sendBookingNotification(booking, NotificationType.CONFIRMATION);
+        try {
+            emailService.sendBookingNotification(booking, NotificationType.CONFIRMATION);
+        } catch (MessagingException exception) {
+            log.error("CRITICAL: Failed to initiate email send for booking {}.", booking.getId(), exception);
+            throw new EmailException("Failed to initiate email send.", exception);
+        }
     }
 }

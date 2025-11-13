@@ -26,12 +26,7 @@ public class ReminderService {
 
     private static final int RETENTION_DAYS = 90;
     private static final List<ReminderStatus> ELIGIBLE_FOR_SENT = List.of(
-            ReminderStatus.PENDING,
-            ReminderStatus.FAILED
-    );
-    private static final int MAX_RETRIES = 5;
-    private static final int BATCH_SIZE = 1000;
-    private static final Pageable PAGE = PageRequest.of(0, BATCH_SIZE);
+            ReminderStatus.PENDING, ReminderStatus.FAILED);
 
     public ReminderService(ReminderRepository reminderRepository,
                            ReminderDeliveryHandler deliveryHandler) {
@@ -44,8 +39,7 @@ public class ReminderService {
         LocalDateTime now = LocalDateTime.now();
         List<Reminder> reminders = new ArrayList<>();
 
-//        LocalDateTime dueAt1 = booking.getStartDate().minusDays(1).atTime(10, 0);
-        LocalDateTime dueAt1 = booking.getStartDate().minusDays(1).atTime(19, 0);
+        LocalDateTime dueAt1 = booking.getStartDate().minusDays(1).atTime(10, 0);
 
         if (isReminderEligible(dueAt1, now)) {
             reminders.add(Reminder.builder()
@@ -55,8 +49,7 @@ public class ReminderService {
                     .build());
         }
 
-//        LocalDateTime dueAt2 = booking.getStartDate().atTime(10, 0);
-        LocalDateTime dueAt2 = booking.getStartDate().minusDays(1).atTime(19, 5);
+        LocalDateTime dueAt2 = booking.getStartDate().atTime(10, 0);
 
         if (isReminderEligible(dueAt2, now)) {
             reminders.add(Reminder.builder()
@@ -66,8 +59,7 @@ public class ReminderService {
                     .build());
         }
 
-//        LocalDateTime dueAt3 = booking.getEndDate().minusDays(1).atTime(10, 0);
-        LocalDateTime dueAt3 = booking.getStartDate().minusDays(1).atTime(19, 10);
+        LocalDateTime dueAt3 = booking.getEndDate().minusDays(1).atTime(10, 0);
 
         if (isReminderEligible(dueAt3, now)) {
             reminders.add(Reminder.builder()
@@ -77,8 +69,7 @@ public class ReminderService {
                     .build());
         }
 
-//        LocalDateTime dueAt4 = booking.getEndDate().atTime(10, 0);
-        LocalDateTime dueAt4 = booking.getStartDate().minusDays(1).atTime(19, 15);
+        LocalDateTime dueAt4 = booking.getEndDate().atTime(10, 0);
 
         if (isReminderEligible(dueAt4, now)) {
             reminders.add(Reminder.builder()
@@ -100,6 +91,9 @@ public class ReminderService {
     public void processDueReminders() {
         log.info("Starting scheduled job: processDueReminders.");
 
+        final int BATCH_SIZE = 1000;
+        final Pageable PAGE = PageRequest.of(0, BATCH_SIZE);
+
         List<Reminder> dueReminders;
         do {
             dueReminders = reminderRepository
@@ -113,15 +107,16 @@ public class ReminderService {
             for (Reminder reminder : dueReminders) {
                 try {
                     int updated = reminderRepository.markAsSent(reminder.getId(), ELIGIBLE_FOR_SENT);
+
                     if (updated == 1) {
                         deliveryHandler.send(reminder);
-                        log.info("Reminder [{}] with id {} sent for booking {}",
+
+                        log.info("Reminder [{}] with id {} SENT for booking {}",
                                 reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId());
                     }
                 } catch (Exception exception) {
-                    log.error("Failed to send reminder [{}] with id {} for booking {}",
+                    log.error("PERMANENT FAILURE after all retries for reminder [{}] with id {} for booking {}",
                             reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId(), exception);
-
                     try {
                         int updated = reminderRepository.markAsFailed(reminder.getId());
                         if (updated == 1) {
@@ -135,45 +130,6 @@ public class ReminderService {
                 }
             }
         } while (dueReminders.size() == BATCH_SIZE);
-    }
-
-//    @Scheduled(cron = "0 0 * * * *")
-@Scheduled(cron = "0 * * * * *")
-    @Transactional
-    public void retryFailedReminders() {
-        log.info("Starting scheduled job: retryFailedReminders.");
-        List<Reminder> failedReminders = reminderRepository.findRemindersForRetry(MAX_RETRIES, PAGE);
-
-        if (failedReminders.isEmpty()) {
-            log.info("Finished scheduled job: retryFailedReminders. No reminders found for retry.");
-            return;
-        }
-
-        for (Reminder reminder : failedReminders) {
-
-            reminderRepository.incrementRetryCount(reminder.getId());
-            int currentRetryCount = reminder.getRetryCount() + 1;
-
-            try {
-                deliveryHandler.send(reminder);
-
-                reminderRepository.markAsSent(reminder.getId(), ELIGIBLE_FOR_SENT);
-                log.info("Successfully resent and marked as SENT reminder [{}] with id {} for booking {}",
-                        reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId());
-
-            } catch (Exception exception) {
-                log.warn("Failed retry attempt #{} for reminder reminder [{}] with id {} for booking {} ",
-                        currentRetryCount, reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId(), exception);
-
-                if (currentRetryCount >= MAX_RETRIES) {
-                    int updated = reminderRepository.markAsPermanentlyFailed(reminder.getId());
-                    if (updated == 1) {
-                        log.error("Reminder [{}] with id {} for booking {} hit max retries. Marked as PERMANENTLY_FAILED.",
-                                reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId());
-                    }
-                }
-            }
-        }
     }
 
     @Transactional

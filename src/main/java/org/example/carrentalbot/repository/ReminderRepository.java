@@ -54,43 +54,6 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
     int markAsFailed(@Param("id") Long id);
 
 
-    @Query(value = """
-            SELECT r FROM Reminder r
-            JOIN FETCH r.booking b
-            JOIN FETCH b.car car
-            JOIN FETCH b.customer c
-            WHERE r.status = org.example.carrentalbot.model.enums.ReminderStatus.FAILED
-            AND r.retryCount < :maxRetries
-            ORDER BY r.dueAt ASC
-            """,
-            countQuery = """
-                SELECT count(r.id) FROM Reminder r
-                WHERE r.status = org.example.carrentalbot.model.enums.ReminderStatus.FAILED
-                AND r.retryCount < :maxRetries
-                """)
-    List<Reminder> findRemindersForRetry(@Param("maxRetries") int maxRetries,
-                                         Pageable pageable);
-
-
-    @Modifying
-    @Query(value = """
-            UPDATE Reminder r
-            SET r.retryCount = r.retryCount + 1
-            WHERE r.id = :id
-            """)
-    void incrementRetryCount(@Param("id") Long id);
-
-
-    @Modifying
-    @Query(value = """
-            UPDATE Reminder r
-            SET r.status = org.example.carrentalbot.model.enums.ReminderStatus.PERMANENTLY_FAILED
-            WHERE r.id = :id
-            AND r.status = org.example.carrentalbot.model.enums.ReminderStatus.FAILED
-            """)
-    int markAsPermanentlyFailed(@Param("id") Long id);
-
-
     @Modifying
     @Query(value = """
             UPDATE Reminder r

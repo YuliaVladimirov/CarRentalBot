@@ -50,14 +50,13 @@ public class EmailService {
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            log.info("Booking notification email [{}] sent to {} for booking {}", notificationType.name(), booking.getEmail(), booking.getId());
+            log.info("Booking notification email [{}] sent to user's email for booking {}", notificationType.name(), booking.getId());
     }
 
     @Recover
     public void recoverFailedNotification(MailException exception, Booking booking, NotificationType notificationType) {
-        log.error("PERMANENTLY FAILED to send notification email [{}] to {} for booking {}: {}",
+        log.error("PERMANENTLY FAILED to send notification email [{}] to user's email for booking {}: {}",
                 notificationType.name(),
-                booking.getEmail(),
                 booking.getId(),
                 exception.getMessage());
     }
@@ -80,14 +79,13 @@ public class EmailService {
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            log.info("Booking reminder email sent to {} for booking {}", reminder.getBooking().getEmail(), reminder.getBooking().getId());
+            log.info("Booking reminder email sent to user's email for booking {}", reminder.getBooking().getId());
     }
 
     @Recover
     public void recoverFailedReminder(MailException exception, Reminder reminder) {
-        log.error("PERMANENTLY FAILED to send reminder email [{}] to {} for booking {}: {}",
+        log.error("PERMANENTLY FAILED to send reminder email [{}] to user's email for booking {}: {}",
                 reminder.getReminderType().name(),
-                reminder.getBooking().getEmail(),
                 reminder.getBooking().getId(),
                 exception.getMessage());
     }

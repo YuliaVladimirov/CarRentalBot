@@ -3,6 +3,7 @@ package org.example.carrentalbot.util;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.config.TelegramBotProperties;
 import org.example.carrentalbot.dto.AnswerCallbackQueryDto;
+import org.example.carrentalbot.dto.EditMessageReplyMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.dto.SendPhotoDto;
 import org.springframework.retry.annotation.Backoff;
@@ -80,6 +81,32 @@ public class TelegramClient {
     @Recover
     public void recoverFailedSendPhoto(Exception exception, SendMessageDto dto) {
         log.error("PERMANENTLY FAILED to send Telegram photo to {}: {}",
+                dto.getChatId(),
+                exception.getMessage());
+    }
+
+    @Async("telegramExecutor")
+    @Retryable(
+            retryFor = {ResourceAccessException.class, IOException.class},
+            maxAttempts = 4,
+            backoff = @Backoff(delay = 2000),
+            recover = "recoverFailedEditMessageMarkup")
+    public void sendEditMessageReplyMarkup(EditMessageReplyMarkupDto request) {
+
+        restTemplate.postForEntity(
+                getApiUrl("editMessageReplyMarkup"),
+                request,
+                String.class
+        );
+
+        log.info("Successfully edited reply markup for message {} in chat {}",
+                request.getMessageId(), request.getChatId());
+    }
+
+    @Recover
+    public void recoverFailedEditMessageMarkup(Exception exception, EditMessageReplyMarkupDto dto) {
+        log.error("PERMANENTLY FAILED to edit reply markup for message {} in chat {}: {}",
+                dto.getMessageId(),
                 dto.getChatId(),
                 exception.getMessage());
     }

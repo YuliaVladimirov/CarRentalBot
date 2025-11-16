@@ -122,7 +122,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
                 .orElseThrow(() -> new DataNotFoundException("Car browsing mode not found in session"));
 
         return switch (carBrowsingMode) {
-            case ALL_CARS -> Map.entry(AskForRentalDatesHandler.KEY, "🕒 Check Availability");
+            case ALL_CARS -> Map.entry(AskForStartDateHandler.KEY, "🕒 Check Availability");
             case CARS_FOR_DATES -> Map.entry(StartBookingHandler.KEY, "📝 Start Booking");
         };
     }

@@ -1,30 +1,36 @@
 package org.example.carrentalbot.handler.callback;
 
 import org.example.carrentalbot.dto.CallbackQueryDto;
+import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
+import java.time.YearMonth;
 import java.util.EnumSet;
 import java.util.Optional;
 
 @Component
-public class AskForRentalDatesHandler implements CallbackHandler {
+public class AskForStartDateHandler implements CallbackHandler {
 
-    public static final String KEY = "ASK_FOR_RENTAL_DAYS";
+    public static final String KEY = "START_DATE";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final SessionService sessionService;
+    private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
-    public AskForRentalDatesHandler(SessionService sessionService,
-                                    TelegramClient telegramClient) {
+    public AskForStartDateHandler(SessionService sessionService,
+                                  KeyboardFactory keyboardFactory,
+                                  TelegramClient telegramClient) {
         this.sessionService = sessionService;
+        this.keyboardFactory = keyboardFactory;
         this.telegramClient = telegramClient;
     }
 
@@ -43,20 +49,17 @@ public class AskForRentalDatesHandler implements CallbackHandler {
 
         updateBrowsingModeInSession(chatId, callbackQuery.getData());
 
-        String text = """
-                Please enter your rental period.
-                
-                Example: 05.10.2025 - 10.10.2025
-                """;
+        YearMonth now = YearMonth.now();
+
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCalendar(
+                now.getYear(), now.getMonthValue(), AskForEndDateHandler.KEY + ":");
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
-                .text(text)
-                .parseMode("HTML")
-                .replyMarkup(null)
+                .text("Pick your start date:")
+                .replyMarkup(replyMarkup)
                 .build());
     }
-
 
     private void updateBrowsingModeInSession(Long chatId, String callbackData) {
         CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(callbackData);

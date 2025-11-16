@@ -1,23 +1,26 @@
 package org.example.carrentalbot.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CarProjectionDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
 import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.Car;
+import org.example.carrentalbot.model.enums.CalendarAction;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Component
-@Slf4j
 public class KeyboardFactory {
 
     public InlineKeyboardMarkupDto buildMainMenuKeyboard() {
@@ -83,7 +86,7 @@ public class KeyboardFactory {
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("Cars For My Dates")
-                                .callbackData(AskForRentalDatesHandler.KEY + ":" + CarBrowsingMode.CARS_FOR_DATES.name())
+                                .callbackData(AskForStartDateHandler.KEY + ":" + CarBrowsingMode.CARS_FOR_DATES.name())
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("⬅️ To Main Menu")
@@ -112,6 +115,40 @@ public class KeyboardFactory {
 
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(rows)
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildConfirmDatesKeyboard(String callbackKey) {
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("✅ Confirm")
+                                .callbackData(callbackKey)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("🔄 Change Dates")
+                                .callbackData(AskForStartDateHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildInvalidDatesKeyboard(){
+        return InlineKeyboardMarkupDto.builder()
+                .inlineKeyboard(List.of(
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("🔄 Change Dates")
+                                .callbackData(AskForStartDateHandler.KEY)
+                                .build()),
+                        List.of(InlineKeyboardButtonDto.builder()
+                                .text("⬅️ To Main Menu")
+                                .callbackData(MainMenuHandler.KEY)
+                                .build())
+                ))
                 .build();
     }
 
@@ -177,7 +214,7 @@ public class KeyboardFactory {
                 .inlineKeyboard(List.of(
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("🗓️ Change Dates")
-                                .callbackData(AskForRentalDatesHandler.KEY)
+                                .callbackData(AskForStartDateHandler.KEY)
                                 .build()),
                         List.of(InlineKeyboardButtonDto.builder()
                                 .text("⬅️ To Main Menu")
@@ -340,6 +377,60 @@ public class KeyboardFactory {
                                 .url("https://example.com/support")
                                 .build())
                 ))
+                .build();
+    }
+
+    public InlineKeyboardMarkupDto buildCalendar(int year, int month, String prefix) {
+
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate first = yearMonth.atDay(1);
+
+        List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
+
+        rows.add(List.of(
+                button("«", prefix + CalendarAction.PREV + ":" + year + ":" + month),
+                button(yearMonth.getMonth().name() + " " + year, prefix + CalendarAction.IGNORE),
+                button("»", prefix +CalendarAction.NEXT + ":" + year + ":" + month)
+        ));
+
+        rows.add(List.of(
+                button("Mo", prefix + CalendarAction.IGNORE),
+                button("Tu", prefix + CalendarAction.IGNORE),
+                button("We", prefix + CalendarAction.IGNORE),
+                button("Th", prefix + CalendarAction.IGNORE),
+                button("Fr", prefix + CalendarAction.IGNORE),
+                button("Sa", prefix + CalendarAction.IGNORE),
+                button("Su", prefix + CalendarAction.IGNORE)
+        ));
+
+        LocalDate currentDate = first.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        do {
+            List<InlineKeyboardButtonDto> week = new ArrayList<>();
+
+            for (int i = 0; i < 7; i++) {
+                if (currentDate.getMonthValue() == month) {
+                    week.add(button(
+                            String.valueOf(currentDate.getDayOfMonth()),
+                            prefix + CalendarAction.PICK + ":" + currentDate
+                    ));
+                } else {
+                    week.add(button(" ", prefix + CalendarAction.IGNORE));
+                }
+                currentDate = currentDate.plusDays(1);
+            }
+
+            rows.add(week);
+
+        } while (currentDate.getMonthValue() == month || currentDate.getDayOfWeek() != DayOfWeek.MONDAY);
+
+        return new InlineKeyboardMarkupDto(rows);
+    }
+
+    private InlineKeyboardButtonDto button(String text, String data) {
+        return InlineKeyboardButtonDto.builder()
+                .text(text)
+                .callbackData(data)
                 .build();
     }
 }

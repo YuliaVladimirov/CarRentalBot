@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class MessageDto {
 
     @JsonProperty("message_id")
-    private Long messageId;
+    private Integer messageId;
 
     @JsonProperty("from")
     private FromDto from;
@@ -25,5 +25,5 @@ public class MessageDto {
     private String text;
 
     @JsonProperty("date")
-    private Long date; // Telegram uses UNIX timestamp
+    private Long date;
 }

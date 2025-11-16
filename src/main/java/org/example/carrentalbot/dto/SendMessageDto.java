@@ -24,5 +24,5 @@ public class SendMessageDto {
     private String parseMode;
 
     @JsonProperty("reply_markup")
-    private Object replyMarkup;
+    private InlineKeyboardMarkupDto replyMarkup;
 }

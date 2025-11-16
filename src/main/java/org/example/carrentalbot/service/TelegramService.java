@@ -86,17 +86,17 @@ public class TelegramService {
         }
 
         if (text.startsWith("/")) {
-            log.info("Executing command '{}' for chatId {}", text.toLowerCase(), chatId);
 
             CommandHandler handler = commandHandlerMap
                     .getOrDefault(text.toLowerCase(), fallbackCommandHandler);
 
             flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
             handler.handle(chatId, message);
+
+            log.info("Executing command '{}' for chatId {}", text.toLowerCase(), chatId);
             return;
         }
 
-        log.info("Executing message for chatId {}: {}", chatId, text);
         textHandlerList.stream()
                 .filter(handler -> handler.canHandle(text))
                 .findFirst()
@@ -107,6 +107,7 @@ public class TelegramService {
                         },
                         () -> fallbackTextHandler.handle(chatId, message)
                 );
+        log.info("Executing message for chatId {}: {}", chatId, text);
     }
 
     public void handleCallbackQuery(CallbackQueryDto callbackQuery) {
@@ -130,8 +131,6 @@ public class TelegramService {
                         .showAlert(false)
                         .build());
 
-        log.info("Executing callback '{}' for chatId {}", callbackData, chatId);
-
         CallbackHandler handler = callbackHandlerMap.entrySet().stream()
                 .filter(entry -> callbackData.startsWith(entry.getKey()))
                 .map(Map.Entry::getValue)
@@ -140,5 +139,7 @@ public class TelegramService {
 
         flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
         handler.handle(chatId, callbackQuery);
+
+        log.info("Executing callback '{}' for chatId {}", callbackData, chatId);
     }
 }

@@ -24,7 +24,7 @@ import java.util.UUID;
 public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
-    public static final String KEY = "MY_BOOKINGS_DETAILS";
+    public static final String KEY = "MY_BOOKING_DETAILS";
 
     private final BookingService bookingService;
     private final SessionService sessionService;

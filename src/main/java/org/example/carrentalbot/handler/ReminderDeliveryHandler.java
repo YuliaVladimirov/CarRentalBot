@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Reminder;
-import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.service.EmailService;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.scheduling.annotation.Async;
@@ -15,14 +14,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReminderDeliveryHandler {
 
-    private final BookingService bookingService;
     private final EmailService emailService;
     private final TelegramClient telegramClient;
 
-    public ReminderDeliveryHandler(BookingService bookingService,
-                                   TelegramClient telegramClient,
+    public ReminderDeliveryHandler(TelegramClient telegramClient,
                                    EmailService emailService) {
-        this.bookingService = bookingService;
         this.telegramClient = telegramClient;
         this.emailService = emailService;
     }
@@ -34,8 +30,6 @@ public class ReminderDeliveryHandler {
     }
 
     private void sendViaTelegram(Reminder reminder) {
-
-        long totalDays = bookingService.calculateTotalDays(reminder.getBooking().getStartDate(), reminder.getBooking().getEndDate());
 
         String text = String.format("""
                 Hi %s, %s
@@ -50,7 +44,7 @@ public class ReminderDeliveryHandler {
                 reminder.getBooking().getId(),
                 reminder.getBooking().getStartDate(),
                 reminder.getBooking().getEndDate(),
-                totalDays,
+                reminder.getBooking().getTotalDays(),
                 reminder.getBooking().getCar().getBrand(),
                 reminder.getBooking().getCar().getModel());
 

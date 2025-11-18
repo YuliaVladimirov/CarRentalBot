@@ -13,7 +13,6 @@ import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
@@ -30,7 +29,6 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
     private final SessionService sessionService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
-
 
     public DisplayMyBookingDetailsHandler (BookingService bookingService,
                                            SessionService sessionService,
@@ -58,9 +56,6 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
         UUID bookingId = updateBookingIdInSession(chatId, callbackQuery.getData());
         Booking booking = bookingService.getBookingById(bookingId);
 
-        BigDecimal dailyRate = booking.getCar().getDailyRate().setScale(0, RoundingMode.HALF_UP);
-        long totalDays = bookingService.calculateTotalDays(booking.getStartDate(), booking.getEndDate());
-
         String text = String.format("""
                         <b>Booking details:</b>
                         
@@ -84,8 +79,8 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
                 booking.getCar().getCategory().getValue(),
                 booking.getStartDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                 booking.getEndDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
-                totalDays,
-                dailyRate,
+                booking.getTotalDays(),
+                booking.getCar().getDailyRate().setScale(0, RoundingMode.HALF_UP),
                 booking.getTotalCost(),
                 booking.getPhone(),
                 booking.getEmail(),

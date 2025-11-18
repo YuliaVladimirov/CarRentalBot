@@ -75,6 +75,14 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 .getLocalDate(chatId, "endDate")
                 .orElseThrow(() -> new DataNotFoundException("End date not found in session"));
 
+        Integer totalDays = sessionService
+                .getInteger(chatId, "totalDays")
+                .orElseThrow(() -> new DataNotFoundException("Total days not found in session"));
+
+        BigDecimal totalCost = sessionService
+                .getBigDecimal(chatId, "totalCost")
+                .orElseThrow(() -> new DataNotFoundException("Total cost not found in session"));
+
         String phone = sessionService
                 .getString(chatId, "phone")
                 .orElseThrow(() -> new DataNotFoundException("Phone not found in session"));
@@ -83,12 +91,8 @@ public class ConfirmBookingHandler implements CallbackHandler {
                 .getString(chatId, "email")
                 .orElseThrow(() -> new DataNotFoundException("Email not found in session"));
 
-        BigDecimal totalCost = sessionService
-                .getBigDecimal(chatId, "totalCost")
-                .orElseThrow(() -> new DataNotFoundException("Total cost not found in session"));
-
         Booking booking = bookingService.createBooking(carId, callbackQuery.getFrom().getId(),
-                startDate, endDate, totalCost,
+                startDate, endDate, totalDays, totalCost,
                 phone, email);
 
         reminderService.createReminders(booking);

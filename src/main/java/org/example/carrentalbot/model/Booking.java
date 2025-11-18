@@ -39,6 +39,9 @@ public class Booking {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Column (name = "total_days", nullable = false)
+    private Integer totalDays;
+
     @Column(name = "total_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalCost;
 

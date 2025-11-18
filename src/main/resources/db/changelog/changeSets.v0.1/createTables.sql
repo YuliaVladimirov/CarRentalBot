@@ -51,6 +51,7 @@ CREATE TABLE bookings (
                           car_id  UUID NOT NULL,
                           start_date DATE NOT NULL,
                           end_date DATE NOT NULL,
+                          total_days INTEGER NOT NULL,
                           total_cost DECIMAL(10, 2) NOT NULL,
                           phone VARCHAR(20),
                           email VARCHAR(100),

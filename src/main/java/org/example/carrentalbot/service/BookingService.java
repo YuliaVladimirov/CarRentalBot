@@ -40,7 +40,7 @@ public class BookingService {
 
     @Transactional
     public Booking createBooking(UUID carId, Long telegramUserId,
-                                 LocalDate startDate, LocalDate endDate, BigDecimal totalCost,
+                                 LocalDate startDate, LocalDate endDate, Integer totalDays, BigDecimal totalCost,
                                  String phone, String email) {
 
         Customer customer = customerRepository.findByTelegramUserId(telegramUserId).orElseThrow(() -> new DataNotFoundException(String.format("User with id: %s, was not found.", telegramUserId)));
@@ -56,6 +56,7 @@ public class BookingService {
                 .car(car)
                 .startDate(startDate)
                 .endDate(endDate)
+                .totalDays(totalDays)
                 .totalCost(totalCost)
                 .phone(phone)
                 .email(email)
@@ -65,8 +66,8 @@ public class BookingService {
         return bookingRepository.saveAndFlush(booking);
     }
 
-    public long calculateTotalDays(LocalDate startDate, LocalDate endDate) {
-        return ChronoUnit.DAYS.between(startDate, endDate) + 1;
+    public Integer calculateTotalDays(LocalDate startDate, LocalDate endDate) {
+        return Math.toIntExact(ChronoUnit.DAYS.between(startDate, endDate) + 1);
     }
 
     public BigDecimal calculateTotalCost(BigDecimal dailyRate, long totalDays) {

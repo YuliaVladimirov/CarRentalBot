@@ -11,10 +11,8 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -63,6 +61,10 @@ public class SessionService {
             return value.toString();
         }
 
+        if (value instanceof Integer) {
+            return value.toString();
+        }
+
         if (value instanceof BigDecimal) {
             return ((BigDecimal) value).toPlainString();
         }
@@ -102,12 +104,25 @@ public class SessionService {
                 });
     }
 
+    public Optional<Integer> getInteger(Long chatId, String field) {
+        return getString(chatId, field)
+                .flatMap(val -> {
+                    try {
+                        return Optional.of(Integer.valueOf(val));
+                    } catch (NumberFormatException ex) {
+                        log.error("Invalid big decimal format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
+                        delete(chatId, field);
+                        return Optional.empty();
+                    }
+                });
+    }
+
     public Optional<BigDecimal> getBigDecimal(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
                     try {
                         return Optional.of(new BigDecimal(val));
-                    } catch (DateTimeParseException ex) {
+                    } catch (NumberFormatException ex) {
                         log.error("Invalid big decimal format in Redis for chatId {} field '{}': {}", chatId, field, val, ex);
                         delete(chatId, field);
                         return Optional.empty();
@@ -154,24 +169,11 @@ public class SessionService {
                 });
     }
 
-    public Map<String, Object> getAll(Long chatId) {
-        Map<Object, Object> entries = redisTemplate.opsForHash().entries(key(chatId));
-        return entries.entrySet().stream()
-                .collect(Collectors.toMap(
-                        e -> (String) e.getKey(),
-                        Map.Entry::getValue
-                ));
-    }
-
     private void delete(Long chatId, String field) {
         redisTemplate.opsForHash().delete(key(chatId), field);
     }
 
     public void deleteAll(Long chatId) {
         redisTemplate.delete(key(chatId));
-    }
-
-    public boolean exists(Long chatId) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key(chatId)));
     }
 }

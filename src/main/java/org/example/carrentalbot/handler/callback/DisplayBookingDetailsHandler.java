@@ -79,9 +79,10 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
         BigDecimal dailyRate = car.getDailyRate().setScale(0, RoundingMode.HALF_UP);
 
-        long totalDays = bookingService.calculateTotalDays(startDate, endDate);
-        BigDecimal totalCost = bookingService.calculateTotalCost(dailyRate, totalDays);
+        Integer totalDays = bookingService.calculateTotalDays(startDate, endDate);
+        sessionService.put(chatId, "totalDays", totalDays);
 
+        BigDecimal totalCost = bookingService.calculateTotalCost(dailyRate, totalDays);
         sessionService.put(chatId, "totalCost", totalCost);
 
         String text = String.format("""

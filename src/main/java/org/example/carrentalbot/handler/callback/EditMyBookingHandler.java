@@ -81,8 +81,9 @@ public class EditMyBookingHandler implements CallbackHandler {
         } else {
 
             text = """
-                ⚠️ <i>To change rental dates,</i>
-                <i>please create a new booking.</i>
+                ⚠️ <i>To change your rental dates,</i>
+                <i>please cancel your current booking</i>
+                <i> and create a new one.</i>
                 
                 Update your contact info,
                 then press <b>Continue</b> when done.

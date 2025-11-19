@@ -27,5 +27,5 @@ public class SendPhotoDto {
     private String parseMode;
 
     @JsonProperty("reply_markup")
-    private Object replyMarkup;
+    private InlineKeyboardMarkupDto replyMarkup;
 }

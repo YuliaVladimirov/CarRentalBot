@@ -67,6 +67,5 @@ public class HelpMenuHandler implements CallbackHandler {
                         .replyMarkup(replyMarkup)
                         .build()
         );
-
     }
 }

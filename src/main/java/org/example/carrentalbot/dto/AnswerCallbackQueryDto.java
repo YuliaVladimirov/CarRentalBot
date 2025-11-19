@@ -18,14 +18,14 @@ public class AnswerCallbackQueryDto {
     private String callbackQueryId;
 
     @JsonProperty("text")
-    private String text;          // optional
+    private String text;
 
     @JsonProperty("show_alert")
-    private Boolean showAlert;   // optional (if true, shows alert instead of toast)
+    private Boolean showAlert;
 
     @JsonProperty("url")
-    private String url;           // optional (open a URL)
+    private String url;
 
     @JsonProperty("cache_time")
-    private Integer cacheTime;   // optional
+    private Integer cacheTime;
 }

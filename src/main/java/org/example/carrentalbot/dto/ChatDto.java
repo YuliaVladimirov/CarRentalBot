@@ -16,5 +16,5 @@ public class ChatDto {
     private Long id;
 
     @JsonProperty("type")
-    private String type; // "private", "group", etc.
+    private String type;
 }

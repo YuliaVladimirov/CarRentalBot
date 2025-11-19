@@ -99,7 +99,7 @@ public class ConfirmBookingHandler implements CallbackHandler {
 
         String text = String.format("""
                 Your booking has been <b>successfully confirmed</b>.
-                Booking ID: <b>%s</b>
+                Booking Id: <b>%s</b>
                 
                 The full booking info
                 has been sent to your email address: <b>%s</b>

@@ -22,5 +22,5 @@ public class CallbackQueryDto {
     private MessageDto message;
 
     @JsonProperty("data")
-    private String data; // the callback data sent from the inline button
+    private String data;
 }

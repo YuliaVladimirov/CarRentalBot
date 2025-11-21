@@ -1,39 +1,31 @@
 package org.example.carrentalbot.handler.text;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
-import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidStateException;
 import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.session.SessionServiceImpl;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
+@RequiredArgsConstructor
 public class ConfirmPhoneHandler implements TextHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
     private static final Pattern PHONE_PATTERN =
             Pattern.compile("\\+?\\d[\\d\\s]{7,14}\\d");
 
-    private final SessionService sessionService;
+    private final SessionServiceImpl sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
-
-    public ConfirmPhoneHandler(SessionService sessionService,
-                               KeyboardFactory keyboardFactory,
-                               TelegramClient telegramClient) {
-        this.sessionService = sessionService;
-        this.keyboardFactory = keyboardFactory;
-        this.telegramClient = telegramClient;
-    }
 
     @Override
     public boolean canHandle(String text) {
@@ -46,9 +38,9 @@ public class ConfirmPhoneHandler implements TextHandler {
     }
 
     @Override
-    public void handle(Long chatId, MessageDto message) {
+    public void handle(Long chatId, String phone) {
 
-        String phone = extractPhoneFromMessageText(message.getText());
+//        String phone = extractPhoneFromMessageText(message.getText());
         sessionService.put(chatId, "phone", phone);
 
         String text = String.format("""
@@ -71,14 +63,14 @@ public class ConfirmPhoneHandler implements TextHandler {
                 .build());
     }
 
-    private String extractPhoneFromMessageText(String text) {
-
-        return Optional.ofNullable(text)
-                .map(String::trim)
-                .filter(t -> !t.isEmpty())
-                .filter(t -> PHONE_PATTERN.matcher(t).matches())
-                .orElse(null);
-    }
+//    private String extractPhoneFromMessageText(String text) {
+//
+//        return Optional.ofNullable(text)
+//                .map(String::trim)
+//                .filter(t -> !t.isEmpty())
+//                .filter(t -> PHONE_PATTERN.matcher(t).matches())
+//                .orElse(null);
+//    }
 
     private String getDataForKeyboard(Long chatId) {
         FlowContext flowContext = sessionService

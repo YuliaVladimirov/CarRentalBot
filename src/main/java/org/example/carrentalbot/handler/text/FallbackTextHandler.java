@@ -1,6 +1,6 @@
 package org.example.carrentalbot.handler.text;
 
-import org.example.carrentalbot.dto.MessageDto;
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.util.TelegramClient;
@@ -9,14 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
+@RequiredArgsConstructor
 public class FallbackTextHandler implements TextHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
     private final TelegramClient telegramClient;
-
-    public FallbackTextHandler(TelegramClient telegramClient) {
-        this.telegramClient = telegramClient;
-    }
 
     @Override
     public boolean canHandle(String text) {
@@ -29,7 +26,7 @@ public class FallbackTextHandler implements TextHandler {
     }
 
     @Override
-    public void handle(Long chatId, MessageDto message) {
+    public void handle(Long chatId, String t) {
 
         String text = """
                 ⚠️ Sorry, I did not understand that text.

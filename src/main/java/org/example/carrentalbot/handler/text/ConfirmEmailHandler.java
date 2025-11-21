@@ -1,7 +1,7 @@
 package org.example.carrentalbot.handler.text;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
-import org.example.carrentalbot.dto.MessageDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidStateException;
@@ -9,34 +9,25 @@ import org.example.carrentalbot.handler.callback.DisplayBookingDetailsHandler;
 import org.example.carrentalbot.handler.callback.EditBookingHandler;
 import org.example.carrentalbot.handler.callback.EditMyBookingHandler;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.session.SessionServiceImpl;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
+@RequiredArgsConstructor
 public class ConfirmEmailHandler implements TextHandler  {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
-    private final SessionService sessionService;
+    private final SessionServiceImpl sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
-
-    public ConfirmEmailHandler(SessionService sessionService,
-                               KeyboardFactory keyboardFactory,
-                               TelegramClient telegramClient) {
-        this.sessionService = sessionService;
-        this.keyboardFactory = keyboardFactory;
-        this.telegramClient = telegramClient;
-    }
-
 
     @Override
     public boolean canHandle(String text) {
@@ -49,9 +40,9 @@ public class ConfirmEmailHandler implements TextHandler  {
     }
 
     @Override
-    public void handle(Long chatId, MessageDto message) {
+    public void handle(Long chatId, String email) {
 
-        String email = extractEmailFromMessageText(message.getText());
+//        String email = extractEmailFromMessageText(message.getText());
         sessionService.put(chatId, "email", email);
 
         String text = String.format("""
@@ -74,13 +65,13 @@ public class ConfirmEmailHandler implements TextHandler  {
                 .build());
     }
 
-    private String extractEmailFromMessageText(String text) {
-        return Optional.ofNullable(text)
-                .map(String::trim)
-                .filter(t -> !t.isEmpty())
-                .filter(t -> EMAIL_PATTERN.matcher(t).matches())
-                .orElse(null);
-    }
+//    private String extractEmailFromMessageText(String text) {
+//        return Optional.ofNullable(text)
+//                .map(String::trim)
+//                .filter(t -> !t.isEmpty())
+//                .filter(t -> EMAIL_PATTERN.matcher(t).matches())
+//                .orElse(null);
+//    }
 
     private String getDataForKeyboard(Long chatId) {
         FlowContext flowContext = sessionService

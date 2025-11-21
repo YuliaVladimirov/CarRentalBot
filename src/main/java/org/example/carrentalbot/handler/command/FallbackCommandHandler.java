@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.command;
 
-import org.example.carrentalbot.dto.MessageDto;
+import lombok.RequiredArgsConstructor;
+import org.example.carrentalbot.dto.FromDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.util.TelegramClient;
@@ -9,15 +10,12 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
+@RequiredArgsConstructor
 public class FallbackCommandHandler implements CommandHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     private final TelegramClient telegramClient;
-
-    public FallbackCommandHandler(TelegramClient telegramClient) {
-        this.telegramClient = telegramClient;
-    }
 
     @Override
     public String getCommand() {
@@ -30,7 +28,7 @@ public class FallbackCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(Long chatId, MessageDto message) {
+    public void handle(Long chatId, FromDto from) {
 
         String text = """
                 ⚠️ Sorry, I did not understand that command.

@@ -2,7 +2,7 @@ package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.CallbackQueryDto;
-import org.example.carrentalbot.dto.CarProjectionDto;
+import org.example.carrentalbot.record.CarProjectionDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;

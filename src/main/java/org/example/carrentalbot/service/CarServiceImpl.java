@@ -1,7 +1,7 @@
 package org.example.carrentalbot.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.carrentalbot.dto.CarProjectionDto;
+import org.example.carrentalbot.record.CarProjectionDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;

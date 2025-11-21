@@ -1,6 +1,6 @@
 package org.example.carrentalbot.service;
 
-import org.example.carrentalbot.dto.CarProjectionDto;
+import org.example.carrentalbot.record.CarProjectionDto;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 

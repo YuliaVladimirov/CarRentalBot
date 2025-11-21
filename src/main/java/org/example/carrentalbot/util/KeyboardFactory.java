@@ -1,6 +1,6 @@
 package org.example.carrentalbot.util;
 
-import org.example.carrentalbot.dto.CarProjectionDto;
+import org.example.carrentalbot.record.CarProjectionDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
 import org.example.carrentalbot.handler.callback.*;

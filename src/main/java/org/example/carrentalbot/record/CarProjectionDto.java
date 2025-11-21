@@ -1,4 +1,4 @@
-package org.example.carrentalbot.dto;
+package org.example.carrentalbot.record;
 
 import org.example.carrentalbot.model.enums.CarCategory;
 

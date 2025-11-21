@@ -10,8 +10,8 @@ import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class TelegramExceptionHandler {
 
     private final TelegramClient telegramClient;
@@ -19,7 +19,7 @@ public class TelegramExceptionHandler {
 
     /**
      * Main entry point for all exceptions thrown during update processing.
-     * Called from TelegramService.handleUpdate()
+     * Called from GlobalHandlerImpl.handleUpdate()
      */
     public void handleException(Exception exception, UpdateDto update) {
 

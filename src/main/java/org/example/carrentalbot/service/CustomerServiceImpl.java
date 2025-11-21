@@ -1,11 +1,14 @@
 package org.example.carrentalbot.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.FromDto;
 import org.example.carrentalbot.model.Customer;
+import org.example.carrentalbot.record.CustomerRegistration;
 import org.example.carrentalbot.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
@@ -13,17 +16,28 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     @Override
-    public Customer registerIfNotExists(Long chatId, FromDto telegramUser) {
+    public CustomerRegistration registerIfNotExists(Long chatId, FromDto telegramUser) {
 
+        log.debug("Attempting to find customer");
         return customerRepository.findByTelegramUserId(telegramUser.getId())
-                .orElseGet(() -> customerRepository.saveAndFlush(
-                        Customer.builder()
-                                .telegramUserId(telegramUser.getId())
-                                .chatId(chatId)
-                                .userName(telegramUser.getUserName())
-                                .firstName(telegramUser.getFirstName())
-                                .lastName(telegramUser.getLastName())
-                                .build()
-                ));
+                .map(customer -> {
+                    log.debug("Found existing customer with id: {}", customer.getId());
+                    return new CustomerRegistration(customer, false);
+                })
+                .orElseGet(() -> {
+                    log.debug("Customer not found. Creating new customer");
+                    Customer newCustomer = Customer.builder()
+                            .telegramUserId(telegramUser.getId())
+                            .chatId(chatId)
+                            .userName(telegramUser.getUserName())
+                            .firstName(telegramUser.getFirstName())
+                            .lastName(telegramUser.getLastName())
+                            .build();
+
+                    Customer savedCustomer = customerRepository.saveAndFlush(newCustomer);
+                    log.debug("Successfully saved new customer with id: {}", savedCustomer.getId());
+                    return new CustomerRegistration(savedCustomer, true);
+
+                });
     }
 }

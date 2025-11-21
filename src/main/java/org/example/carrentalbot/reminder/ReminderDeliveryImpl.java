@@ -1,28 +1,25 @@
-package org.example.carrentalbot.handler;
+package org.example.carrentalbot.reminder;
 
 import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Reminder;
-import org.example.carrentalbot.service.EmailService;
+import org.example.carrentalbot.email.EmailServiceImpl;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 @Slf4j
-@Service
-public class ReminderDeliveryHandler {
+@Component
+@RequiredArgsConstructor
+public class ReminderDeliveryImpl implements ReminderDelivery {
 
-    private final EmailService emailService;
+    private final EmailServiceImpl emailService;
     private final TelegramClient telegramClient;
 
-    public ReminderDeliveryHandler(TelegramClient telegramClient,
-                                   EmailService emailService) {
-        this.telegramClient = telegramClient;
-        this.emailService = emailService;
-    }
-
+    @Override
     @Async
     public void send(Reminder reminder) {
         sendViaTelegram(reminder);

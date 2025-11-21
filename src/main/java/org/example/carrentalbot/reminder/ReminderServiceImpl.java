@@ -1,7 +1,7 @@
-package org.example.carrentalbot.service;
+package org.example.carrentalbot.reminder;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.carrentalbot.handler.ReminderDeliveryHandler;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.Reminder;
 import org.example.carrentalbot.model.enums.ReminderStatus;
@@ -19,21 +19,17 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ReminderService {
+@RequiredArgsConstructor
+public class ReminderServiceImpl implements ReminderService {
 
     private final ReminderRepository reminderRepository;
-    private final ReminderDeliveryHandler deliveryHandler;
+    private final ReminderDeliveryImpl reminderDelivery;
 
     private static final int RETENTION_DAYS = 90;
     private static final List<ReminderStatus> ELIGIBLE_FOR_SENT = List.of(
             ReminderStatus.PENDING, ReminderStatus.FAILED);
 
-    public ReminderService(ReminderRepository reminderRepository,
-                           ReminderDeliveryHandler deliveryHandler) {
-        this.reminderRepository = reminderRepository;
-        this.deliveryHandler = deliveryHandler;
-    }
-
+    @Override
     public void createReminders(Booking booking) {
 
         LocalDateTime now = LocalDateTime.now();
@@ -86,6 +82,7 @@ public class ReminderService {
         return dueAt.isAfter(now);
     }
 
+    @Override
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void processDueReminders() {
@@ -109,7 +106,7 @@ public class ReminderService {
                     int updated = reminderRepository.markAsSent(reminder.getId(), ELIGIBLE_FOR_SENT);
 
                     if (updated == 1) {
-                        deliveryHandler.send(reminder);
+                        reminderDelivery.send(reminder);
 
                         log.info("Reminder [{}] with id {} SENT for booking {}",
                                 reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId());
@@ -132,6 +129,7 @@ public class ReminderService {
         } while (dueReminders.size() == BATCH_SIZE);
     }
 
+    @Override
     @Transactional
     public void cancelReminders(Booking booking) {
 
@@ -143,6 +141,7 @@ public class ReminderService {
         }
     }
 
+    @Override
     @Scheduled(cron = "0 0 3 * * ?") // 3:00 AM daily
     @Transactional
     public void purgeOldReminders() {

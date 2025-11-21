@@ -1,11 +1,13 @@
-package org.example.carrentalbot.service;
+package org.example.carrentalbot.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.Reminder;
 import org.example.carrentalbot.model.enums.NotificationType;
+import org.example.carrentalbot.util.EmailTemplateBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,20 +20,16 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class EmailService {
+@RequiredArgsConstructor
+public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
-    private final EmailTemplateService emailTemplateService;
+    private final EmailTemplateBuilder emailTemplateBuilder;
 
     @Value("${spring.mail.username}")
     private String userName;
 
-    public EmailService(JavaMailSender mailSender,
-                        EmailTemplateService emailTemplateService) {
-        this.mailSender = mailSender;
-        this.emailTemplateService = emailTemplateService;
-    }
-
+    @Override
     @Async("emailExecutor")
     @Retryable(
             retryFor = {MailException.class},
@@ -39,7 +37,7 @@ public class EmailService {
             recover = "recoverFailedNotification")
     public void sendBookingNotification(Booking booking, NotificationType notificationType) throws MessagingException {
 
-            String htmlBody = emailTemplateService.buildNotificationHtmlBody(booking, notificationType.getTitle(), notificationType.getMessage());
+            String htmlBody = emailTemplateBuilder.buildNotificationHtmlBody(booking, notificationType.getTitle(), notificationType.getMessage());
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -53,6 +51,7 @@ public class EmailService {
             log.info("Booking notification email [{}] sent to user's email for booking {}", notificationType.name(), booking.getId());
     }
 
+    @Override
     @Recover
     public void recoverFailedNotification(MailException exception, Booking booking, NotificationType notificationType) {
         log.error("PERMANENTLY FAILED to send notification email [{}] to user's email for booking {}: {}",
@@ -61,6 +60,7 @@ public class EmailService {
                 exception.getMessage());
     }
 
+    @Override
     @Async("emailExecutor")
     @Retryable(
             retryFor = {MailException.class},
@@ -68,7 +68,7 @@ public class EmailService {
             recover = "recoverFailedReminder")
     public void sendBookingReminder(Reminder reminder) throws MessagingException {
 
-            String htmlBody = emailTemplateService.buildReminderHtmlBody(reminder.getBooking(), reminder.getReminderType().getTitle(), reminder.getReminderType().getMessage());
+            String htmlBody = emailTemplateBuilder.buildReminderHtmlBody(reminder.getBooking(), reminder.getReminderType().getTitle(), reminder.getReminderType().getMessage());
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -82,6 +82,7 @@ public class EmailService {
             log.info("Booking reminder email sent to user's email for booking {}", reminder.getBooking().getId());
     }
 
+    @Override
     @Recover
     public void recoverFailedReminder(MailException exception, Reminder reminder) {
         log.error("PERMANENTLY FAILED to send reminder email [{}] to user's email for booking {}: {}",

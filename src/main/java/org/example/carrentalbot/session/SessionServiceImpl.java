@@ -1,5 +1,6 @@
-package org.example.carrentalbot.service;
+package org.example.carrentalbot.session;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.CarCategory;
@@ -14,22 +15,21 @@ import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
 @Slf4j
-public class SessionService {
+@Service
+@RequiredArgsConstructor
+public class SessionServiceImpl implements SessionService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
     private static final String SESSION_PREFIX = "chat:";
     private static final Duration DEFAULT_TTL = Duration.ofHours(1);
 
-    public SessionService(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+    private final RedisTemplate<String, Object> redisTemplate;
 
     private String key(Long chatId) {
         return SESSION_PREFIX + chatId;
     }
 
+    @Override
     public void put(Long chatId, String field, Object value) {
         if (chatId == null) {
             throw new IllegalArgumentException("chatId cannot be null");
@@ -74,10 +74,12 @@ public class SessionService {
         );
     }
 
+    @Override
     public Optional<String> getString(Long chatId, String field) {
         return Optional.ofNullable((String) redisTemplate.opsForHash().get(key(chatId), field));
     }
 
+    @Override
     public Optional<UUID> getUUID(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
@@ -91,6 +93,7 @@ public class SessionService {
                 });
     }
 
+    @Override
     public Optional<LocalDate> getLocalDate(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
@@ -104,6 +107,7 @@ public class SessionService {
                 });
     }
 
+    @Override
     public Optional<Integer> getInteger(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
@@ -117,6 +121,7 @@ public class SessionService {
                 });
     }
 
+    @Override
     public Optional<BigDecimal> getBigDecimal(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
@@ -130,6 +135,7 @@ public class SessionService {
                 });
     }
 
+    @Override
     public Optional<CarCategory> getCarCategory(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
@@ -143,6 +149,7 @@ public class SessionService {
                 });
     }
 
+    @Override
     public Optional<FlowContext> getFlowContext(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
@@ -156,6 +163,7 @@ public class SessionService {
                 });
     }
 
+    @Override
     public Optional<CarBrowsingMode> getCarBrowsingMode(Long chatId, String field) {
         return getString(chatId, field)
                 .flatMap(val -> {
@@ -173,6 +181,7 @@ public class SessionService {
         redisTemplate.opsForHash().delete(key(chatId), field);
     }
 
+    @Override
     public void deleteAll(Long chatId) {
         redisTemplate.delete(key(chatId));
     }

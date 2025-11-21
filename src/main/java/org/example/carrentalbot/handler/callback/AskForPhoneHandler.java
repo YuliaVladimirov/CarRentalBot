@@ -1,5 +1,6 @@
 package org.example.carrentalbot.handler.callback;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
@@ -9,16 +10,13 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
+@RequiredArgsConstructor
 public class AskForPhoneHandler implements CallbackHandler {
 
     public static final String KEY = "ASK_FOR_PHONE";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     private final TelegramClient telegramClient;
-
-    public AskForPhoneHandler(TelegramClient telegramClient) {
-        this.telegramClient = telegramClient;
-    }
 
     @Override
     public String getKey() {

@@ -1,21 +1,19 @@
-package org.example.carrentalbot.service;
+package org.example.carrentalbot.util;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.model.Booking;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 
-@Service
-public class EmailTemplateService {
+@Component
+@RequiredArgsConstructor
+public class EmailTemplateBuilder {
 
     private final TemplateEngine templateEngine;
-
-    public EmailTemplateService(TemplateEngine templateEngine) {
-        this.templateEngine = templateEngine;
-    }
 
     public String buildNotificationHtmlBody(Booking booking, String title, String message) {
 

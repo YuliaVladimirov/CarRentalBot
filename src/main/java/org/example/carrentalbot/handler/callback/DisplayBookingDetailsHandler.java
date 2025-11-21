@@ -1,5 +1,6 @@
 package org.example.carrentalbot.handler.callback;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendPhotoDto;
@@ -7,6 +8,7 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.*;
+import org.example.carrentalbot.session.SessionServiceImpl;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -19,28 +21,17 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class DisplayBookingDetailsHandler implements CallbackHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
     public static final String KEY = "DISPLAY_BOOKING_DETAILS";
 
-    private final SessionService sessionService;
-    private final CarService carService;
-    private final BookingService bookingService;
+    private final SessionServiceImpl sessionService;
+    private final CarServiceImpl carService;
+    private final BookingServiceImpl bookingService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
-
-    public DisplayBookingDetailsHandler(SessionService sessionService,
-                                        CarService carService,
-                                        BookingService bookingService,
-                                        KeyboardFactory keyboardFactory,
-                                        TelegramClient telegramClient) {
-        this.sessionService = sessionService;
-        this.carService = carService;
-        this.bookingService = bookingService;
-        this.keyboardFactory = keyboardFactory;
-        this.telegramClient = telegramClient;
-    }
 
     @Override
     public String getKey() {

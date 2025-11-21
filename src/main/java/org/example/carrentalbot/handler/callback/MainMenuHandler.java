@@ -1,5 +1,6 @@
 package org.example.carrentalbot.handler.callback;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
+@RequiredArgsConstructor
 public class MainMenuHandler implements CallbackHandler {
 
     public static final String KEY = "GO_TO_MAIN_MENU";
@@ -18,12 +20,6 @@ public class MainMenuHandler implements CallbackHandler {
 
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
-
-    public MainMenuHandler(KeyboardFactory keyboardFactory,
-                           TelegramClient telegramClient) {
-        this.keyboardFactory = keyboardFactory;
-        this.telegramClient = telegramClient;
-    }
 
     @Override
     public String getKey() {

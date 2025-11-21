@@ -1,5 +1,6 @@
 package org.example.carrentalbot.handler.callback;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -7,8 +8,8 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.BookingServiceImpl;
+import org.example.carrentalbot.session.SessionServiceImpl;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -20,25 +21,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
     public static final String KEY = "MY_BOOKING_DETAILS";
 
-    private final BookingService bookingService;
-    private final SessionService sessionService;
+    private final BookingServiceImpl bookingService;
+    private final SessionServiceImpl sessionService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
-
-    public DisplayMyBookingDetailsHandler (BookingService bookingService,
-                                           SessionService sessionService,
-                                           TelegramClient telegramClient,
-                                           KeyboardFactory keyboardFactory) {
-        this.bookingService = bookingService;
-        this.sessionService = sessionService;
-        this.telegramClient = telegramClient;
-        this.keyboardFactory = keyboardFactory;
-    }
 
     @Override
     public String getKey() {

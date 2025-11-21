@@ -1,12 +1,13 @@
 package org.example.carrentalbot.handler.callback;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.*;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CalendarAction;
 import org.example.carrentalbot.model.enums.CarBrowsingMode;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.session.SessionServiceImpl;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -16,22 +17,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.EnumSet;
 
 @Component
+@RequiredArgsConstructor
 public class ConfirmDatesHandler implements CallbackHandler {
 
     public static final String KEY = "CONFIRM_DATES";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final KeyboardFactory keyboardFactory;
-    private final SessionService sessionService;
+    private final SessionServiceImpl sessionService;
     private final TelegramClient telegramClient;
-
-    public ConfirmDatesHandler(KeyboardFactory keyboardFactory,
-                               SessionService sessionService,
-                               TelegramClient telegramClient) {
-        this.keyboardFactory = keyboardFactory;
-        this.sessionService = sessionService;
-        this.telegramClient = telegramClient;
-    }
 
     @Override
     public String getKey() {

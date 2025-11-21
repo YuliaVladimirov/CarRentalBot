@@ -1,5 +1,6 @@
 package org.example.carrentalbot.handler.callback;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 @Component
+@RequiredArgsConstructor
 public class HelpMenuHandler implements CallbackHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
@@ -18,12 +20,6 @@ public class HelpMenuHandler implements CallbackHandler {
 
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
-
-    public HelpMenuHandler(TelegramClient telegramClient,
-                           KeyboardFactory keyboardFactory) {
-        this.telegramClient = telegramClient;
-        this.keyboardFactory = keyboardFactory;
-    }
 
     @Override
     public String getKey() {

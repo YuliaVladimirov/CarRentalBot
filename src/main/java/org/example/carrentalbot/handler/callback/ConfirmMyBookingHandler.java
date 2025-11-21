@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
@@ -10,9 +11,9 @@ import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.EmailService;
-import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.BookingServiceImpl;
+import org.example.carrentalbot.email.EmailServiceImpl;
+import org.example.carrentalbot.session.SessionServiceImpl;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -24,28 +25,17 @@ import java.util.UUID;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ConfirmMyBookingHandler implements CallbackHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
     public static final String KEY = "CONFIRM_MY_BOOKING";
 
-    private final BookingService bookingService;
-    private final SessionService sessionService;
-    private final EmailService emailService;
+    private final BookingServiceImpl bookingService;
+    private final SessionServiceImpl sessionService;
+    private final EmailServiceImpl emailService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
-
-    public ConfirmMyBookingHandler(BookingService bookingService,
-                                   SessionService sessionService,
-                                   EmailService emailService,
-                                   TelegramClient telegramClient,
-                                   KeyboardFactory keyboardFactory) {
-        this.bookingService = bookingService;
-        this.sessionService = sessionService;
-        this.emailService = emailService;
-        this.telegramClient = telegramClient;
-        this.keyboardFactory = keyboardFactory;
-    }
 
     @Override
     public String getKey() {

@@ -1,12 +1,13 @@
 package org.example.carrentalbot.handler.callback;
 
+import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.BookingService;
-import org.example.carrentalbot.service.SessionService;
+import org.example.carrentalbot.service.BookingServiceImpl;
+import org.example.carrentalbot.session.SessionServiceImpl;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -16,26 +17,16 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class CheckCarAvailabilityHandler implements CallbackHandler {
 
     public static final String KEY = "CHECK_AVAILABILITY";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
-    private final BookingService bookingService;
-    private final SessionService sessionService;
+    private final BookingServiceImpl bookingService;
+    private final SessionServiceImpl sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
-
-    public CheckCarAvailabilityHandler(BookingService bookingService,
-                                       SessionService sessionService,
-                                       KeyboardFactory keyboardFactory,
-                                       TelegramClient telegramClient) {
-        this.bookingService = bookingService;
-        this.sessionService = sessionService;
-        this.keyboardFactory = keyboardFactory;
-        this.telegramClient = telegramClient;
-    }
-
 
     @Override
     public String getKey() {

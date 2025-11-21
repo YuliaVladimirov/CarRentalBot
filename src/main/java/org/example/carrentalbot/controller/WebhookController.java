@@ -25,7 +25,7 @@ public class WebhookController {
 
         if (telegramBotProperties.secret() != null && !telegramBotProperties.secret().isBlank()) {
             if (!telegramBotProperties.secret().equals(secretHeader)) {
-                log.warn("Rejected update due to invalid secret header");
+                log.warn("updateId={} Rejected update due to invalid secret header", update.getUpdateId());
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid secret");
             }
         }

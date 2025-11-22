@@ -5,7 +5,7 @@ import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
     public static final String KEY = "CONFIRM_CANCEL_BOOKING";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.EDIT_BOOKING_FLOW);
 
-    private final SessionServiceImpl sessionService;
+    private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 

@@ -7,7 +7,7 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidStateException;
 import org.example.carrentalbot.handler.callback.*;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class ConfirmPhoneHandler implements TextHandler {
     private static final Pattern PHONE_PATTERN =
             Pattern.compile("\\+?\\d[\\d\\s]{7,14}\\d");
 
-    private final SessionServiceImpl sessionService;
+    private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 

@@ -6,15 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
+import org.example.carrentalbot.email.EmailService;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.BookingServiceImpl;
-import org.example.carrentalbot.email.EmailServiceImpl;
-import org.example.carrentalbot.reminder.ReminderServiceImpl;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.reminder.ReminderService;
+import org.example.carrentalbot.service.BookingService;
+import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -30,10 +30,10 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
     public static final String KEY = "CONFIRM_CANCEL_MY_BOOKING";
 
-    private final BookingServiceImpl bookingService;
-    private final SessionServiceImpl sessionService;
-    private final EmailServiceImpl emailService;
-    private final ReminderServiceImpl reminderService;
+    private final BookingService bookingService;
+    private final SessionService sessionService;
+    private final EmailService emailService;
+    private final ReminderService reminderService;
     private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
 

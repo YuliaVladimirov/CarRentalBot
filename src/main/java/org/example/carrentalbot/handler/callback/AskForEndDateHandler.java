@@ -8,7 +8,7 @@ import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.InvalidDataException;
 import org.example.carrentalbot.model.enums.CalendarAction;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class AskForEndDateHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     private final KeyboardFactory keyboardFactory;
-    private final SessionServiceImpl sessionService;
+    private final SessionService sessionService;
     private final TelegramClient telegramClient;
 
     @Override

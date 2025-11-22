@@ -8,7 +8,7 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.service.*;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -27,9 +27,9 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
     public static final String KEY = "DISPLAY_BOOKING_DETAILS";
 
-    private final SessionServiceImpl sessionService;
-    private final CarServiceImpl carService;
-    private final BookingServiceImpl bookingService;
+    private final SessionService sessionService;
+    private final CarService carService;
+    private final BookingService bookingService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 

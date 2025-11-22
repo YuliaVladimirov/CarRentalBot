@@ -8,8 +8,8 @@ import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.service.CarServiceImpl;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.service.CarService;
+import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -25,8 +25,8 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
     public static final String KEY = "BROWSE_CARS_FOR_DATES";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
-    private final CarServiceImpl carService;
-    private final SessionServiceImpl sessionService;
+    private final CarService carService;
+    private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 

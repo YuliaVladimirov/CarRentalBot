@@ -3,7 +3,7 @@ package org.example.carrentalbot.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.config.TelegramBotProperties;
-import org.example.carrentalbot.handler.GlobalHandlerImpl;
+import org.example.carrentalbot.handler.GlobalHandler;
 import org.example.carrentalbot.dto.UpdateDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class WebhookController {
 
-    private final GlobalHandlerImpl globalHandler;
+    private final GlobalHandler globalHandler;
     private final TelegramBotProperties telegramBotProperties;
 
     @PostMapping

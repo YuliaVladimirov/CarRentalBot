@@ -23,7 +23,7 @@ import java.util.List;
 public class ReminderServiceImpl implements ReminderService {
 
     private final ReminderRepository reminderRepository;
-    private final ReminderDeliveryImpl reminderDelivery;
+    private final ReminderDelivery reminderDelivery;
 
     private static final int RETENTION_DAYS = 90;
     private static final List<ReminderStatus> ELIGIBLE_FOR_SENT = List.of(

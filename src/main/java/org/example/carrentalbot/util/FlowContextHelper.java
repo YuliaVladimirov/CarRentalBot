@@ -3,7 +3,7 @@ package org.example.carrentalbot.util;
 import lombok.RequiredArgsConstructor;
 import org.example.carrentalbot.exception.InvalidFlowContextException;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.session.SessionService;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
@@ -12,7 +12,7 @@ import java.util.EnumSet;
 @RequiredArgsConstructor
 public class FlowContextHelper {
 
-    private final SessionServiceImpl sessionService;
+    private final SessionService sessionService;
 
     public void validateFlowContext(Long chatId, EnumSet<FlowContext> allowedContexts) {
         FlowContext current = sessionService

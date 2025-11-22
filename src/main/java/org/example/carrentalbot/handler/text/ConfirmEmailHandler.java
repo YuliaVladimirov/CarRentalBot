@@ -9,7 +9,7 @@ import org.example.carrentalbot.handler.callback.DisplayBookingDetailsHandler;
 import org.example.carrentalbot.handler.callback.EditBookingHandler;
 import org.example.carrentalbot.handler.callback.EditMyBookingHandler;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.session.SessionServiceImpl;
+import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class ConfirmEmailHandler implements TextHandler  {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
-    private final SessionServiceImpl sessionService;
+    private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 

@@ -1,14 +1,16 @@
 package org.example.carrentalbot.handler.command;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.FromDto;
 import org.example.carrentalbot.handler.callback.BrowseCategoriesHandler;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class BrowseCommandHandler implements CommandHandler {
 
@@ -28,6 +30,8 @@ public class BrowseCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Long chatId, FromDto from) {
+        log.info("Processing '/browse' flow");
+
         browseCategoriesHandler.handle(chatId, null);
     }
 }

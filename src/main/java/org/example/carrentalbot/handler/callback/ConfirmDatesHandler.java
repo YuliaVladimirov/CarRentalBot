@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.*;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.exception.InvalidDataException;
@@ -10,13 +11,16 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.EnumSet;
+import java.util.Optional;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class ConfirmDatesHandler implements CallbackHandler {
 
@@ -39,26 +43,27 @@ public class ConfirmDatesHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'confirm dates' flow");
 
         InlineKeyboardMarkupDto replyMarkup;
-
-        String data = callbackQuery.getData();
         Integer messageId = callbackQuery.getMessage().getMessageId();
 
-        String[] callbackParts = data.split(":");
-        CalendarAction action;
+        String data = callbackQuery.getData();
+        String[] callbackParts = parseCallback(data);
+        log.debug("Callback parsed: callback parts={}", (Object) callbackParts);
 
-        try {
-            action = CalendarAction.valueOf(callbackParts[1]);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidDataException("Invalid calendar action: " + callbackParts[1]);
-        }
+        CalendarAction action = extractCalendarAction(callbackParts);
+        log.debug("Extracted calendar action: action={}", action);
 
         switch (action) {
 
-            case IGNORE -> { return; }
+            case IGNORE ->
+                log.debug("Handling IGNORE action");
 
             case PREV, NEXT -> {
+                log.debug("Handling month change: action={}, yearPart={}, monthPart={}",
+                        action, callbackParts[2], callbackParts[3]);
+
                 replyMarkup = handleMonthChange(callbackParts);
 
                 telegramClient.sendEditMessageReplyMarkup(EditMessageReplyMarkupDto.builder()
@@ -69,17 +74,23 @@ public class ConfirmDatesHandler implements CallbackHandler {
             }
 
             case PICK -> {
-                LocalDate endDate = LocalDate.parse(callbackParts[2]);
+                log.debug("Handling end date: action={}", action);
+
+                LocalDate endDate = extractDate(callbackParts);
+                log.debug("Extracted from callback: endDate={}", endDate);
 
                 LocalDate startDate = sessionService
                         .getLocalDate(chatId, "startDate")
                         .orElseThrow(() -> new DataNotFoundException("Start date not found in session"));
+                log.debug("Loaded from session: startDate={}", startDate);
 
                 String text;
 
                 if (validateEndDate(startDate, endDate) && validateDuration(startDate, endDate)) {
+                    log.debug("End date and duration are valid: start date={} , end date={}", startDate, endDate);
 
                     sessionService.put(chatId, "endDate", endDate);
+                    log.debug("Session updated: 'endDate' set to {}", endDate);
 
                     String callbackKey = getDataForKeyboard(chatId);
 
@@ -92,18 +103,19 @@ public class ConfirmDatesHandler implements CallbackHandler {
 
                     replyMarkup = keyboardFactory.buildConfirmDatesKeyboard(callbackKey);
                 } else {
+                    log.debug("End date or duration is invalid: start date={} , end date={}", startDate, endDate);
 
                     text = """
-                    <b>Invalid end date or rental period:</b>
-                    
-                    ⚠️ <b>Make sure:</b>
-                    • You cannot book for past days
-                    • Start date must be before the end date.
-                    • Minimum rental period is 1 day.
-                    • Maximum rental period is 60 days.
-                    
-                    Please check your dates and re-enter:
-                    """;
+                            <b>Invalid end date or rental period:</b>
+                            
+                            ⚠️ <b>Make sure:</b>
+                            • You cannot book for past days
+                            • Start date must be before the end date.
+                            • Minimum rental period is 1 day.
+                            • Maximum rental period is 60 days.
+                            
+                            Please check your dates and re-enter:
+                            """;
 
                     replyMarkup = keyboardFactory.buildInvalidDatesKeyboard();
                 }
@@ -118,12 +130,34 @@ public class ConfirmDatesHandler implements CallbackHandler {
         }
     }
 
-    private InlineKeyboardMarkupDto handleMonthChange(String[] p) {
+    private String[] parseCallback(String data) {
+        return Optional.ofNullable(data)
+                .orElseThrow(() -> new InvalidDataException("Callback data is null"))
+                .trim()
+                .split(":");
+    }
 
-        int year = Integer.parseInt(p[2]);
-        int month = Integer.parseInt(p[3]);
+    private CalendarAction extractCalendarAction(String[] callbackParts) {
+        if (callbackParts.length < 2) {
+            throw new InvalidDataException("Missing calendar action in callback");
+        }
 
-        if (p[1].equals("PREV")) {
+        try {
+            return CalendarAction.valueOf(callbackParts[1].toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidDataException("Invalid calendar action: " + callbackParts[1]);
+        }
+    }
+
+    private InlineKeyboardMarkupDto handleMonthChange(String[] callbackParts) {
+        if (callbackParts.length < 4) {
+            throw new InvalidDataException("Missing year or month in callback");
+        }
+
+        int year = Integer.parseInt(callbackParts[2]);
+        int month = Integer.parseInt(callbackParts[3]);
+
+        if (callbackParts[1].equals("PREV")) {
             month--;
             if (month == 0) {
                 month = 12;
@@ -140,6 +174,18 @@ public class ConfirmDatesHandler implements CallbackHandler {
         return keyboardFactory.buildCalendar(year, month, ConfirmDatesHandler.KEY + ":");
     }
 
+    private LocalDate extractDate(String[] callbackParts) {
+        if (callbackParts.length < 3) {
+            throw new InvalidDataException("Missing date in callback");
+        }
+
+        try {
+            return LocalDate.parse(callbackParts[2]);
+        } catch (DateTimeParseException exception) {
+            throw new InvalidDataException("Invalid date format: " + callbackParts[2]);
+        }
+    }
+
     public boolean validateEndDate(LocalDate startDate, LocalDate endDate) {
         return !endDate.isBefore(LocalDate.now()) && !endDate.isBefore(startDate);
     }
@@ -154,6 +200,7 @@ public class ConfirmDatesHandler implements CallbackHandler {
         CarBrowsingMode carBrowsingMode = sessionService
                 .getCarBrowsingMode(chatId, "carBrowsingMode")
                 .orElseThrow(() -> new DataNotFoundException("Car browsing mode not found in session"));
+        log.debug("Loaded from session: carBrowsingMode={}", carBrowsingMode);
 
         return switch (carBrowsingMode) {
             case ALL_CARS -> CheckCarAvailabilityHandler.KEY;

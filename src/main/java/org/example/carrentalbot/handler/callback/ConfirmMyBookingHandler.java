@@ -8,7 +8,6 @@ import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.email.EmailService;
 import org.example.carrentalbot.exception.DataNotFoundException;
-import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
@@ -16,7 +15,7 @@ import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +23,7 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class ConfirmMyBookingHandler implements CallbackHandler {
 
@@ -49,20 +48,25 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'confirm my booking' flow");
 
         UUID bookingId = sessionService
                 .getUUID(chatId, "bookingId")
                 .orElseThrow(() -> new DataNotFoundException("Booking id not found in message or session"));
+        log.debug("Loaded from session: bookingId={}", bookingId);
 
         String phone = sessionService
                 .getString(chatId, "phone")
                 .orElse(null);
+        log.debug("Loaded from session: phone={}", phone);
 
         String email = sessionService
                 .getString(chatId, "email")
                 .orElse(null);
+        log.debug("Loaded from session: email={}", email);
 
         Booking booking = bookingService.updateBooking(bookingId, phone, email);
+        log.info("Booking updated: bookingId={}", booking.getId());
 
         String text = String.format("""
                         Your booking has been <b>successfully updated</b>.
@@ -98,6 +102,7 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
                 booking.getStatus());
 
         sessionService.deleteAll(chatId);
+        log.debug("Session cleared: chat id={}", chatId);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 
@@ -112,7 +117,6 @@ public class ConfirmMyBookingHandler implements CallbackHandler {
             emailService.sendBookingNotification(booking, NotificationType.UPDATE);
         } catch (MessagingException exception) {
             log.error("CRITICAL: Failed to initiate email send for booking {}.", booking.getId(), exception);
-            throw new EmailException("Failed to initiate email send.", exception);
         }
     }
 }

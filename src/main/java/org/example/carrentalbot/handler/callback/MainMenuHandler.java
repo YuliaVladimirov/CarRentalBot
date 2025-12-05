@@ -8,12 +8,12 @@ import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class MainMenuHandler implements CallbackHandler {
 
@@ -35,10 +35,7 @@ public class MainMenuHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
-
-        if (callbackQuery != null) {
-            log.debug("Called from another handler (no callback provided).");
-        }
+        log.info("Processing 'main menu'");
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildMainMenuKeyboard();
 

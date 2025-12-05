@@ -4,7 +4,6 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.SendMessageDto;
-import org.example.carrentalbot.exception.EmailException;
 import org.example.carrentalbot.model.Reminder;
 import org.example.carrentalbot.email.EmailServiceImpl;
 import org.example.carrentalbot.util.TelegramClient;
@@ -29,14 +28,13 @@ public class ReminderDeliveryImpl implements ReminderDelivery {
     private void sendViaTelegram(Reminder reminder) {
 
         String text = String.format("""
-                Hi %s, %s
+                %s
 
                 🆔  Booking id:  %s
                 📅  Rental period:  %s - %s
                 📆  Total Days: %d
                 🚗  Car:  %s (%s)
                 """,
-                reminder.getBooking().getCustomer().getFirstName(),
                 reminder.getReminderType().getMessage(),
                 reminder.getBooking().getId(),
                 reminder.getBooking().getStartDate(),
@@ -58,7 +56,6 @@ public class ReminderDeliveryImpl implements ReminderDelivery {
             emailService.sendBookingReminder(reminder);
         } catch (MessagingException exception) {
             log.error("CRITICAL: Failed to initiate email send for booking {}.", reminder.getBooking().getId(), exception);
-            throw new EmailException("Failed to initiate email send.", exception);
         }
     }
 }

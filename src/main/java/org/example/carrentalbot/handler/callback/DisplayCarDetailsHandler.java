@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendPhotoDto;
@@ -13,7 +14,7 @@ import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
 import java.util.EnumSet;
@@ -21,7 +22,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class DisplayCarDetailsHandler implements CallbackHandler {
 
@@ -45,9 +47,12 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'display car details' flow");
 
         UUID carId = updateCarIdInSession(chatId, callbackQuery.getData());
+
         Car car = carService.getCar(carId);
+        log.info("Retrieved car: id={}", car.getId());
 
         Map.Entry<String, String> data = getDataForKeyboard(chatId);
 
@@ -72,27 +77,31 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     private UUID updateCarIdInSession(Long chatId, String callbackData) {
-
         UUID fromCallback = extractCarIdFromCallback(callbackData);
+        log.debug("Extracted from callback: car id={}", fromCallback);
 
         UUID fromSession = sessionService
                 .getUUID(chatId, "carId")
                 .orElse(null);
+        log.debug("Loaded from session: carId={}", fromSession);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException("Car id not found in callback or session");
+            throw new DataNotFoundException("Missing car id in callback or session");
         }
 
         UUID result = (fromCallback != null) ? fromCallback : fromSession;
 
         if (!result.equals(fromSession)) {
             sessionService.put(chatId, "carId", result);
+            log.debug("Session updated: 'carId' set to {}", result);
+        } else {
+            log.debug("Session unchanged: 'carId' remains {}", result);
         }
 
         return result;
     }
 
-    private UUID extractCarIdFromCallback (String callbackData) {
+    private UUID extractCarIdFromCallback(String callbackData) {
 
         return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
@@ -111,6 +120,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
         CarBrowsingMode carBrowsingMode = sessionService
                 .getCarBrowsingMode(chatId, "carBrowsingMode")
                 .orElseThrow(() -> new DataNotFoundException("Car browsing mode not found in session"));
+        log.debug("Loaded from session: carBrowsingMode={}", carBrowsingMode);
 
         return switch (carBrowsingMode) {
             case ALL_CARS -> Map.entry(AskForStartDateHandler.KEY, "🕒 Check Availability");

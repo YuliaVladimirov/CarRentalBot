@@ -1,15 +1,17 @@
 package org.example.carrentalbot.handler.command;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.FromDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class FallbackCommandHandler implements CommandHandler {
 
@@ -29,6 +31,7 @@ public class FallbackCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Long chatId, FromDto from) {
+        log.info("Processing 'command fallback'");
 
         String text = """
                 ⚠️ Sorry, I did not understand that command.

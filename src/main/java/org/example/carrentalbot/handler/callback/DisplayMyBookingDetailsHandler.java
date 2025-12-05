@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -12,7 +13,7 @@ import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
@@ -20,7 +21,8 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
@@ -44,9 +46,12 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'display my booking details' flow");
 
         UUID bookingId = updateBookingIdInSession(chatId, callbackQuery.getData());
+
         Booking booking = bookingService.getBookingById(bookingId);
+        log.info("Retrieved booking: id={}", booking.getId());
 
         String text = String.format("""
                         <b>Booking details:</b>
@@ -90,19 +95,24 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
     private UUID updateBookingIdInSession(Long chatId, String callbackData) {
         UUID fromCallback = extractBookingIdFromCallback(callbackData);
+        log.debug("Extracted from callback: booking id={}", fromCallback);
 
         UUID fromSession = sessionService
                 .getUUID(chatId, "bookingId")
                 .orElse(null);
+        log.debug("Loaded from session: bookingId={}", fromSession);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException("Booking id not found in callback or session");
+            throw new DataNotFoundException("Missing booking id in callback or session");
         }
 
         UUID result = (fromCallback != null) ? fromCallback : fromSession;
 
         if (!result.equals(fromSession)) {
             sessionService.put(chatId, "bookingId", result);
+            log.debug("Session updated: 'bookingId' set to {}", result);
+        } else {
+            log.debug("Session unchanged: 'bookingId' remains {}", result);
         }
 
         return result;

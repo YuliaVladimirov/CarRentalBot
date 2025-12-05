@@ -3,13 +3,12 @@ package org.example.carrentalbot.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.*;
-import org.example.carrentalbot.exception.TelegramExceptionHandler;
 import org.example.carrentalbot.handler.callback.CallbackHandler;
 import org.example.carrentalbot.handler.command.CommandHandler;
+import org.example.carrentalbot.handler.text.FallbackTextHandler;
 import org.example.carrentalbot.util.FlowContextHelper;
 import org.example.carrentalbot.util.HandlerRegistry;
 import org.example.carrentalbot.util.TelegramClient;
-import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,18 @@ public class GlobalHandlerImpl implements GlobalHandler {
     private final TelegramClient telegramClient;
     private final FlowContextHelper flowContextHelper;
     private final HandlerRegistry handlerRegistry;
-    private final TelegramExceptionHandler telegramExceptionHandler;
+
+    private Long extractChatId(UpdateDto update) {
+        if (update.getMessage() != null) {
+            return update.getMessage().getChat() != null && update.getMessage().getChat().getId() != null
+                    ? update.getMessage().getChat().getId() : null;
+        }
+        if (update.getCallbackQuery() != null && update.getCallbackQuery().getMessage() != null) {
+            return update.getCallbackQuery().getMessage().getChat() != null && update.getCallbackQuery().getMessage().getChat().getId() != null
+                    ? update.getCallbackQuery().getMessage().getChat().getId() : null;
+        }
+        return null;
+    }
 
     @Override
     @Async("telegramExecutor")
@@ -34,47 +44,36 @@ public class GlobalHandlerImpl implements GlobalHandler {
             return;
         }
 
-        try (MDC.MDCCloseable ignoredUpdateId = MDC.putCloseable("updateId", update.getUpdateId().toString())) {
+        Long chatId = extractChatId(update);
 
-            if (update.getMessage() != null) {
-                handleMessage(update.getMessage());
-            } else if (update.getCallbackQuery() != null) {
-                handleCallbackQuery(update.getCallbackQuery());
-            } else {
-                log.warn("Unhandled update: {}", update);
-            }
-        } catch (Exception exception) {
-            telegramExceptionHandler.handleException(exception, update);
+        if (update.getMessage() != null) {
+            handleMessage(chatId, update.getMessage());
+        } else if (update.getCallbackQuery() != null) {
+            handleCallbackQuery(chatId, update.getCallbackQuery());
+        } else {
+            log.warn("Unhandled update: {}", update);
         }
     }
 
     @Override
-    public void handleMessage(MessageDto message) {
-        if (message.getChat().getId() == null) {
-            log.warn("Missing chatId in message: {}", message);
-            return;
-        }
-        Long chatId = message.getChat().getId();
+    public void handleMessage(Long chatId, MessageDto message) {
 
-        if (message.getFrom() == null) {
-            log.warn("Missing telegram user in message: {}", message);
-            return;
-        }
         FromDto from = message.getFrom();
+        if (message.getFrom() == null) {
+            log.warn("Missing telegram user in message");
+            return;
+        }
 
-        try (MDC.MDCCloseable ignoredChatId = MDC.putCloseable("chatId", chatId.toString());
-             MDC.MDCCloseable ignoredUserId = MDC.putCloseable("userId", from.getId().toString())) {
+        String text = Optional.ofNullable(message.getText()).map(String::trim).orElse("");
+        if (text.isBlank()) {
+            log.debug("Ignoring message with empty text");
+            return;
+        }
 
-            String text = Optional.ofNullable(message.getText()).orElse("").trim();
-            if (text.isEmpty()) {
-                log.debug("Ignoring empty text in message");
-                return;
-            }
-            if (text.startsWith("/")) {
-                handleCommand(chatId, from, text);
-            } else {
-                handleText(chatId, text);
-            }
+        if (text.startsWith("/")) {
+            handleCommand(chatId, from, text);
+        } else {
+            handleText(chatId, text);
         }
     }
 
@@ -82,13 +81,10 @@ public class GlobalHandlerImpl implements GlobalHandler {
         CommandHandler handler = handlerRegistry.getCommandHandlers()
                 .getOrDefault(text.toLowerCase(), handlerRegistry.getFallbackCommandHandler());
 
-        try (MDC.MDCCloseable ignoredHandler = MDC.putCloseable("handler", handler.getClass().getSimpleName())) {
+        log.info("Executing command '{}'", text.toLowerCase());
 
-            log.debug("Executing command '{}'", text.toLowerCase());
-
-            flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
-            handler.handle(chatId, from);
-        }
+        flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
+        handler.handle(chatId, from);
     }
 
     private void handleText(Long chatId, String text) {
@@ -97,70 +93,45 @@ public class GlobalHandlerImpl implements GlobalHandler {
                 .findFirst()
                 .ifPresentOrElse(
                         handler -> {
-                            try (MDC.MDCCloseable ignoredHandler = MDC.putCloseable("handler", handler.getClass().getSimpleName())) {
+                            log.info("Executing text '{}'", text);
 
-                                log.info("Executing text '{}'", text);
-
-                                flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
-                                handler.handle(chatId, text);
-                            }
+                            flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
+                            handler.handle(chatId, text);
                         },
                         () -> {
-                            try (MDC.MDCCloseable ignoredHandler = MDC.putCloseable("handler", "FallbackTextHandler")) {
-                                log.info("Executing text '{}'", text);
-                                handlerRegistry.getFallbackTextHandler().handle(chatId, text);
-                            }
+                            FallbackTextHandler fallbackHandler = handlerRegistry.getFallbackTextHandler();
+
+                            log.info("Executing text '{}'", text);
+                            fallbackHandler.handle(chatId, text);
                         }
                 );
     }
 
     @Override
-    public void handleCallbackQuery(CallbackQueryDto callbackQuery) {
-        if (callbackQuery.getMessage() == null) {
-            log.warn("Missing message in callback query: {}", callbackQuery);
+    public void handleCallbackQuery(Long chatId, CallbackQueryDto callbackQuery) {
+
+        String callbackData = Optional.ofNullable(callbackQuery.getData()).map(String::trim).orElse("");
+        if (callbackData.isBlank()) {
+            log.warn("Empty callback data: {}", callbackQuery);
             return;
         }
 
-        if (callbackQuery.getMessage().getChat() == null || callbackQuery.getMessage().getChat().getId() == null) {
-            log.warn("Missing chat or chatId in callback query: {}", callbackQuery);
-            return;
-        }
-        Long chatId = callbackQuery.getMessage().getChat().getId();
+        telegramClient.answerCallbackQuery(
+                AnswerCallbackQueryDto.builder()
+                        .callbackQueryId(callbackQuery.getId())
+                        .text("Ok")
+                        .showAlert(false)
+                        .build());
 
-        if (callbackQuery.getMessage().getFrom() == null) {
-            log.warn("Missing telegram user in callback query: {}", callbackQuery);
-            return;
-        }
-        FromDto from = callbackQuery.getMessage().getFrom();
+        CallbackHandler handler = handlerRegistry.getCallbackHandlers().entrySet().stream()
+                .filter(entry -> callbackData.startsWith(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(handlerRegistry.getFallbackCallbackHandler());
 
-        try (MDC.MDCCloseable ignoredChatId = MDC.putCloseable("chatId", chatId.toString());
-             MDC.MDCCloseable ignoredUserId = MDC.putCloseable("userId", from.getId().toString())) {
+        log.info("Executing callback '{}' ", callbackData);
 
-            String callbackData = Optional.ofNullable(callbackQuery.getData()).orElse("").trim();
-            if (callbackData.isEmpty()) {
-                log.warn("Empty callback data: {}", callbackQuery);
-                return;
-            }
-
-            telegramClient.answerCallbackQuery(
-                    AnswerCallbackQueryDto.builder()
-                            .callbackQueryId(callbackQuery.getId())
-                            .text("Ok")
-                            .showAlert(false)
-                            .build());
-
-            CallbackHandler handler = handlerRegistry.getCallbackHandlers().entrySet().stream()
-                    .filter(entry -> callbackData.startsWith(entry.getKey()))
-                    .map(Map.Entry::getValue)
-                    .findFirst()
-                    .orElse(handlerRegistry.getFallbackCallbackHandler());
-
-            try (MDC.MDCCloseable ignoredHandler = MDC.putCloseable("handler", handler.getClass().getSimpleName())) {
-                log.debug("Executing callback '{}' ", callbackData);
-
-                flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
-                handler.handle(chatId, callbackQuery);
-            }
-        }
+        flowContextHelper.validateFlowContext(chatId, handler.getAllowedContexts());
+        handler.handle(chatId, callbackQuery);
     }
 }

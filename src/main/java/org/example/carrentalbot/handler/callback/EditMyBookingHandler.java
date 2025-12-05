@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -12,13 +13,14 @@ import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.UUID;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class EditMyBookingHandler implements CallbackHandler {
 
@@ -42,11 +44,15 @@ public class EditMyBookingHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'edit my booking' flow");
+
         UUID bookingId = sessionService
                 .getUUID(chatId, "bookingId")
                 .orElseThrow(() -> new DataNotFoundException("Booking id not found in session"));
+        log.debug("Loaded from session: bookingId={}", bookingId);
 
         Booking booking = bookingService.getBookingById(bookingId);
+        log.info("Retrieved booking: id={}", booking.getId());
 
         LocalDate today = LocalDate.now();
 
@@ -73,13 +79,13 @@ public class EditMyBookingHandler implements CallbackHandler {
         } else {
 
             text = """
-                ⚠️ <i>To change your rental dates,</i>
-                <i>please cancel your current booking</i>
-                <i> and create a new one.</i>
-                
-                Update your contact info,
-                then press <b>Continue</b> when done.
-                """;
+                    ⚠️ <i>To change your rental dates,</i>
+                    <i>please cancel your current booking</i>
+                    <i> and create a new one.</i>
+                    
+                    Update your contact info,
+                    then press <b>Continue</b> when done.
+                    """;
 
             replyMarkup = keyboardFactory.buildEditBookingKeyboard(ConfirmMyBookingHandler.KEY);
         }

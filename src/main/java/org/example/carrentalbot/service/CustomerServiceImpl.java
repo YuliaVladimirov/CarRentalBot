@@ -33,9 +33,8 @@ public class CustomerServiceImpl implements CustomerService {
                             .firstName(telegramUser.getFirstName())
                             .lastName(telegramUser.getLastName())
                             .build();
-
+                    log.debug("Saving new customer");
                     Customer savedCustomer = customerRepository.saveAndFlush(newCustomer);
-                    log.debug("Successfully saved new customer with id: {}", savedCustomer.getId());
                     return new CustomerRegistration(savedCustomer, true);
 
                 });

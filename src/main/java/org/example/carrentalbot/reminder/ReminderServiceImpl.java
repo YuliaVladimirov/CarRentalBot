@@ -30,13 +30,13 @@ public class ReminderServiceImpl implements ReminderService {
             ReminderStatus.PENDING, ReminderStatus.FAILED);
 
     @Override
-    public void createReminders(Booking booking) {
+    public List<Reminder> createReminders(Booking booking) {
 
         LocalDateTime now = LocalDateTime.now();
         List<Reminder> reminders = new ArrayList<>();
 
+        log.debug("Creating new reminder: reminder type={}", ReminderType.START_DAY_BEFORE);
         LocalDateTime dueAt1 = booking.getStartDate().minusDays(1).atTime(10, 0);
-
         if (isReminderEligible(dueAt1, now)) {
             reminders.add(Reminder.builder()
                     .booking(booking)
@@ -45,8 +45,8 @@ public class ReminderServiceImpl implements ReminderService {
                     .build());
         }
 
+        log.debug("Creating new reminder: reminder type={}", ReminderType.START_DAY_OF);
         LocalDateTime dueAt2 = booking.getStartDate().atTime(10, 0);
-
         if (isReminderEligible(dueAt2, now)) {
             reminders.add(Reminder.builder()
                     .booking(booking)
@@ -55,8 +55,8 @@ public class ReminderServiceImpl implements ReminderService {
                     .build());
         }
 
+        log.debug("Creating new reminder: reminder type={}", ReminderType.END_DAY_BEFORE);
         LocalDateTime dueAt3 = booking.getEndDate().minusDays(1).atTime(10, 0);
-
         if (isReminderEligible(dueAt3, now)) {
             reminders.add(Reminder.builder()
                     .booking(booking)
@@ -65,8 +65,8 @@ public class ReminderServiceImpl implements ReminderService {
                     .build());
         }
 
+        log.debug("Creating new reminder: reminder type={}", ReminderType.END_DAY_OF);
         LocalDateTime dueAt4 = booking.getEndDate().atTime(10, 0);
-
         if (isReminderEligible(dueAt4, now)) {
             reminders.add(Reminder.builder()
                     .booking(booking)
@@ -75,7 +75,8 @@ public class ReminderServiceImpl implements ReminderService {
                     .build());
         }
 
-        reminderRepository.saveAll(reminders);
+        log.debug("Saving new reminders");
+        return reminderRepository.saveAll(reminders);
     }
 
     private boolean isReminderEligible(LocalDateTime dueAt, LocalDateTime now) {
@@ -83,9 +84,10 @@ public class ReminderServiceImpl implements ReminderService {
     }
 
     @Override
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 3600000)
     @Transactional
     public void processDueReminders() {
+
         log.info("Starting scheduled job: processDueReminders.");
 
         final int BATCH_SIZE = 1000;
@@ -118,11 +120,11 @@ public class ReminderServiceImpl implements ReminderService {
                         int updated = reminderRepository.markAsFailed(reminder.getId());
                         if (updated == 1) {
                             log.warn("Marked reminder [{}] with id {} for booking {} as FAILED.",
-                                    reminder.getReminderType(),reminder.getId(), reminder.getBooking().getId());
+                                    reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId());
                         }
                     } catch (Exception dbException) {
                         log.error("FATAL: Could not mark reminder [{}] with id {} for booking {} as FAILED.",
-                                reminder.getReminderType(),reminder.getId(), reminder.getBooking().getId(), dbException);
+                                reminder.getReminderType(), reminder.getId(), reminder.getBooking().getId(), dbException);
                     }
                 }
             }
@@ -132,7 +134,6 @@ public class ReminderServiceImpl implements ReminderService {
     @Override
     @Transactional
     public void cancelReminders(Booking booking) {
-
         int cancelledCount = reminderRepository.markAsCancelled(booking.getId());
 
         if (cancelledCount > 0) {
@@ -153,7 +154,7 @@ public class ReminderServiceImpl implements ReminderService {
         if (deletedCount > 0) {
             log.info("Successfully purged {} old reminders.", deletedCount);
         } else {
-            log.debug("Reminder cleanup complete. No old reminders to purge.");
+            log.info("Reminder cleanup complete. No old reminders to purge.");
         }
     }
 }

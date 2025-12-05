@@ -1,14 +1,16 @@
 package org.example.carrentalbot.handler.text;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class FallbackTextHandler implements TextHandler {
 
@@ -27,6 +29,7 @@ public class FallbackTextHandler implements TextHandler {
 
     @Override
     public void handle(Long chatId, String t) {
+        log.info("Processing 'text fallback'");
 
         String text = """
                 ⚠️ Sorry, I did not understand that text.

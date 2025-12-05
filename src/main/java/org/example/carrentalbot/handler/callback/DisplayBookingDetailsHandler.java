@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendPhotoDto;
@@ -11,7 +12,7 @@ import org.example.carrentalbot.service.*;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -20,7 +21,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
 import java.util.UUID;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class DisplayBookingDetailsHandler implements CallbackHandler {
 
@@ -45,26 +47,32 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'display booking details' flow");
 
         UUID carId = sessionService
                 .getUUID(chatId, "carId")
                 .orElseThrow(() -> new DataNotFoundException("Car id not found in session"));
+        log.debug("Loaded from session: carId={}", carId);
 
         LocalDate startDate = sessionService
                 .getLocalDate(chatId, "startDate")
                 .orElseThrow(() -> new DataNotFoundException("Start date not found in session"));
+        log.debug("Loaded from session: startDate={}", startDate);
 
         LocalDate endDate = sessionService
                 .getLocalDate(chatId, "endDate")
                 .orElseThrow(() -> new DataNotFoundException("End date not found in session"));
+        log.debug("Loaded from session: endDate={}", endDate);
 
         String phone = sessionService
                 .getString(chatId, "phone")
                 .orElseThrow(() -> new DataNotFoundException("Phone not found in session"));
+        log.debug("Loaded from session: phone={}", phone);
 
         String email = sessionService
                 .getString(chatId, "email")
                 .orElseThrow(() -> new DataNotFoundException("Email not found in session"));
+        log.debug("Loaded from session: email={}", email);
 
         Car car = carService.getCar(carId);
 
@@ -72,24 +80,26 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
         Integer totalDays = bookingService.calculateTotalDays(startDate, endDate);
         sessionService.put(chatId, "totalDays", totalDays);
+        log.debug("Session updated: 'totalDays' set to {}", totalDays);
 
         BigDecimal totalCost = bookingService.calculateTotalCost(dailyRate, totalDays);
         sessionService.put(chatId, "totalCost", totalCost);
+        log.debug("Session updated: 'totalCost' set to {}", totalCost);
 
         String text = String.format("""
-                        <b>Your booking details:</b>
-                       
-                       🚗  Car:  %s (%s)
-                       🏷️  Category:  %s
-                       
-                       📅  Rental period:  %s - %s
-                       📆  Total Days: %d
-                       💰  Daily Rate:  €%s/day
-                       💳  Total Cost:  €%s
-                       
-                       📞  Phone number:  %s
-                       📧  Email:  %s
-                       """,
+                         <b>Your booking details:</b>
+                        
+                        🚗  Car:  %s (%s)
+                        🏷️  Category:  %s
+                        
+                        📅  Rental period:  %s - %s
+                        📆  Total Days: %d
+                        💰  Daily Rate:  €%s/day
+                        💳  Total Cost:  €%s
+                        
+                        📞  Phone number:  %s
+                        📧  Email:  %s
+                        """,
                 car.getBrand(), car.getModel(), car.getCategory().getValue(),
                 startDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), endDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                 totalDays,

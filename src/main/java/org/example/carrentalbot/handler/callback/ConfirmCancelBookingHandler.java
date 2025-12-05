@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -8,11 +9,12 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class ConfirmCancelBookingHandler implements CallbackHandler {
 
@@ -35,6 +37,7 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'confirm cancel booking' flow");
 
         String text = """
                 <b>Your booking has been cancelled.</b>
@@ -44,6 +47,7 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
                 """;
 
         sessionService.deleteAll(chatId);
+        log.debug("Session cleared: chat id={}", chatId);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
 

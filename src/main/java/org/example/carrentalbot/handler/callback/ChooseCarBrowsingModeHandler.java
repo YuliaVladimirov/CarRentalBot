@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -11,12 +12,13 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.Optional;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class ChooseCarBrowsingModeHandler implements CallbackHandler {
 
@@ -39,42 +41,47 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'choose browsing mode' flow");
+
         updateCategoryInSession(chatId, callbackQuery.getData());
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarBrowsingModeKeyboard();
 
-        SendMessageDto message = SendMessageDto.builder()
+        telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text("<b>Choose browsing mode:</b>")
                 .parseMode("HTML")
                 .replyMarkup(replyMarkup)
-                .build();
-
-        telegramClient.sendMessage(message);
+                .build());
     }
 
     private void updateCategoryInSession(Long chatId, String callbackData) {
         CarCategory fromCallback = extractCategoryFromCallback(callbackData);
+        log.debug("Extracted from callback: car category={}", fromCallback);
 
         CarCategory fromSession = sessionService
                 .getCarCategory(chatId, "carCategory")
                 .orElse(null);
+        log.debug("Loaded from session: carCategory={}", fromSession);
 
         if (fromCallback == null && fromSession == null) {
-            throw new DataNotFoundException("Car category not found in callback or session");
+            throw new DataNotFoundException("Missing car category in callback or session");
         }
 
         CarCategory result = fromCallback != null ? fromCallback : fromSession;
 
         if (!result.equals(fromSession)) {
             sessionService.put(chatId, "carCategory", result);
+            log.debug("Session updated: 'carCategory' set to {}", result);
+        } else {
+            log.debug("Session unchanged: 'carCategory' remains {}", result);
         }
     }
 
     private CarCategory extractCategoryFromCallback(String callbackData) {
         return Optional.ofNullable(callbackData)
                 .filter(data -> data.contains(":"))
-                .map(data -> data.split(":", 2)[1])
+                .map(data -> data.split(":")[1])
                 .map(String::toUpperCase)
                 .map(categoryStr -> {
                     try {

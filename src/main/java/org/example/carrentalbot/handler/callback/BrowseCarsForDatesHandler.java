@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -12,13 +13,14 @@ import org.example.carrentalbot.service.CarService;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.List;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class BrowseCarsForDatesHandler implements CallbackHandler {
 
@@ -42,26 +44,31 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'browse cars for dates' flow");
 
         CarCategory carCategory = sessionService
                 .getCarCategory(chatId, "carCategory")
                 .orElseThrow(() -> new DataNotFoundException("Category not found in session"));
+        log.debug("Loaded from session: carCategory={}", carCategory);
 
         LocalDate startDate = sessionService
                 .getLocalDate(chatId, "startDate")
                 .orElseThrow(() -> new DataNotFoundException("Start date not found in session"));
+        log.debug("Loaded from session: startDate={}", startDate);
 
         LocalDate endDate = sessionService
                 .getLocalDate(chatId, "endDate")
                 .orElseThrow(() -> new DataNotFoundException("End date not found in session"));
+        log.debug("Loaded from session: endDate={}", endDate);
 
         List<Car> availableCars = carService.getAvailableCarsByCategoryAndDates(carCategory, startDate, endDate);
+        log.info("Fetched {} cars for category '{}'", availableCars.size(), carCategory);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCarsKeyboard(availableCars);
 
         String text = String.format("""
-                        <b>Available cars in category '%s':</b>
-                        """, carCategory);
+                <b>Available cars in category '%s':</b>
+                """, carCategory);
 
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())

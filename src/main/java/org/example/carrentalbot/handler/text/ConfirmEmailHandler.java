@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.text;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
@@ -12,14 +13,15 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.regex.Pattern;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
-public class ConfirmEmailHandler implements TextHandler  {
+public class ConfirmEmailHandler implements TextHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
     private static final Pattern EMAIL_PATTERN =
@@ -41,9 +43,10 @@ public class ConfirmEmailHandler implements TextHandler  {
 
     @Override
     public void handle(Long chatId, String email) {
+        log.info("Processing 'confirm email' flow");
 
-//        String email = extractEmailFromMessageText(message.getText());
         sessionService.put(chatId, "email", email);
+        log.debug("Session updated: 'email' set to {}", email);
 
         String text = String.format("""
                 Confirm your email:
@@ -65,21 +68,14 @@ public class ConfirmEmailHandler implements TextHandler  {
                 .build());
     }
 
-//    private String extractEmailFromMessageText(String text) {
-//        return Optional.ofNullable(text)
-//                .map(String::trim)
-//                .filter(t -> !t.isEmpty())
-//                .filter(t -> EMAIL_PATTERN.matcher(t).matches())
-//                .orElse(null);
-//    }
-
     private String getDataForKeyboard(Long chatId) {
         FlowContext flowContext = sessionService
                 .getFlowContext(chatId, "flowContext")
                 .orElseThrow(() -> new DataNotFoundException("Flow context not found in session."));
+        log.debug("Loaded from session: flowContext={}", flowContext);
 
         return switch (flowContext) {
-            case BOOKING_FLOW  -> DisplayBookingDetailsHandler.KEY;
+            case BOOKING_FLOW -> DisplayBookingDetailsHandler.KEY;
             case EDIT_BOOKING_FLOW -> EditBookingHandler.KEY;
             case MY_BOOKINGS_FLOW -> EditMyBookingHandler.KEY;
             default -> throw new InvalidStateException("Unexpected flow context for current handler: " + flowContext);

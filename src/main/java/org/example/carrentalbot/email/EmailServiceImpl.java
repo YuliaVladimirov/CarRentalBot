@@ -48,13 +48,14 @@ public class EmailServiceImpl implements EmailService {
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            log.info("Booking notification email [{}] sent to user's email for booking {}", notificationType.name(), booking.getId());
+//            log.info("Booking notification [{}] sent to user's email for booking {}", notificationType.name(), booking.getId());
+            log.info("Booking notification sent to user's email");
     }
 
     @Override
     @Recover
     public void recoverFailedNotification(MailException exception, Booking booking, NotificationType notificationType) {
-        log.error("PERMANENTLY FAILED to send notification email [{}] to user's email for booking {}: {}",
+        log.error("PERMANENTLY FAILED to send notification [{}] to user's email for booking {}: {}",
                 notificationType.name(),
                 booking.getId(),
                 exception.getMessage());
@@ -79,13 +80,13 @@ public class EmailServiceImpl implements EmailService {
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            log.info("Booking reminder email sent to user's email for booking {}", reminder.getBooking().getId());
+            log.info("Booking reminder [{}] sent to user's email for booking {}", reminder.getReminderType().name(), reminder.getBooking().getId());
     }
 
     @Override
     @Recover
     public void recoverFailedReminder(MailException exception, Reminder reminder) {
-        log.error("PERMANENTLY FAILED to send reminder email [{}] to user's email for booking {}: {}",
+        log.error("PERMANENTLY FAILED to send reminder [{}] to user's email for booking {} | {}",
                 reminder.getReminderType().name(),
                 reminder.getBooking().getId(),
                 exception.getMessage());

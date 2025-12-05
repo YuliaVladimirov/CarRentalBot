@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
@@ -12,13 +13,14 @@ import org.example.carrentalbot.service.BookingService;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.UUID;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class CancelMyBookingHandler implements CallbackHandler {
 
@@ -42,12 +44,15 @@ public class CancelMyBookingHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'cancel my booking' flow");
 
         UUID bookingId = sessionService
                 .getUUID(chatId, "bookingId")
-                .orElseThrow(() -> new DataNotFoundException("Booking id nor found in session"));
+                .orElseThrow(() -> new DataNotFoundException("Booking id not found in session"));
+        log.debug("Loaded from session: bookingId={}", bookingId);
 
         Booking booking = bookingService.getBookingById(bookingId);
+        log.info("Retrieved booking: id={}", booking.getId());
 
         LocalDate today = LocalDate.now();
 

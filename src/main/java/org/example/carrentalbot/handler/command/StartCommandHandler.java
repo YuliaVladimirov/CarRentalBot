@@ -10,12 +10,12 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.record.CustomerRegistration;
 import org.example.carrentalbot.service.CustomerServiceImpl;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class StartCommandHandler implements CommandHandler {
 
@@ -37,39 +37,35 @@ public class StartCommandHandler implements CommandHandler {
 
     @Override
     public void handle(Long chatId, FromDto from) {
-        log.debug("Checking registration status.");
+        log.info("Processing '/start' flow");
 
         CustomerRegistration customerRegistration = customerService.registerIfNotExists(chatId, from);
         Customer customer = customerRegistration.customer();
         String welcomeText;
-        if (!customerRegistration.isNew()) {
+
+        if (customerRegistration.isNew()) {
+            log.info("New customer created: customerId={}", customer.getId());
 
             welcomeText = String.format("""
-             Hi, %s!
-             Welcome to Car Rental Bot.
-             You've just joined the Car Rental Bot!
-             """, customer.getFirstName());
-
-            log.info("Customer registration successful. New customer id: {}", customer.getId());
-
+                    Hi, %s!
+                    Welcome to Car Rental Bot.
+                    You've just joined the Car Rental Bot!
+                    """, customer.getFirstName());
         } else {
+            log.info("Returning customer: customerId={}", customer.getId());
 
             welcomeText = String.format("""
-             Hi, %s!
-             Welcome back to Car Rental Bot.
-             Glad to see you again.
-             """, customer.getFirstName());
-
-            log.info("Existing customer welcomed back. Customer id: {}", customer.getId());
+                    Hi, %s!
+                    Welcome back to Car Rental Bot.
+                    Glad to see you again.
+                    """, customer.getFirstName());
         }
-
-                telegramClient.sendMessage(SendMessageDto.builder()
+        telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(welcomeText)
                 .parseMode("HTML")
                 .build());
 
-        log.debug("Calling MainMenuHandler.");
         mainMenuHandler.handle(chatId, null);
     }
 }

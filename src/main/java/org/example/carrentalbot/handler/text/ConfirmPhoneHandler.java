@@ -1,6 +1,7 @@
 package org.example.carrentalbot.handler.text;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.exception.DataNotFoundException;
@@ -10,12 +11,13 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.regex.Pattern;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class ConfirmPhoneHandler implements TextHandler {
 
@@ -39,9 +41,10 @@ public class ConfirmPhoneHandler implements TextHandler {
 
     @Override
     public void handle(Long chatId, String phone) {
+        log.info("Processing 'confirm phone' flow");
 
-//        String phone = extractPhoneFromMessageText(message.getText());
         sessionService.put(chatId, "phone", phone);
+        log.debug("Session updated: 'phone' set to {}", phone);
 
         String text = String.format("""
                 Confirm your phone:
@@ -63,19 +66,11 @@ public class ConfirmPhoneHandler implements TextHandler {
                 .build());
     }
 
-//    private String extractPhoneFromMessageText(String text) {
-//
-//        return Optional.ofNullable(text)
-//                .map(String::trim)
-//                .filter(t -> !t.isEmpty())
-//                .filter(t -> PHONE_PATTERN.matcher(t).matches())
-//                .orElse(null);
-//    }
-
     private String getDataForKeyboard(Long chatId) {
         FlowContext flowContext = sessionService
                 .getFlowContext(chatId, "flowContext")
                 .orElseThrow(() -> new DataNotFoundException("Flow context not found in session."));
+        log.debug("Loaded from session: flowContext={}", flowContext);
 
         return switch (flowContext) {
             case BOOKING_FLOW -> AskForEmailHandler.KEY;

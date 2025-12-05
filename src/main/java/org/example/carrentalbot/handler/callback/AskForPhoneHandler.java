@@ -1,15 +1,17 @@
 package org.example.carrentalbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.util.TelegramClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class AskForPhoneHandler implements CallbackHandler {
 
@@ -30,10 +32,11 @@ public class AskForPhoneHandler implements CallbackHandler {
 
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
+        log.info("Processing 'ask for phone' flow");
 
         String text = """
                 Please enter your phone.
-                
+                                    
                 Example: +49 123 456789
                 """;
 
@@ -43,6 +46,5 @@ public class AskForPhoneHandler implements CallbackHandler {
                 .parseMode("HTML")
                 .replyMarkup(null)
                 .build());
-
     }
 }

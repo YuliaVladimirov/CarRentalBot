@@ -1,6 +1,6 @@
 package org.example.carrentalbot.util;
 
-import org.example.carrentalbot.record.CarProjectionDto;
+import org.example.carrentalbot.record.CarProjection;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.InlineKeyboardButtonDto;
 import org.example.carrentalbot.handler.callback.*;
@@ -41,10 +41,10 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public InlineKeyboardMarkupDto buildCarCategoryKeyboard(List<CarProjectionDto> availability) {
+    public InlineKeyboardMarkupDto buildCarCategoryKeyboard(List<CarProjection> availability) {
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
-        for (CarProjectionDto dto : availability) {
+        for (CarProjection dto : availability) {
             String emoji = getCategoryEmoji(dto.category());
             BigDecimal minimalDailyRate = dto.minimalDailyRate().setScale(0, RoundingMode.HALF_UP);
 

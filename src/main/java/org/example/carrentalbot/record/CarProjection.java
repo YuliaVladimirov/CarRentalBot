@@ -1,7 +1,6 @@
 package org.example.carrentalbot.record;
 
 import org.example.carrentalbot.model.enums.CarCategory;
-
 import java.math.BigDecimal;
 
-public record CarProjectionDto(CarCategory category, BigDecimal minimalDailyRate) {}
+public record CarProjection(CarCategory category, BigDecimal minimalDailyRate) {}

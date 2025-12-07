@@ -88,7 +88,7 @@ public class ReminderServiceImpl implements ReminderService {
     @Transactional
     public void processDueReminders() {
 
-        log.info("Starting scheduled job: processDueReminders.");
+        log.info("Starting scheduled job.");
 
         final int BATCH_SIZE = 1000;
         final Pageable PAGE = PageRequest.of(0, BATCH_SIZE);
@@ -99,7 +99,7 @@ public class ReminderServiceImpl implements ReminderService {
                     .findDueReminders(LocalDateTime.now(), ELIGIBLE_FOR_SENT, PAGE);
 
             if (dueReminders.isEmpty()) {
-                log.info("Finished scheduled job: processDueReminders. No reminders were due.");
+                log.info("Finished scheduled job. No reminders were due.");
                 break;
             }
 

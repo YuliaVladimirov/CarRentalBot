@@ -5,12 +5,19 @@ import lombok.Getter;
 @Getter
 public enum MDCFields {
 
-    REQUEST_ID,
+    TRACE_ID ("traceId"),
 
-    UPDATE_ID,
-    CHAT_ID,
-    TELEGRAM_USER_ID,
+    UPDATE_ID ("updateId"),
+    UPDATE_TYPE ("updateType"),
+    CHAT_ID ("chatId"),
+    TELEGRAM_USER_ID ("telegramUserId"),
 
-    CLASS,
-    METHOD
+    CLASS ("class"),
+    METHOD ("method");
+
+    private final String value;
+
+    MDCFields (String value) {
+        this.value = value;
+    }
 }

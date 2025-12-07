@@ -1,81 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
-	<property name="CLEAN_MDC_PATTERN"
-			  value="%replace([REQUEST_ID:%X{REQUEST_ID}]){'\[REQUEST_ID:\]', ''}%replace([UPDATE_ID:%X{UPDATE_ID}]){'\[UPDATE_ID:\]', ''}%replace([CHAT_ID:%X{CHAT_ID}]){'\[CHAT_ID:\]', ''}%replace([TELEGRAM_USER_ID:%X{TELEGRAM_USER_ID}]){'\[TELEGRAM_USER_ID:\]', ''}%replace([CLASS:%X{CLASS}]){'\[CLASS:\]', ''}%replace([METHOD:%X{METHOD}]){'\[METHOD:\]', ''}%replace([DURATION:%X{DURATION}]){'\[DURATION:\]', ''}"/>
 
-	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
-		</filter>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] ${CLEAN_MDC_PATTERN} %logger{36} - %msg%n</pattern>
+	<!-- =============================
+		 Properties for file paths
+		 ============================= -->
+	<property name="LOG_DIR" value="log" />
+	<property name="ARCHIVE_DIR" value="log/archive" />
+
+	<!-- ==========================
+		 CONSOLE (JSON)
+		 ========================== -->
+	<appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp>
+					<timeZone>UTC</timeZone>
+					<pattern>yyyy-MM-dd HH:mm:ss.SSS</pattern>
+				</timestamp>
+				<logLevel/>
+				<threadName/>
+				<loggerName/>
+				<mdc/>
+				<message/>
+				<stackTrace/>
+			</providers>
+			<jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
 		</encoder>
 	</appender>
 
-	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>log/carrentalbot.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] ${CLEAN_MDC_PATTERN} %logger{36} - %msg%n</pattern>
+
+	<!-- ==========================
+		 FILE (JSON)
+		 ========================== -->
+	<appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/carrentalbot.json</file>
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp>
+					<timeZone>UTC</timeZone>
+					<pattern>yyyy-MM-dd HH:mm:ss.SSS</pattern>
+				</timestamp>
+				<logLevel/>
+				<threadName/>
+				<loggerName/>
+				<mdc/>
+				<message/>
+				<stackTrace/>
+			</providers>
 		</encoder>
+
 		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-			<fileNamePattern>log/archive/carrentalbot-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+			<fileNamePattern>${ARCHIVE_DIR}/carrentalbot-%d{yyyy-MM-dd}.%i.json.gz</fileNamePattern>
 			<maxFileSize>10MB</maxFileSize>
 			<maxHistory>30</maxHistory>
 			<totalSizeCap>1GB</totalSizeCap>
 		</rollingPolicy>
 	</appender>
 
-	<appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>log/errors.log</file>
+
+	<!-- ==========================
+		 ERROR FILE ONLY (JSON)
+		 ========================== -->
+	<appender name="ERROR_FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/errors.json</file>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>ERROR</level>
 		</filter>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] ${CLEAN_MDC_PATTERN} %logger{36} - %msg%n</pattern>
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp>
+					<timeZone>UTC</timeZone>
+					<pattern>yyyy-MM-dd HH:mm:ss.SSS</pattern>
+				</timestamp>
+				<logLevel />
+				<threadName />
+				<loggerName />
+				<message />
+				<mdc />
+				<stackTrace />
+			</providers>
 		</encoder>
+
 		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-			<fileNamePattern>log/archive/errors-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+			<fileNamePattern>${ARCHIVE_DIR}/errors-%d{yyyy-MM-dd}.%i.json.gz</fileNamePattern>
 			<maxFileSize>5MB</maxFileSize>
 			<maxHistory>7</maxHistory>
 			<totalSizeCap>1GB</totalSizeCap>
 		</rollingPolicy>
 	</appender>
 
-	<appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
-		<appender-ref ref="CONSOLE"/>
+
+	<!-- ==========================
+		 ASYNC WRAPPERS
+		 ========================== -->
+	<appender name="ASYNC_CONSOLE_JSON" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="CONSOLE_JSON"/>
 		<queueSize>5000</queueSize>
 		<discardingThreshold>0</discardingThreshold>
 		<includeCallerData>false</includeCallerData>
 	</appender>
 
-	<appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
-		<appender-ref ref="FILE"/>
+	<appender name="ASYNC_FILE_JSON" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="FILE_JSON"/>
 		<queueSize>5000</queueSize>
 		<discardingThreshold>0</discardingThreshold>
 		<includeCallerData>false</includeCallerData>
 	</appender>
 
-	<appender name="ASYNC_ERROR_FILE" class="ch.qos.logback.classic.AsyncAppender">
-		<appender-ref ref="ERROR_FILE"/>
+	<appender name="ASYNC_ERROR_JSON" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="ERROR_FILE_JSON"/>
 		<queueSize>5000</queueSize>
 		<discardingThreshold>0</discardingThreshold>
 		<includeCallerData>false</includeCallerData>
 	</appender>
 
+
+	<!-- ==========================
+		 LOGGERS
+		 ========================== -->
 	<logger name="org.example.carrentalbot" level="DEBUG" additivity="false">
-		<appender-ref ref="ASYNC_CONSOLE"/>
-		<appender-ref ref="ASYNC_FILE"/>
-		<appender-ref ref="ASYNC_ERROR_FILE"/>
+		<appender-ref ref="ASYNC_CONSOLE_JSON"/>
+		<appender-ref ref="ASYNC_FILE_JSON"/>
+		<appender-ref ref="ASYNC_ERROR_JSON"/>
 	</logger>
 
 	<logger name="org.springframework" level="INFO"/>
 	<logger name="org.hibernate" level="INFO"/>
 
+
+	<!-- ==========================
+		 ROOT LOGGER
+		 ========================== -->
 	<root level="WARN">
-		<appender-ref ref="ASYNC_CONSOLE"/>
-		<appender-ref ref="ASYNC_FILE"/>
-		<appender-ref ref="ASYNC_ERROR_FILE"/>
+		<appender-ref ref="ASYNC_CONSOLE_JSON"/>
+		<appender-ref ref="ASYNC_FILE_JSON"/>
+		<appender-ref ref="ASYNC_ERROR_JSON"/>
 	</root>
 
 </configuration>

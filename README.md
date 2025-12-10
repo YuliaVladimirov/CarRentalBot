@@ -9,17 +9,6 @@ This demo project is a Telegram Bot for car rental services designed to let cust
 
 ---
 
-## 📑 Table of Contents
-- [Description](#general-description)
-- [Technology Stack](#-technology-stack)
-- [Project Documentation](#-project-documentation)
-- [Getting Started](#-getting-started)
-   - [Prerequisites](#-prerequisites)
-   - [Installation](#-installation)
-   - [Webhook Setup](#-setting-the-webhook)
-- [Usage](#-usage)
-
----
 ## 📖 General Description
 The bot allows customers to browse available cars, make reservations, view and manage their bookings, and receive real-time updates via Telegram.<br>
 For administrators, the bot provides tools to manage the car fleet, handle reservations, and track basic rental analytics (planned for future updates).
@@ -61,7 +50,6 @@ Use this section to set up the project locally in your IDE  _(IntelliJ IDEA, Ecl
 - Docker installed _(optional but recommended)_
 
 ---
-
 
 ## 🛠️ Installation
 

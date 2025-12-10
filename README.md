@@ -33,7 +33,7 @@ For administrators, the bot provides tools to manage the car fleet, handle reser
 
 ---
 
-## 🛠️ Technology Stack
+## ⚙️ Technology Stack
 This project is implemented as a Spring Boot Web Application using:
 - __Java 17__
 - __Spring Boot 3.5.5__
@@ -55,7 +55,7 @@ This project is implemented as a Spring Boot Web Application using:
 ## 🚀 Getting Started
 Use this section to set up the project locally in your IDE  _(IntelliJ IDEA, Eclipse, VS Code)_ if you want to run or modify the source code.
 
-### 📝 Prerequisites
+### 📋 Prerequisites
 - A __Telegram Bot Token__ from [BotFather](https://t.me/BotFather)
 - A __public webhook URL__ (HTTPS) to receive Telegram updates
 - Docker installed _(optional but recommended)_
@@ -63,7 +63,7 @@ Use this section to set up the project locally in your IDE  _(IntelliJ IDEA, Ecl
 ---
 
 
-## 📝 Installation
+## 🛠️ Installation
 
 ### 1. Clone the repository:
 
@@ -130,7 +130,7 @@ Or directly from your IDE (Spring Boot run configuration).
 
 ---
 
-## 📝 Setting the Webhook
+## 🔗 Setting the Webhook
 Once your application is running on a public HTTPS endpoint (e.g. https://my-domain.com), set your webhook:
 
 ```[bash]

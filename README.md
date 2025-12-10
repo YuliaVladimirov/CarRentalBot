@@ -10,7 +10,7 @@ This demo project is a Telegram Bot for car rental services designed to let cust
 ---
 
 ## 📑 Table of Contents
-- [Description](#-general-description)
+- [Description](#general-description)
 - [Technology Stack](#-technology-stack)
 - [Project Documentation](#-project-documentation)
 - [Getting Started](#-getting-started)

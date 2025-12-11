@@ -12,6 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Central registry for all Telegram update handlers.
+ *
+ * <p>This component discovers and organizes all {@link CallbackHandler},
+ * {@link CommandHandler}, and {@link TextHandler} implementations provided
+ * via Spring dependency injection.</p>
+ *
+ * <p>Each handler category maintains a primary set of handlers along with a
+ * mandatory fallback handler. The fallback is used when no dedicated handler
+ * matches the incoming update.</p>
+ *
+ * <p>The registry is constructed once at application startup and remains immutable.</p>
+ */
 @Component
 @Getter
 @Slf4j
@@ -26,6 +39,23 @@ public class HandlerRegistry {
     private final List<TextHandler> textHandlers;
     private final FallbackTextHandler fallbackTextHandler;
 
+    /**
+     * Builds the handler registry by categorizing all provided handlers
+     * into dedicated and fallback handler groups.
+     *
+     * <p>A handler is considered the fallback variant if its key/command is
+     * {@code "__FALLBACK__"} (for callbacks and commands), or if it is an instance of
+     * {@link FallbackTextHandler} (for text handlers).</p>
+     *
+     * <p>During initialization, each non-fallback handler is logged for visibility.</p>
+     *
+     * @param callbackHandlerList list of all callback handlers discovered by Spring
+     * @param commandHandlerList  list of all command handlers discovered by Spring
+     * @param textHandlerList     list of all text handlers discovered by Spring
+     *
+     * @throws IllegalStateException if any of the required fallback handlers
+     *                               (callback, command, text) is missing
+     */
     public HandlerRegistry(List<CallbackHandler> callbackHandlerList,
                            List<CommandHandler> commandHandlerList,
                            List<TextHandler> textHandlerList) {

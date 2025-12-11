@@ -6,6 +6,7 @@ import org.example.carrentalbot.dto.*;
 import org.example.carrentalbot.handler.callback.CallbackHandler;
 import org.example.carrentalbot.handler.command.CommandHandler;
 import org.example.carrentalbot.handler.text.FallbackTextHandler;
+import org.example.carrentalbot.handler.text.TextHandler;
 import org.example.carrentalbot.util.FlowContextHelper;
 import org.example.carrentalbot.util.HandlerRegistry;
 import org.example.carrentalbot.util.TelegramClient;
@@ -14,6 +15,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * Central dispatcher for all incoming Telegram updates.
+ *
+ * <p>This service extracts the update type (message, command, text, callback)
+ * and delegates it to the appropriate handler based on the registered
+ * {@link CommandHandler}, {@link TextHandler}, and {@link CallbackHandler}
+ * instances.</p>
+ *
+ * <p>The handler invocation respects conversational state by validating the
+ * active flow context through {@link FlowContextHelper}.</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,6 +35,15 @@ public class GlobalHandlerImpl implements GlobalHandler {
     private final FlowContextHelper flowContextHelper;
     private final HandlerRegistry handlerRegistry;
 
+    /**
+     * Extracts the chat ID from a Telegram {@link UpdateDto}.
+     *
+     * <p>Chat ID is resolved either from the message or from the callback query's
+     * message container. If neither exists, {@code null} is returned.</p>
+     *
+     * @param update the Telegram update
+     * @return the chat ID if present, otherwise {@code null}
+     */
     private Long extractChatId(UpdateDto update) {
         if (update.getMessage() != null) {
             return update.getMessage().getChat() != null && update.getMessage().getChat().getId() != null
@@ -35,6 +56,16 @@ public class GlobalHandlerImpl implements GlobalHandler {
         return null;
     }
 
+    /**
+     * Entry point for processing any Telegram update.
+     *
+     * <p>The method resolves the update type (message or callback query)
+     * and delegates further processing accordingly.</p>
+     *
+     * <p>Runs asynchronously on the {@code telegramExecutor} thread pool.</p>
+     *
+     * @param update the incoming Telegram update, may be {@code null}
+     */
     @Override
     @Async("telegramExecutor")
     public void handleUpdate(UpdateDto update) {
@@ -55,6 +86,15 @@ public class GlobalHandlerImpl implements GlobalHandler {
         }
     }
 
+    /**
+     * Handles an incoming Telegram message.
+     *
+     * <p>Messages are classified into commands (starting with '/') or regular text,
+     * and dispatched to the appropriate handler type.</p>
+     *
+     * @param chatId the chat ID where the message originated
+     * @param message the Telegram message payload
+     */
     @Override
     public void handleMessage(Long chatId, MessageDto message) {
 
@@ -77,6 +117,18 @@ public class GlobalHandlerImpl implements GlobalHandler {
         }
     }
 
+    /**
+     * Processes a bot command message.
+     *
+     * <p>Resolves the responsible {@link CommandHandler}. If no matching handler is found,
+     * the fallback command handler is used.</p>
+     *
+     * <p>Ensures the command is permitted in the current flow context before execution.</p>
+     *
+     * @param chatId the originating chat ID
+     * @param from the Telegram user issuing the command
+     * @param text the command text, starting with '/'
+     */
     private void handleCommand(Long chatId, FromDto from, String text) {
         CommandHandler handler = handlerRegistry.getCommandHandlers()
                 .getOrDefault(text.toLowerCase(), handlerRegistry.getFallbackCommandHandler());
@@ -87,6 +139,17 @@ public class GlobalHandlerImpl implements GlobalHandler {
         handler.handle(chatId, from);
     }
 
+    /**
+     * Processes a plain text message.
+     *
+     * <p>Finds the first {@link TextHandler} that claims it can handle the message.
+     * If none match, the fallback text handler is used.</p>
+     *
+     * <p>Before handler execution, the user's active flow context is validated.</p>
+     *
+     * @param chatId the originating chat ID
+     * @param text the non-command text message
+     */
     private void handleText(Long chatId, String text) {
         handlerRegistry.getTextHandlers().stream()
                 .filter(handler -> handler.canHandle(text))
@@ -107,6 +170,20 @@ public class GlobalHandlerImpl implements GlobalHandler {
                 );
     }
 
+    /**
+     * Processes a callback query generated from an inline button.
+     *
+     * <p>Automatically sends a callback answer to Telegram confirming receipt, then
+     * resolves and executes the appropriate {@link CallbackHandler} based on the
+     * callback data prefix.</p>
+     *
+     * <p>If no matching handler is found, the fallback callback handler is used.</p>
+     *
+     * <p>Flow context is validated before handler execution.</p>
+     *
+     * @param chatId the originating chat ID
+     * @param callbackQuery the callback query payload
+     */
     @Override
     public void handleCallbackQuery(Long chatId, CallbackQueryDto callbackQuery) {
 

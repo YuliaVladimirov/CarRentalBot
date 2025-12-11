@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>All valid updates are delegated to {@link GlobalHandler} for processing.</p>
  */
-
 @Slf4j
 @RestController
 @RequestMapping("/webhook")

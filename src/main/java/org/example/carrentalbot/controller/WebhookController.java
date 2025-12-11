@@ -38,7 +38,6 @@ public class WebhookController {
      * @return {@code 200 OK} if the update is valid and processed successfully,
      *         or {@code 403 Forbidden} if the secret token validation fails
      */
-
     @PostMapping
     public ResponseEntity<String> onUpdate(
             @RequestHeader(value = "X-Telegram-Bot-Api-Secret-Token", required = false) String secretHeader,

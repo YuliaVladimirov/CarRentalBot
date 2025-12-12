@@ -95,8 +95,7 @@ public class GlobalHandlerImpl implements GlobalHandler {
      * @param chatId the chat ID where the message originated
      * @param message the Telegram message payload
      */
-    @Override
-    public void handleMessage(Long chatId, MessageDto message) {
+    private void handleMessage(Long chatId, MessageDto message) {
 
         FromDto from = message.getFrom();
         if (message.getFrom() == null) {
@@ -184,8 +183,7 @@ public class GlobalHandlerImpl implements GlobalHandler {
      * @param chatId the originating chat ID
      * @param callbackQuery the callback query payload
      */
-    @Override
-    public void handleCallbackQuery(Long chatId, CallbackQueryDto callbackQuery) {
+    private void handleCallbackQuery(Long chatId, CallbackQueryDto callbackQuery) {
 
         String callbackData = Optional.ofNullable(callbackQuery.getData()).map(String::trim).orElse("");
         if (callbackData.isBlank()) {

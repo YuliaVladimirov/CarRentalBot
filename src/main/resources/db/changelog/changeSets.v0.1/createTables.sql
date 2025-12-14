@@ -29,17 +29,13 @@ CREATE TABLE cars (
                       category VARCHAR(50) NOT NULL CHECK (category IN ('SEDAN', 'SUV',  'HATCHBACK', 'CONVERTIBLE', 'VAN')),
                       description VARCHAR(500),
                       image_file_id VARCHAR(200),
-                      daily_rate DECIMAL(10,2) NOT NULL,
-                      available BOOLEAN DEFAULT TRUE
+                      daily_rate DECIMAL(10,2) NOT NULL
 );
 
 --changeset yulia:2025-09-06-index-cars-name
 CREATE INDEX index_cars_name ON cars(brand);
 --changeset yulia:2025-09-06-index-cars-category
 CREATE INDEX index_cars_category_id ON cars(category);
---changeset yulia:2025-09-06-index-cars-available
-CREATE INDEX index_cars_available ON cars(available);
-
 
 
 -- ========================================
@@ -87,7 +83,6 @@ CREATE TABLE reminders (
                               reminder_type VARCHAR(30) NOT NULL CHECK (reminder_type IN ('START_DAY_BEFORE', 'START_DAY_OF', 'END_DAY_BEFORE', 'END_DAY_OF')),
                               due_at TIMESTAMP NOT NULL,
                               reminder_status VARCHAR(20) NOT NULL CHECK (reminder_status IN ('PENDING', 'SENT', 'FAILED', 'PERMANENTLY_FAILED','CANCELLED')),
-                              retry_count INT NOT NULL,
                               created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               CONSTRAINT fk_reminders_bookings FOREIGN KEY (booking_id) REFERENCES bookings (id)
 );

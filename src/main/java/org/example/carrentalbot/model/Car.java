@@ -2,6 +2,7 @@ package org.example.carrentalbot.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.carrentalbot.model.enums.CarStatus;
 import org.example.carrentalbot.model.enums.CarCategory;
 
 import java.math.BigDecimal;
@@ -83,6 +84,18 @@ public class Car {
      */
     @Column(name = "daily_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal dailyRate;
+
+    /**
+     * The administrative status of the car, which dictates whether it can
+     * be rented, regardless of booking conflicts. For example, a car
+     * in {@code UNDER_REPAIR} status cannot be booked.
+     * Mapped as a String (ENUM) in the database.
+     * @see org.example.carrentalbot.model.enums.CarStatus
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "car_status", nullable = false)
+    @Builder.Default
+    private CarStatus carStatus = CarStatus.IN_SERVICE;
 
     /**
      * A collection of all bookings associated with this specific car.

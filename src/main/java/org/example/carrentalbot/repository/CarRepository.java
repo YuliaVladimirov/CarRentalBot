@@ -20,11 +20,18 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
             """)
     List<CarProjection> getCarCategories();
 
-    List<Car> findByCategory(CarCategory carCategory);
+    @Query(value = """
+            SELECT c FROM Car c
+            WHERE c.category = :category
+            AND c.carStatus = org.example.carrentalbot.model.enums.CarStatus.IN_SERVICE
+""")
+    List<Car> findByCategory(
+            @Param("category") CarCategory category);
 
     @Query(value = """
             SELECT c FROM Car c
             WHERE c.category = :category
+            AND c.carStatus = org.example.carrentalbot.model.enums.CarStatus.IN_SERVICE
             AND c.id NOT IN (
             SELECT b.car.id FROM Booking b
             WHERE b.startDate <= :endDate

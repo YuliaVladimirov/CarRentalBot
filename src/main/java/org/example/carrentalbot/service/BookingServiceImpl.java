@@ -8,6 +8,7 @@ import org.example.carrentalbot.model.Booking;
 import org.example.carrentalbot.model.Car;
 import org.example.carrentalbot.model.Customer;
 import org.example.carrentalbot.model.enums.BookingStatus;
+import org.example.carrentalbot.model.enums.CarStatus;
 import org.example.carrentalbot.repository.BookingRepository;
 import org.example.carrentalbot.repository.CarRepository;
 import org.example.carrentalbot.repository.CustomerRepository;
@@ -48,6 +49,10 @@ public class BookingServiceImpl implements BookingService {
 
         log.debug("Fetching car: car id={}", carId);
         Car car = carRepository.findById(carId).orElseThrow(() -> new DataNotFoundException(String.format("Car with id: %s, was not found.", carId)));
+
+        if (car.getCarStatus() != CarStatus.IN_SERVICE) {
+            throw new InvalidStateException(String.format("Car is not available for booking due to administrative status: %s", car.getCarStatus()));
+        }
 
         if (!isCarAvailable(carId, startDate, endDate)) {
             throw new InvalidStateException("Car is no longer available for selected dates");

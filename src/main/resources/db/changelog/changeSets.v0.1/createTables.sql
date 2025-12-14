@@ -29,6 +29,7 @@ CREATE TABLE cars (
                       category VARCHAR(50) NOT NULL CHECK (category IN ('SEDAN', 'SUV',  'HATCHBACK', 'CONVERTIBLE', 'VAN')),
                       description VARCHAR(500),
                       image_file_id VARCHAR(200),
+                      car_status VARCHAR(50) NOT NULL CHECK (car_status IN ('IN_SERVICE', 'AWAITING_PREPARATION',  'UNDER_MAINTENANCE', 'UNDER_REPAIR', 'DAMAGED', 'RETIRED')),
                       daily_rate DECIMAL(10,2) NOT NULL
 );
 

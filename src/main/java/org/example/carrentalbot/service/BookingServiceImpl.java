@@ -51,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
         Car car = carRepository.findById(carId).orElseThrow(() -> new DataNotFoundException(String.format("Car with id: %s, was not found.", carId)));
 
         if (car.getCarStatus() != CarStatus.IN_SERVICE) {
-            throw new InvalidStateException(String.format("Car is not available for booking due to administrative status: %s", car.getCarStatus()));
+            throw new InvalidStateException(String.format("Car is not available for booking due to administrative status: %s", car.getCarStatus().getValue()));
         }
 
         if (!isCarAvailable(carId, startDate, endDate)) {

@@ -15,10 +15,8 @@ import java.util.UUID;
  * Represents a confirmed or proposed rental reservation transaction
  * between a specific {@link org.example.carrentalbot.model.Customer} and a {@link org.example.carrentalbot.model.Car}.
  * This entity defines the rental period, costs, contact details, and current status of the reservation.
- *
  * <p>Maps to the {@code bookings} table in the database.</p>
- * <p>The lifecycle of this entity is governed by the {@link org.example.carrentalbot.model.enums.BookingStatus}
- * which is critical for availability checks and financial reporting.</p>
+ * <p>Uses Lombok for boilerplate code generation.</p>
  *
  * @see org.example.carrentalbot.model.Customer
  * @see org.example.carrentalbot.model.Car

@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 /**
  * Represents a scheduled notification related to a specific
  * {@link org.example.carrentalbot.model.Booking}.
- * This entity tracks the type of reminder (e.g., START_DAY_BEFORE, START_DAY_OF, END_DAY_BEFORE, END_DAY_OF),
+ * This entity tracks the type of reminder (e.g., Rental Start Reminder, Rental Return Reminder),
  * its scheduled time, and its current execution status, including retry attempts.
- *
  * <p>Maps to the {@code reminders} table and acts as a queue item for the
  * scheduled job processing system.</p>
+ * <p>Uses Lombok for boilerplate code generation.</p>
  *
  * @see org.example.carrentalbot.model.Booking
  * @see org.example.carrentalbot.model.enums.ReminderType

@@ -15,10 +15,8 @@ import java.util.UUID;
  * This entity stores the descriptive metadata, rental rates, and
  * availability status for a car, and maintains a history of all
  * associated rental bookings.
- *
  * <p>Maps to the {@code cars} table in the database.</p>
- * * <p>Uses Lombok's {@code @Builder} and data annotations for
- * constructor and boilerplate method generation.</p>
+ * <p>Uses Lombok for boilerplate code generation.</p>
  *
  * @see org.example.carrentalbot.model.enums.CarCategory
  * @see org.example.carrentalbot.model.Booking

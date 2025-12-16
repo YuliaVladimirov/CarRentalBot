@@ -13,10 +13,8 @@ import java.util.UUID;
  * Represents a registered user (Customer) of the service.
  * This entity stores key identifying information from the Telegram platform
  * and maintains a historical record of all associated bookings.
- *
  * <p>Maps to the {@code customers} table in the database.</p>
- * * <p>Uses Lombok's {@code @Data} and {@code @Builder} for boilerplate code
- * generation.</p>
+ * <p>Uses Lombok for boilerplate code generation.</p>
  *
  * @see org.example.carrentalbot.model.Booking
  */
@@ -83,7 +81,7 @@ public class Customer {
      * A collection of all bookings associated with this customer.
      * This is a one-to-many relationship, loaded lazily. Operations on the
      * Customer cascade to its Bookings (e.g., deletion).
-     * * @see org.example.carrentalbot.model.Booking
+     * @see org.example.carrentalbot.model.Booking
      */
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default

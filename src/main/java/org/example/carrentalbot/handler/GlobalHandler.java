@@ -3,23 +3,21 @@ package org.example.carrentalbot.handler;
 import org.example.carrentalbot.dto.UpdateDto;
 
 /**
- * Primary entry point for processing incoming Telegram updates.
- *
- * <p>Implementations of this interface are responsible for inspecting the
- * {@link UpdateDto} payload and delegating it to the appropriate handler
- * (e.g., message, command, text, or callback query processing).</p>
- *
- * <p>This abstraction intentionally exposes only a single method to keep
- * the dispatching logic encapsulated and allow internal routing to evolve
- * without affecting callers such as the webhook controller.</p>
+ * Defines the core contract for processing all incoming updates from the
+ * Telegram Bot API.
+ * <p>Implementations of this interface act as the central dispatcher, analyzing the
+ * type of content within the {@link UpdateDto} (e.g., message, command, callback query)
+ * and routing it to the appropriate specialized handler.</p>
  */
-
 public interface GlobalHandler {
 
     /**
-     * Handles an incoming Telegram update.
-     *
-     * @param update the update payload received from Telegram; may be {@code null}
+     * Handles a single, incoming update received from the Telegram Bot API.
+     * <p>The implementation should inspect the contents of the {@code update} object
+     * (e.g., check for {@code message()}, {@code callback_query()}, etc.) and
+     * dispatch the processing to the correct component based on the update type.</p>
+     * @param update The data transfer object containing the full update details
+     * from Telegram. This object is never {@code null}.
      */
     void handleUpdate(UpdateDto update);
 }

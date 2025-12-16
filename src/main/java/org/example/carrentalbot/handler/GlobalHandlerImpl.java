@@ -16,33 +16,47 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * Central dispatcher for all incoming Telegram updates.
- *
- * <p>This service extracts the update type (message, command, text, callback)
- * and delegates it to the appropriate handler based on the registered
- * {@link CommandHandler}, {@link TextHandler}, and {@link CallbackHandler}
- * instances.</p>
- *
- * <p>The handler invocation respects conversational state by validating the
- * active flow context through {@link FlowContextHelper}.</p>
+ * Concrete implementation of the {@link GlobalHandler} interface.
+ * <p>This service acts as the primary dispatcher for all incoming Telegram updates.
+ * It is responsible for:
+ * <ul>
+ * <li>Securing and extracting the {@code chatId} from various update types.</li>
+ * <li>Routing messages to command handlers (if starting with '/') or text handlers.</li>
+ * <li>Routing callback queries to appropriate callback handlers based on the data prefix.</li>
+ * <li>Managing and validating the user's current flow context before execution.</li>
+ * </ul>
+ * </p>
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GlobalHandlerImpl implements GlobalHandler {
 
+    /**
+     * Component used for interacting with the Telegram Bot API, specifically for actions
+     * like answering callback queries.
+     */
     private final TelegramClient telegramClient;
+
+    /**
+     * Helper component responsible for checking and managing the current state/context
+     * of a user's interaction flow. Used to ensure the user is in an allowed context
+     * before executing a handler.
+     */
     private final FlowContextHelper flowContextHelper;
+
+    /**
+     * Registry holding all specialized handlers (commands, text, callbacks) and their
+     * respective fallback implementations.
+     */
     private final HandlerRegistry handlerRegistry;
 
     /**
-     * Extracts the chat ID from a Telegram {@link UpdateDto}.
-     *
-     * <p>Chat ID is resolved either from the message or from the callback query's
-     * message container. If neither exists, {@code null} is returned.</p>
-     *
-     * @param update the Telegram update
-     * @return the chat ID if present, otherwise {@code null}
+     * Helper method to safely extract the unique chat ID from either a message
+     * or a callback query update.
+     * @param update The incoming Telegram update DTO.
+     * @return The chat ID as a {@link Long}, or {@code null} if the chat ID could
+     * not be determined.
      */
     private Long extractChatId(UpdateDto update) {
         if (update.getMessage() != null) {
@@ -57,14 +71,17 @@ public class GlobalHandlerImpl implements GlobalHandler {
     }
 
     /**
-     * Entry point for processing any Telegram update.
-     *
-     * <p>The method resolves the update type (message or callback query)
-     * and delegates further processing accordingly.</p>
-     *
-     * <p>Runs asynchronously on the {@code telegramExecutor} thread pool.</p>
-     *
-     * @param update the incoming Telegram update, may be {@code null}
+     * The main entry point for processing all updates from the Telegram webhook.
+     * <p>This method is executed asynchronously to avoid blocking the incoming webhook
+     * thread and ensure prompt response to the Telegram server.</p>
+     * <ol>
+     * <li>Extracts the {@code chatId}.</li>
+     * <li>Routes the update to {@link #handleMessage(Long, MessageDto)} or
+     * {@link #handleCallbackQuery(Long, CallbackQueryDto)} based on the update type.</li>
+     * <li>Logs a warning for any unhandled update types.</li>
+     * </ol>
+     * @param update The data transfer object containing the full update details
+     * from Telegram.
      */
     @Override
     @Async("telegramExecutor")
@@ -87,13 +104,14 @@ public class GlobalHandlerImpl implements GlobalHandler {
     }
 
     /**
-     * Handles an incoming Telegram message.
-     *
-     * <p>Messages are classified into commands (starting with '/') or regular text,
-     * and dispatched to the appropriate handler type.</p>
-     *
-     * @param chatId the chat ID where the message originated
-     * @param message the Telegram message payload
+     * Processes an incoming message (text or command).
+     * <ol>
+     * <li>Performs basic checks for user presence and empty text.</li>
+     * <li>If the text starts with '/', it is routed to {@link #handleCommand(Long, FromDto, String)}.</li>
+     * <li>Otherwise, it is routed to the flexible {@link #handleText(Long, String)} handlers.</li>
+     * </ol>
+     * @param chatId The ID of the chat where the message originated.
+     * @param message The message DTO.
      */
     private void handleMessage(Long chatId, MessageDto message) {
 
@@ -116,17 +134,18 @@ public class GlobalHandlerImpl implements GlobalHandler {
         }
     }
 
+
     /**
-     * Processes a bot command message.
-     *
-     * <p>Resolves the responsible {@link CommandHandler}. If no matching handler is found,
-     * the fallback command handler is used.</p>
-     *
-     * <p>Ensures the command is permitted in the current flow context before execution.</p>
-     *
-     * @param chatId the originating chat ID
-     * @param from the Telegram user issuing the command
-     * @param text the command text, starting with '/'
+     * Dispatches the update to a specific command handler.
+     * <ol>
+     * <li>Looks up the {@link CommandHandler} in the registry based on the command text (case-insensitive).</li>
+     * <li>Uses the fallback command handler if a specific match is not found.</li>
+     * <li>Validates the user's current flow context.</li>
+     * <li>Executes the matched handler.</li>
+     * </ol>
+     * @param chatId The ID of the chat.
+     * @param from The user who sent the command.
+     * @param text The full command text (e.g., "/start").
      */
     private void handleCommand(Long chatId, FromDto from, String text) {
         CommandHandler handler = handlerRegistry.getCommandHandlers()
@@ -139,15 +158,14 @@ public class GlobalHandlerImpl implements GlobalHandler {
     }
 
     /**
-     * Processes a plain text message.
-     *
-     * <p>Finds the first {@link TextHandler} that claims it can handle the message.
-     * If none match, the fallback text handler is used.</p>
-     *
-     * <p>Before handler execution, the user's active flow context is validated.</p>
-     *
-     * @param chatId the originating chat ID
-     * @param text the non-command text message
+     * Dispatches the update to the first capable text handler.
+     * <ol>
+     * <li>Streams through the registered text handlers.</li>
+     * <li>The first {@link TextHandler} that returns {@code true} from {@code canHandle(text)} is executed.</li>
+     * <li>If no specific handler can process the text, the fallback text handler is executed.</li>
+     * </ol>
+     * @param chatId The ID of the chat.
+     * @param text The text content of the message.
      */
     private void handleText(Long chatId, String text) {
         handlerRegistry.getTextHandlers().stream()
@@ -170,18 +188,16 @@ public class GlobalHandlerImpl implements GlobalHandler {
     }
 
     /**
-     * Processes a callback query generated from an inline button.
-     *
-     * <p>Automatically sends a callback answer to Telegram confirming receipt, then
-     * resolves and executes the appropriate {@link CallbackHandler} based on the
-     * callback data prefix.</p>
-     *
-     * <p>If no matching handler is found, the fallback callback handler is used.</p>
-     *
-     * <p>Flow context is validated before handler execution.</p>
-     *
-     * @param chatId the originating chat ID
-     * @param callbackQuery the callback query payload
+     * Processes an incoming callback query resulting from a user pressing an inline keyboard button.
+     * <ol>
+     * <li>Sends an {@code answerCallbackQuery} response to remove the "loading" indicator from the button.</li>
+     * <li>Finds the appropriate {@link CallbackHandler} by matching the beginning of the {@code callbackData}
+     * against the keys in the handler registry.</li>
+     * <li>Validates the user's current flow context.</li>
+     * <li>Executes the matched handler.</li>
+     * </ol>
+     * @param chatId The ID of the chat.
+     * @param callbackQuery The callback query DTO.
      */
     private void handleCallbackQuery(Long chatId, CallbackQueryDto callbackQuery) {
 

@@ -13,49 +13,60 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Central registry for all Telegram update handlers.
- *
- * <p>This component discovers and organizes all {@link CallbackHandler},
- * {@link CommandHandler}, and {@link TextHandler} implementations provided
- * via Spring dependency injection.</p>
- *
- * <p>Each handler category maintains a primary set of handlers along with a
- * mandatory fallback handler. The fallback is used when no dedicated handler
- * matches the incoming update.</p>
- *
- * <p>The registry is constructed once at application startup and remains immutable.</p>
+ * Registry component that manages and distributes different types of message handlers.
+ * <p>
+ * This class acts as a central repository for {@link CallbackHandler}, {@link CommandHandler},
+ * and {@link TextHandler} implementations. It categorizes handlers into maps for quick lookup
+ * and identifies mandatory fallback handlers for each category.
+ * </p>
  */
 @Component
 @Getter
 @Slf4j
 public class HandlerRegistry {
 
+    /**
+     * Map of callback handlers indexed by their unique key.
+     */
     private final Map<String, CallbackHandler> callbackHandlers;
+
+    /**
+     * The default handler used when no specific callback key matches.
+     */
     private final CallbackHandler fallbackCallbackHandler;
 
+    /**
+     * Map of command handlers indexed by their specific command string.
+     */
     private final Map<String, CommandHandler> commandHandlers;
+
+    /**
+     * The default handler used when an unknown command is received.
+     */
     private final CommandHandler fallbackCommandHandler;
 
+    /**
+     * List of handlers processed sequentially for plain text messages.
+     */
     private final List<TextHandler> textHandlers;
+
+    /**
+     * The default handler used when no text handlers can process the input.
+     */
     private final FallbackTextHandler fallbackTextHandler;
 
     /**
-     * Builds the handler registry by categorizing all provided handlers
-     * into dedicated and fallback handler groups.
-     *
-     * <p>A handler is considered the fallback variant if its key/command is
-     * {@code "__FALLBACK__"} (for callbacks and commands), or if it is an instance of
-     * {@link FallbackTextHandler} (for text handlers).</p>
-     *
-     * <p>During initialization, each non-fallback handler is logged for visibility.</p>
-     *
-     * @param callbackHandlerList list of all callback handlers discovered by Spring
-     * @param commandHandlerList  list of all command handlers discovered by Spring
-     * @param textHandlerList     list of all text handlers discovered by Spring
-     *
-     * @throws IllegalStateException if any of the required fallback handlers
-     *                               (callback, command, text) is missing
+     * Constructs the registry by filtering and indexing provided handler implementations.
+     * <p>
+     * Handlers marked with the key {@code "__FALLBACK__"} are assigned as fallback handlers.
+     * All other handlers are registered into their respective maps or lists.
+     * </p>
+     * @param callbackHandlerList List of available {@link CallbackHandler} beans.
+     * @param commandHandlerList  List of available {@link CommandHandler} beans.
+     * @param textHandlerList     List of available {@link TextHandler} beans.
+     * @throws IllegalStateException if a required fallback handler is missing from the provided lists.
      */
+
     public HandlerRegistry(List<CallbackHandler> callbackHandlerList,
                            List<CommandHandler> commandHandlerList,
                            List<TextHandler> textHandlerList) {

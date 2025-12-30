@@ -9,14 +9,10 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 /**
- * Utility component responsible for validating whether a handler is allowed to run
+ * Helper component for validating whether a handler is allowed to run
  * in the user's current conversational flow context.
- *
- * <p>The application associates each chat session with a {@link FlowContext}
- * (e.g., browsing, booking, editing). Handlers declare the flow contexts in which
- * they are permitted to operate, and this helper ensures that the invocation is
- * valid.</p>
- *
+ * <p>This class ensures that a user's current session state (FlowContext) aligns with
+ * the permitted contexts for a specific action or command.</p>
  * <p>If a handler is invoked in an invalid context, an
  * {@link InvalidFlowContextException} is thrown with a user-friendly message.</p>
  */
@@ -24,23 +20,23 @@ import java.util.EnumSet;
 @RequiredArgsConstructor
 public class FlowContextHelper {
 
+    /**
+     * Service used to retrieve and manage session-specific data.
+     */
     private final SessionService sessionService;
 
     /**
-     * Validates that the user's current flow context is allowed for the handler.
-     *
-     * <p>This method retrieves the active {@link FlowContext} from the session store.
-     * If the current context is not among the allowed ones, or if no context exists
-     * and the handler is not universally allowed, an exception is thrown.</p>
-     *
-     * <p>A handler is considered universally allowed when its
-     * {@code allowedContexts} equals {@code EnumSet.allOf(FlowContext.class)}.</p>
-     *
-     * @param chatId the ID of the Telegram chat whose context is being validated
-     * @param allowedContexts the contexts in which the handler may execute
-     *
-     * @throws InvalidFlowContextException if execution is not allowed for the
-     *                                     current flow context
+     * Validates if the current flow context for a given chat ID is permitted.
+     * <p>The validation logic follows these rules:
+     * <ul>
+     *     <li>If a context exists, it must be present in the {@code allowedContexts} set.</li>
+     *     <li>If no context exists, the action is only permitted if {@code allowedContexts}
+     *     contains all possible {@link FlowContext} values (representing a global/open state).</li>
+     * </ul>
+     * </p>
+     * @param chatId          The unique identifier of the chat/user session.
+     * @param allowedContexts An {@link EnumSet} of {@link FlowContext} values that are valid for this operation.
+     * @throws InvalidFlowContextException if the current context is not allowed or is missing when required.
      */
     public void validateFlowContext(Long chatId, EnumSet<FlowContext> allowedContexts) {
         FlowContext current = sessionService

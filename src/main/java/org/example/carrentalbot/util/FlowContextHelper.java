@@ -48,34 +48,11 @@ public class FlowContextHelper {
                 .orElse(null);
 
         if (current != null && !allowedContexts.contains(current)) {
-            throw new InvalidFlowContextException(getInvalidContextMessage(current));
+            throw new InvalidFlowContextException(current.getErrorMessage());
         }
 
         if (current == null && !allowedContexts.equals(EnumSet.allOf(FlowContext.class))) {
-            throw new InvalidFlowContextException(getInvalidContextMessage(null));
+            throw new InvalidFlowContextException("This option is not available right now.");
         }
-    }
-
-    /**
-     * Produces a user-friendly validation failure message based on the current flow.
-     *
-     * @param current the user's active flow context; may be {@code null}
-     * @return a descriptive error message indicating why the handler is unavailable
-     */
-    private String getInvalidContextMessage(FlowContext current) {
-        if (current == null) {
-            return "This action is not available right now.";
-        }
-
-        return switch (current) {
-            case BROWSING_FLOW ->
-                    "The handler is not available in browsing flow.";
-            case BOOKING_FLOW ->
-                    "The handler is not available in booking flow.";
-            case EDIT_BOOKING_FLOW ->
-                    "The handler is not available in editing booking flow.";
-            case MY_BOOKINGS_FLOW ->
-                    "The handler is not available in my booking flow.";
-        };
     }
 }

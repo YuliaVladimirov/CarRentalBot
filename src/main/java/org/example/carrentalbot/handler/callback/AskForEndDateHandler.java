@@ -21,29 +21,97 @@ import java.time.format.DateTimeParseException;
 import java.util.EnumSet;
 import java.util.Optional;
 
+/**
+ * Concrete implementation of the {@link CallbackHandler} interface.
+ * <p>This service manages the interactive calendar state during the start-date selection
+ * phase. It is responsible for:
+ * <ul>
+ * <li>Providing the unique {@code AskForEndDateHandler} identifier ({@code KEY}) for callback routing.</li>
+ * <li>Enforcing access control by restricting execution to {@link FlowContext#BROWSING_FLOW}.</li>
+ * <li>Handling calendar navigation (switching between months).</li>
+ * <li>Processing the user's initial date selection ({@code PICK} action).</li>
+ * <li>Validating that the selected start date is not in the past.</li>
+ * <li>Persisting the valid start date to the {@link SessionService}.</li>
+ * <li>Transitioning the user to the end-date selection by refreshing the calendar
+ * with the {@link ConfirmDatesHandler} prefix.</li>
+ * </ul>
+ * </p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AskForEndDateHandler implements CallbackHandler {
 
+    /**
+     * The unique callback data prefix used to identify {@code AskForEndDateHandler} and properly route callbacks.
+     */
     public static final String KEY = "END_DATE";
+
+    /**
+     * The set of application states in which this handler is permitted to execute.
+     * <p>Restricted to {@link FlowContext#BROWSING_FLOW}
+     * to ensure date selection only occurs during the browsing lifecycle.</p>
+     */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
+    /**
+     * Service responsible for managing user-specific session data, specifically the
+     * validated {@code startDate} (in {@link LocalDate} format).
+     */
     private final SessionService sessionService;
+
+    /**
+     * Factory responsible for constructing the interactive inline calendar markup
+     * for selecting rental end date.
+     */
     private final KeyboardFactory keyboardFactory;
+
+    /**
+     * Component responsible for interacting with the Telegram Bot API to deliver messages,
+     * specifically to display the calendar for rental date selection.
+     */
     private final TelegramClient telegramClient;
+
+
     private final Clock clock = Clock.systemDefaultZone();
 
+    /**
+     * {@inheritDoc}
+     * @return The constant {@link #KEY}.
+     */
     @Override
     public String getKey() {
         return KEY;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return A set containing only {@link FlowContext#BROWSING_FLOW}.
+     */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
         return ALLOWED_CONTEXTS;
     }
 
+    /**
+     * Processes interactions with the start-date calendar, including navigation
+     * and date selection.
+     * <ol>
+     * <li>Parses the callback data to extract the specific {@link CalendarAction}.</li>
+     * <li>If the action is {@code IGNORE}, the request is discarded.</li>
+     * <li>If the action is {@code PREV} or {@code NEXT}, the current month view
+     * is updated via {@code editMessageReplyMarkup}.</li>
+     * <li>If the action is {@code PICK}, the selected date is validated:</li>
+     * <ul>
+     * <li><b>Valid:</b> The date is saved to the session, and a new calendar is
+     * presented for the end-date selection.</li>
+     * <li><b>Invalid:</b> An error message is sent along with a "Try Again"
+     * keyboard option.</li>
+     * </ul>
+     * </ol>
+     * @param chatId The ID of the chat.
+     * @param callbackQuery The incoming callback query DTO.
+     */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         log.info("Processing 'end date calendar'");
@@ -61,10 +129,8 @@ public class AskForEndDateHandler implements CallbackHandler {
 
         switch (action) {
 
-            case IGNORE -> {
+            case IGNORE ->
                 log.debug("Handling IGNORE action");
-                return;
-            }
 
             case PREV, NEXT -> {
                 log.debug("Handling month change: action={}, yearPart={}, monthPart={}",
@@ -107,11 +173,11 @@ public class AskForEndDateHandler implements CallbackHandler {
 
                     text = """
                             <b>Invalid start date:</b>
-                                                            
+                            
                             ⚠️ <b>Make sure:</b>
                             • You cannot book for past days
                             • Start date must NOT be before the current date.
-                                                            
+                            
                             Please check your date and re-enter:
                             """;
 
@@ -128,6 +194,12 @@ public class AskForEndDateHandler implements CallbackHandler {
         }
     }
 
+    /**
+     * Splits the raw callback data into its constituent parts for processing.
+     * @param data The raw callback string from Telegram.
+     * @return A string array containing the segments of the callback.
+     * @throws InvalidDataException if the data is null.
+     */
     private String[] parseCallback(String data) {
         return Optional.ofNullable(data)
                 .orElseThrow(() -> new InvalidDataException("Callback data is null"))
@@ -135,6 +207,12 @@ public class AskForEndDateHandler implements CallbackHandler {
                 .split(":");
     }
 
+    /**
+     * Identifies the specific operation requested from the calendar (PICK, NEXT, PREV, IGNORE).
+     * @param callbackParts The segmented callback data.
+     * @return The corresponding {@link CalendarAction}.
+     * @throws InvalidDataException if the action is missing or unrecognized.
+     */
     private CalendarAction extractCalendarAction(String[] callbackParts) {
         if (callbackParts.length < 2) {
             throw new InvalidDataException("Missing calendar action in callback");
@@ -147,6 +225,12 @@ public class AskForEndDateHandler implements CallbackHandler {
         }
     }
 
+    /**
+     * Calculates the target year and month based on navigation input and
+     * builds a new calendar markup.
+     * @param callbackParts The segmented callback data containing current month/year.
+     * @return A new {@link InlineKeyboardMarkupDto} representing the adjacent month.
+     */
     private InlineKeyboardMarkupDto handleMonthChange(String[] callbackParts) {
         if (callbackParts.length < 4) {
             throw new InvalidDataException("Missing year or month in callback");
@@ -172,6 +256,12 @@ public class AskForEndDateHandler implements CallbackHandler {
         return keyboardFactory.buildCalendar(year, month, AskForEndDateHandler.KEY + ":");
     }
 
+    /**
+     * Parses the date string from the callback data into a {@link LocalDate} object.
+     * @param callbackParts The segmented callback data.
+     * @return The selected {@link LocalDate}.
+     * @throws InvalidDataException if the date segment is missing or malformed.
+     */
     private LocalDate extractDate(String[] callbackParts) {
         if (callbackParts.length < 3) {
             throw new InvalidDataException("Missing date in callback");
@@ -184,6 +274,13 @@ public class AskForEndDateHandler implements CallbackHandler {
         }
     }
 
+    /**
+     * Validates that the selected start date is eligible for a new booking.
+     * <p>The date is considered valid only if it is not earlier than the
+     * current system date.</p>
+     * @param startDate The date selected by the user.
+     * @return {@code true} if the date is today or in the future; {@code false} otherwise.
+     */
     public boolean validateStartDate(LocalDate startDate) {
         if (startDate == null) return false;
 

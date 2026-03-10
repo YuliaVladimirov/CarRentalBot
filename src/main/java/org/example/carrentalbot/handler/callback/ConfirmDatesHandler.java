@@ -27,8 +27,8 @@ public class ConfirmDatesHandler implements CallbackHandler {
     public static final String KEY = "CONFIRM_DATES";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
-    private final KeyboardFactory keyboardFactory;
     private final SessionService sessionService;
+    private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     @Override
@@ -187,13 +187,21 @@ public class ConfirmDatesHandler implements CallbackHandler {
     }
 
     public boolean validateEndDate(LocalDate startDate, LocalDate endDate) {
-        return !endDate.isBefore(LocalDate.now()) && !endDate.isBefore(startDate);
+        if (startDate == null || endDate == null) {
+            return false;
+        }
+
+        return endDate.isAfter(startDate);
     }
 
     public boolean validateDuration(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            return false;
+        }
+
         long days = ChronoUnit.DAYS.between(startDate, endDate);
 
-        return days >= 0 && days <= 60;
+        return days >= 1 && days <= 60;
     }
 
     private String getDataForKeyboard(Long chatId) {

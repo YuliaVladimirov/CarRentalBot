@@ -14,6 +14,7 @@ import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -28,9 +29,10 @@ public class AskForEndDateHandler implements CallbackHandler {
     public static final String KEY = "END_DATE";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
-    private final KeyboardFactory keyboardFactory;
     private final SessionService sessionService;
+    private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
+    private final Clock clock = Clock.systemDefaultZone();
 
     @Override
     public String getKey() {
@@ -183,6 +185,9 @@ public class AskForEndDateHandler implements CallbackHandler {
     }
 
     public boolean validateStartDate(LocalDate startDate) {
-        return !startDate.isBefore(LocalDate.now());
+        if (startDate == null) return false;
+
+        LocalDate today = LocalDate.now(clock);
+        return !startDate.isBefore(today);
     }
 }

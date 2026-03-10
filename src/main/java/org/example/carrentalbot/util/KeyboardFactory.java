@@ -44,13 +44,13 @@ public class KeyboardFactory {
     public InlineKeyboardMarkupDto buildCarCategoryKeyboard(List<CarProjection> availability) {
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
-        for (CarProjection dto : availability) {
-            String emoji = getCategoryEmoji(dto.category());
-            BigDecimal minimalDailyRate = dto.minimalDailyRate().setScale(0, RoundingMode.HALF_UP);
+        for (CarProjection projection : availability) {
+            String emoji = getCategoryEmoji(projection.category());
+            BigDecimal minimalDailyRate = projection.minimalDailyRate().setScale(0, RoundingMode.HALF_UP);
 
             rows.add(List.of(button(
-                    String.format("%s %s - from €%s/day", emoji, dto.category().getValue(), minimalDailyRate),
-                    ChooseCarBrowsingModeHandler.KEY + ":" + dto.category().name())));
+                    String.format("%s %s - from €%s/day", emoji, projection.category().getValue(), minimalDailyRate),
+                    ChooseCarBrowsingModeHandler.KEY + ":" + projection.category().name())));
         }
 
         rows.add(List.of(button("⬅️ To Main Menu", MainMenuHandler.KEY)));

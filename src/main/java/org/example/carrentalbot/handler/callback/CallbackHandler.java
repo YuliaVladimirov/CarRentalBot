@@ -34,8 +34,10 @@ public interface CallbackHandler {
 
     /**
      * Executes the main business logic required to process the callback query.
-     * <p>Implementations should typically update the user's flow state, send
-     * a response message, or modify the message that contains the inline keyboard.</p>
+     * <p>Implementations should typically update the user's flow state,
+     * validate the received data, persist it to the session store, and send
+     * a response message with the inline keyboard
+     * to advance the user to the next step in the flow.</p>
      * @param chatId The ID of the Telegram chat where the callback originated.
      * @param callbackQuery The data transfer object containing the full callback
      * details, including the user and the callback data payload.

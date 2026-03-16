@@ -17,8 +17,8 @@ import java.util.EnumSet;
  * <ul>
  * <li>Providing a unique internal key {@code __FALLBACK__} for unmapped requests.</li>
  * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Gracefully handling scenarios where a callback key is recognized but no
- * specific business logic is found.</li>
+ * <li>Gracefully handling scenarios where a callback key {@code "__FALLBACK__"} is recognized
+ * preventing the bot from becoming unresponsive.</li>
  * <li>Guiding the user back to the primary navigation points (Main Menu or Help).</li>
  * </ul>
  * </p>

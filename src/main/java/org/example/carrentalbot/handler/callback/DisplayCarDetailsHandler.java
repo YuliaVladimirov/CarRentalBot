@@ -61,7 +61,7 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
 
     /**
      * Service responsible for managing user-specific session data,
-     * specifically for {@code carId} (in {@link UUID} format).
+     * specifically the {@code carId} (in {@link UUID} format).
      */
     private final SessionService sessionService;
 

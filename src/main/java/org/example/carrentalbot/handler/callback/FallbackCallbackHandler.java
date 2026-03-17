@@ -37,6 +37,10 @@ public class FallbackCallbackHandler implements CallbackHandler {
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
+    /**
+     * Factory responsible for constructing the inline contextual keyboard
+     * for main menu navigation.
+     */
     private final KeyboardFactory keyboardFactory;
 
     /**
@@ -69,7 +73,7 @@ public class FallbackCallbackHandler implements CallbackHandler {
      * <li>Logs the fallback event for administrative monitoring.</li>
      * <li>Constructs a user-friendly HTML error message.</li>
      * <li>Provides actionable instructions for the user to reset their state
-     * using {@code /main} or {@code /help}.</li>
+     * using navigation keyboard, or commands {@code /main} or {@code /help}.</li>
      * <li>Delivers the response message via the Telegram API.</li>
      * </ol>
      * @param chatId The ID of the chat where the error occurred.

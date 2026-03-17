@@ -325,12 +325,9 @@ public class ConfirmDatesHandler implements CallbackHandler {
     }
 
     /**
-     * Determines the appropriate callback target for the next phase of the flow.
-     * <ol>
-     * <li>Retrieves the active {@link CarBrowsingMode} from the session.</li>
-     * <li>If the mode is {@code ALL_CARS}, the user is routed to availability verification.</li>
-     * <li>If the mode is {@code CARS_FOR_DATES}, the user is routed to the car list search.</li>
-     * </ol>
+     * Logic-driven router that selects the next {@link CallbackHandler} key
+     * based on the user's current {@link FlowContext}.
+     * Retrieves the active {@link CarBrowsingMode} from the session.
      * @param chatId The ID of the chat.
      * @return The {@code KEY} associated with the next {@link CallbackHandler}.
      * @throws DataNotFoundException if the browsing mode is not present in the session.

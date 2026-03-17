@@ -201,13 +201,11 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Evaluates the current browsing mode to determine the next button the user should see.
-     * <ul>
-     * <li><b>ALL_CARS:</b> Returns a key for {@link AskForStartDateHandler} to check availability.</li>
-     * <li><b>CARS_FOR_DATES:</b> Returns a key for {@code StartBookingHandler} since dates are already known.</li>
-     * </ul>
+     * Logic-driven router that selects the next {@link CallbackHandler} key
+     * based on the user's current {@link FlowContext}.
+     * Retrieves the active {@link CarBrowsingMode} from the session.
      * @param chatId The ID of the chat.
-     * @return A {@link Map.Entry} where the key is the handler KEY and the value is the button label.
+     * @return A {@link Map.Entry} where the key is the next {@link CallbackHandler} KEY and the value is the button label.
      * @throws DataNotFoundException if the browsing mode is missing from the session.
      */
     private Map.Entry<String, String> getDataForKeyboard(Long chatId) {

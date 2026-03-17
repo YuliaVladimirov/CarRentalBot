@@ -2,8 +2,10 @@ package org.example.carrentalbot.handler.text;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
+import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ import java.util.EnumSet;
 public class FallbackTextHandler implements TextHandler {
 
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
+
+    private final KeyboardFactory keyboardFactory;
     private final TelegramClient telegramClient;
 
     @Override
@@ -38,10 +42,13 @@ public class FallbackTextHandler implements TextHandler {
                 For other available options type /help.
                 """;
 
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(text)
                 .parseMode("HTML")
+                .replyMarkup(replyMarkup)
                 .build());
     }
 }

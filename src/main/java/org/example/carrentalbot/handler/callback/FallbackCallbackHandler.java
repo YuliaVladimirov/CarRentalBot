@@ -3,8 +3,10 @@ package org.example.carrentalbot.handler.callback;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.carrentalbot.dto.CallbackQueryDto;
+import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
+import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,8 @@ public class FallbackCallbackHandler implements CallbackHandler {
      * response can be delivered regardless of the user's current session state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
+
+    private final KeyboardFactory keyboardFactory;
 
     /**
      * Component responsible for interacting with the Telegram Bot API to deliver messages,
@@ -82,10 +86,13 @@ public class FallbackCallbackHandler implements CallbackHandler {
                 For other available options type /help.
                 """;
 
+        InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildToMainMenuKeyboard();
+
         telegramClient.sendMessage(SendMessageDto.builder()
                 .chatId(chatId.toString())
                 .text(text)
                 .parseMode("HTML")
+                .replyMarkup(replyMarkup)
                 .build());
     }
 }

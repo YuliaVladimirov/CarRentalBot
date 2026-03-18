@@ -6,7 +6,6 @@ import org.example.carrentalbot.dto.CallbackQueryDto;
 import org.example.carrentalbot.dto.InlineKeyboardMarkupDto;
 import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.model.enums.FlowContext;
-import org.example.carrentalbot.session.SessionService;
 import org.example.carrentalbot.util.KeyboardFactory;
 import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.stereotype.Service;
@@ -21,9 +20,8 @@ public class CancelBookingHandler implements CallbackHandler {
     public static final String KEY = "CANCEL_BOOKING";
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
-    private final SessionService sessionService;
-    private final TelegramClient telegramClient;
     private final KeyboardFactory keyboardFactory;
+    private final TelegramClient telegramClient;
 
     @Override
     public String getKey() {
@@ -38,9 +36,6 @@ public class CancelBookingHandler implements CallbackHandler {
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         log.info("Processing 'cancel booking' flow");
-
-        sessionService.put(chatId, "flowContext", FlowContext.EDIT_BOOKING_FLOW);
-        log.debug("Session updated: 'flowContext' set to {}", FlowContext.EDIT_BOOKING_FLOW);
 
         InlineKeyboardMarkupDto replyMarkup = keyboardFactory.buildCancelBookingKeyboard();
 

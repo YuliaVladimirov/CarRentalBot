@@ -19,7 +19,7 @@ import java.util.EnumSet;
 public class ConfirmCancelBookingHandler implements CallbackHandler {
 
     public static final String KEY = "CONFIRM_CANCEL_BOOKING";
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.EDIT_BOOKING_FLOW);
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     private final SessionService sessionService;
     private final KeyboardFactory keyboardFactory;

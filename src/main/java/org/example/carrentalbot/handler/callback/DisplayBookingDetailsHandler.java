@@ -54,7 +54,7 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     /**
-     * Service used to retrieve the full {@link Car} entity, including technical
+     * Service responsible for retrieving the full {@link Car} entity, including technical
      * specifications and the {@code imageFileId} for the summary photo.
      */
     private final CarService carService;

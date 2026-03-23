@@ -22,6 +22,7 @@ import java.util.EnumSet;
  * <li>Defining accessibility to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</li>
  * <li>Executing the final "Hard Reset" of the user's conversational state.</li>
  * <li>Purging all transient booking data (dates, car selection, contact info) from the session.</li>
+ * <li>Sends a Telegram message with the cancellation receipt.</li>
  * <li>Providing a clean transition back to the Main Menu.</li>
  * </ul>
  * </p>
@@ -49,14 +50,13 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
     private final SessionService sessionService;
 
     /**
-     * Factory component responsible for constructing the "To Main Menu" keyboard,
-     * providing the user with a clear exit path after their session is cleared.
+     * Factory component responsible for generating the "To Main Menu" keyboard for the final exit.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver the
-     * final cancellation acknowledgment message.
+     * Component responsible for interacting with the Telegram Bot API
+     * to deliver the final cancellation acknowledgment message.
      */
     private final TelegramClient telegramClient;
 
@@ -82,8 +82,8 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
      * Finalizes the cancellation by clearing the user session.
      * <ol>
      * <li>Logs the confirmed cancellation for session tracking.</li>
-     * <li><b>Session Cleanup:</b> Invokes {@code deleteAll} to remove all attributes associated
-     * with the current {@code chatId}, effectively resetting the state machine.</li>
+     * <li>Invokes {@code deleteAll} to remove all attributes associated
+     * with the current {@code chatId} in session.</li>
      * <li>Sends a final acknowledgment message to the user confirming the action.</li>
      * <li>Attaches a "Main Menu" keyboard to facilitate the start of a new interaction.</li>
      * </ol>

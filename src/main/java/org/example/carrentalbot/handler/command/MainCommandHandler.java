@@ -30,7 +30,7 @@ public class MainCommandHandler implements CommandHandler {
     /**
      * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
      */
-    public static final String COMMAND = "/start";
+    public static final String COMMAND = "/main";
 
     /**
      * The set of application states in which this handler is permitted to execute.

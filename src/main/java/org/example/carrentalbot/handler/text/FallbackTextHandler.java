@@ -43,7 +43,7 @@ public class FallbackTextHandler implements TextHandler {
 
     /**
      * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to deliver the fallback message.
+     * specifically for delivering the fallback message.
      */
     private final TelegramClient telegramClient;
 

@@ -24,8 +24,7 @@ public interface TextHandler {
      * Returns a set of allowed application states (flow contexts) in which this
      * text handler is permitted to execute its logic.
      * <p>This is used by the dispatcher (e.g., {@code GlobalHandler}) to ensure
-     * that a user's text input (e.g., a phone number) is only processed when the bot is actually
-     * expecting that specific piece of information.</p>
+     * the user is not attempting to perform an action outside a defined workflow.</p>
      * If the implementation returns {@link EnumSet#allOf(Class)}, it signifies
      * that the handler can be executed regardless of the user's current flow state.</p>
      * @return An {@link EnumSet} of {@link FlowContext} constants that allow execution.

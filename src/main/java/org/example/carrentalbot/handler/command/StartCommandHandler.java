@@ -14,27 +14,78 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
+/**
+ * Concrete implementation of the {@link CommandHandler} interface.
+ * <p>This service is the primary entry point for all users of the Car Rental Bot.
+ * This handler is responsible for:
+ * the initial "Onboarding" experience, including:
+ * <ul>
+ * <li>Providing a direct mapping for the {@code /start} slash-command.</li>
+ *  <li>Defining global accessibility across all {@link FlowContext} states.</li>
+ * <li>Idempotent registration of the customer in the database.</li>
+ * <li>Differentiating between new users and returning customers for personalized greetings.</li>
+ * <li>Immediate hand-off to the {@link MainMenuHandler} to present available services.</li>
+ * </ul>
+ * </p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StartCommandHandler implements CommandHandler {
 
+    /**
+     * The set of application states in which this handler is permitted to execute.
+     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure
+     * that a reset or restart can be possible regardless of the user's current session state.</p>
+     */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
+    /**
+     * Service responsible for persisting or retrieving the {@link Customer} record based on
+     * Telegram user information.
+     */
     private final CustomerServiceImpl customerService;
+
+    /**
+     * Handler responsible for displaying the initial navigation options after the welcome message.
+     */
     private final MainMenuHandler mainMenuHandler;
+
+    /**
+     * Component responsible for interacting with the Telegram Bot API to deliver messages,
+     * specifically for delivering the personalized welcome text.
+     */
     private final TelegramClient telegramClient;
 
+    /**
+     * {@inheritDoc}
+     * @return The string {@code "/start"}.
+     */
     @Override
     public String getCommand() {
         return "/start";
     }
 
+    /**
+     * {@inheritDoc}
+     * @return A set containing all possible {@link FlowContext} values.
+     */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
         return ALLOWED_CONTEXTS;
     }
 
+    /**
+     * Orchestrates the user's first interaction with the bot.
+     * <ol>
+     * <li>Invokes {@code registerIfNotExists} to ensure a database record exists for the user.</li>
+     * <li>Checks {@code CustomerRegistration.isNew()} to branch the greeting logic.</li>
+     * <li>Sends a "Hi!" or "Welcome back!" message via the {@link TelegramClient}.</li>
+     * <li>Delegates control to the {@link MainMenuHandler} to present the main interface.</li>
+     * </ol>
+     * @param chatId The ID of the chat.
+     * @param from The Telegram user data used for registration and personalization.
+     */
     @Override
     public void handle(Long chatId, FromDto from) {
         log.info("Processing '/start' flow");

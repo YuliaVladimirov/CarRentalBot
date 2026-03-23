@@ -68,7 +68,7 @@ public class StartCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return A set containing all possible {@link FlowContext} values.
+     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {

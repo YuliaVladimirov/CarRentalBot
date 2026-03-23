@@ -87,7 +87,7 @@ public class EditMyBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Returns the allowed contexts for this handler.
+     * {@inheritDoc}
      * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override

@@ -55,8 +55,8 @@ public class AskForPhoneHandler implements CallbackHandler {
     }
 
     /**
-     * Returns the allowed contexts for this handler.
-     * @return A set containing all possible {@link FlowContext} values.
+     * {@inheritDoc}
+     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {

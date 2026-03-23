@@ -76,7 +76,7 @@ public class AskForStartDateHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return A set containing only {@link FlowContext#BROWSING_FLOW}.
+     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {

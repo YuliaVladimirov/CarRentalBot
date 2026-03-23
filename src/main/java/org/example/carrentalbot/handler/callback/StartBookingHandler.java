@@ -70,8 +70,8 @@ public class StartBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Returns the allowed contexts for this handler.
-     * @return A set containing only {@link FlowContext#BROWSING_FLOW}.
+     * {@inheritDoc}
+     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {

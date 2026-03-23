@@ -19,29 +19,93 @@ import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.UUID;
 
+/**
+ * Concrete implementation of the {@link CallbackHandler} interface.
+ * <p>This service manages the intent to cancel an existing reservation from the
+ * "My Bookings" management dashboard. It is responsible for:
+ * <ul>
+ * <li>Providing the unique {@code CancelMyBookingHandler} identifier ({@code KEY}) for callback routing.</li>
+ * <li>Defining accessibility to {@link FlowContext#MY_BOOKINGS_FLOW}.</li>
+ * <li>Retrieving the active {@code bookingId} from the user's session.</li>
+ * <li>Enforces business rules regarding cancellation eligibility (status and timing).</li>
+ * <li>Prevents the cancellation of bookings that have already started or are already canceled.</li>
+ * <li>Presents a confirmation prompt only if the booking is eligible for termination.</li>
+ * </ul>
+ * </p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CancelMyBookingHandler implements CallbackHandler {
 
-    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
+    /**
+     * The unique callback data prefix used to identify {@code CancelMyBookingHandler} and properly route callbacks.
+     */
     public static final String KEY = "CANCEL_MY_BOOKING";
 
+    /**
+     * The set of application states in which this handler is permitted to execute.
+     * <p>Restricted to {@link FlowContext#MY_BOOKINGS_FLOW}.</p>
+     */
+    private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
+
+    /**
+     * Service responsible for fetching the current {@link Booking} state to validate against
+     * cancellation business rules.
+     */
     private final BookingService bookingService;
+
+    /**
+     * Service responsible for retrieving the {@code bookingId} associated with the current interaction.
+     */
     private final SessionService sessionService;
-    private final TelegramClient telegramClient;
+
+    /**
+     * Factory responsible for building cancellation keyboard.
+     */
     private final KeyboardFactory keyboardFactory;
 
+    /**
+     * Component responsible for interacting with the Telegram Bot API to deliver validation
+     * warnings or the confirmation prompt.
+     */
+    private final TelegramClient telegramClient;
+
+    /**
+     * {@inheritDoc}
+     * @return The constant {@link #KEY}.
+     */
     @Override
     public String getKey() {
         return KEY;
     }
 
+    /**
+     * Returns the allowed contexts for this handler.
+     * @return {@link #ALLOWED_CONTEXTS}.
+     */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
         return ALLOWED_CONTEXTS;
     }
 
+    /**
+     * Orchestrates the validation logic for cancelling an existing booking.
+     * <ol>
+     * <li><b>State Retrieval:</b> Pulls the {@code bookingId} from the {@link SessionService}.</li>
+     * <li><b>Eligibility Check:</b>
+     * <ul>
+     * <li>If {@code status} is already {@link BookingStatus#CANCELLED}: Informs the user the action is redundant.</li>
+     * <li>If {@code today} is on or after {@code startDate}: Denies cancellation based on the 24-hour policy.</li>
+     * <li>Otherwise: Requests a confirmation of the cancellation to proceed.</li>
+     * </ul>
+     * </li>
+     * <li>Dispatches a context-specific message and the appropriate inline keyboard via {@link TelegramClient}.</li>
+     * </ol>
+     * @param chatId The ID of the chat.
+     * @param callbackQuery The incoming callback query DTO.
+     * @throws DataNotFoundException if the {@code bookingId} is missing from the session.
+     */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
         log.info("Processing 'cancel my booking' flow");

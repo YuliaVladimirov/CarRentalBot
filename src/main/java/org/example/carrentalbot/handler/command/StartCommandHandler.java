@@ -18,10 +18,9 @@ import java.util.EnumSet;
  * Concrete implementation of the {@link CommandHandler} interface.
  * <p>This service is the primary entry point for all users of the Car Rental Bot.
  * This handler is responsible for:
- * the initial "Onboarding" experience, including:
  * <ul>
- * <li>Providing a direct mapping for the {@code /start} slash-command.</li>
- *  <li>Defining global accessibility across all {@link FlowContext} states.</li>
+ * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
+ * <li>Defining global accessibility across all {@link FlowContext} states.</li>
  * <li>Idempotent registration of the customer in the database.</li>
  * <li>Differentiating between new users and returning customers for personalized greetings.</li>
  * <li>Immediate hand-off to the {@link MainMenuHandler} to present available services.</li>
@@ -32,6 +31,11 @@ import java.util.EnumSet;
 @Service
 @RequiredArgsConstructor
 public class StartCommandHandler implements CommandHandler {
+
+    /**
+     * The unique routing identifier used to identify {@code StartCommandHandler} and properly route commands.
+     */
+    public static final String COMMAND = "/start";
 
     /**
      * The set of application states in which this handler is permitted to execute.
@@ -59,11 +63,11 @@ public class StartCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return The string {@code "/start"}.
+     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
-        return "/start";
+        return COMMAND;
     }
 
     /**

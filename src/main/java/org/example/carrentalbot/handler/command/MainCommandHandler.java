@@ -15,7 +15,7 @@ import java.util.EnumSet;
  * <p>This service provides a global navigation shortcut to the bot's home screen.
  * It is responsible for:
  * <ul>
- * <li>Providing a direct mapping for the {@code /main} slash-command.</li>
+ * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
  * <li>Defining global accessibility across all {@link FlowContext} states.</li>
  * <li>Delegating the UI rendering and state management directly to the
  * {@link MainMenuHandler}.</li>
@@ -26,6 +26,11 @@ import java.util.EnumSet;
 @Service
 @RequiredArgsConstructor
 public class MainCommandHandler implements CommandHandler {
+
+    /**
+     * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
+     */
+    public static final String COMMAND = "/start";
 
     /**
      * The set of application states in which this handler is permitted to execute.
@@ -42,11 +47,11 @@ public class MainCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return The string {@code "/main"}.
+     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
-        return "/main";
+        return COMMAND;
     }
 
     /**

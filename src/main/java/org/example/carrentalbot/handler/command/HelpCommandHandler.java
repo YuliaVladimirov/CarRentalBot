@@ -14,7 +14,7 @@ import java.util.EnumSet;
  * <p>This service provides a global shortcut to the bot's assistance and
  * documentation menu. It is responsible for:
  * <ul>
- * <li>Mapping the {@code /help} slash-command to the help subsystem.</li>
+ * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
  * <li>Defining global accessibility across all {@link FlowContext} states.</li>
  * <li>Providing a context-agnostic way for users to find information about
  * bot features or commands.</li>
@@ -26,6 +26,11 @@ import java.util.EnumSet;
 @Service
 @RequiredArgsConstructor
 public class HelpCommandHandler implements CommandHandler {
+
+    /**
+     * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
+     */
+    public static final String COMMAND = "/help";
 
     /**
      * The set of application states in which this handler is permitted to execute.
@@ -43,11 +48,11 @@ public class HelpCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return The string {@code "/help"}.
+     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
-        return "/help";
+        return COMMAND;
     }
 
     /**

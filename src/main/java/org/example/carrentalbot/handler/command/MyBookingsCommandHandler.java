@@ -15,7 +15,7 @@ import java.util.EnumSet;
  * <p>This service provides a global shortcut to the user's personal booking
  * management dashboard. It is responsible for:
  * <ul>
- * <li>Mapping the {@code /bookings} slash-command to the reservation list view.</li>
+ * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
  * <li>Defining global accessibility across all {@link FlowContext} states.</li>
  * <li>Synthesizing a {@link CallbackQueryDto} to bridge the gap between command-based
  * input and the underlying callback-driven UI logic.</li>
@@ -26,6 +26,11 @@ import java.util.EnumSet;
 @Service
 @RequiredArgsConstructor
 public class MyBookingsCommandHandler implements CommandHandler {
+
+    /**
+     * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
+     */
+    public static final String COMMAND = "/bookings";
 
     /**
      * The set of application states in which this handler is permitted to execute.
@@ -42,11 +47,11 @@ public class MyBookingsCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return The string {@code "/bookings"}.
+     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
-        return "/bookings";
+        return COMMAND;
     }
 
     /**

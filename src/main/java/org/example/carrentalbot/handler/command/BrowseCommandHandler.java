@@ -14,7 +14,7 @@ import java.util.EnumSet;
  * <p>This service provides a global shortcut to the car browsing and
  * selection flow. It is responsible for:
  * <ul>
- * <li>Mapping the {@code /browse} slash-command to the car category catalog.</li>
+ * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
  * <li>Defining global accessibility across all {@link FlowContext} states.</li>
  * <li>Allowing users to bypass menus and immediately view available vehicle types.</li>
  * <li>Delegating the category display logic to the {@link BrowseCategoriesHandler}.</li>
@@ -25,6 +25,11 @@ import java.util.EnumSet;
 @Service
 @RequiredArgsConstructor
 public class BrowseCommandHandler implements CommandHandler {
+
+    /**
+     * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
+     */
+    public static final String COMMAND = "/browse";
 
     /**
      * The set of application states in which this handler is permitted to execute.
@@ -42,11 +47,11 @@ public class BrowseCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return The string {@code "/browse"}.
+     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
-        return "/browse";
+        return COMMAND;
     }
 
     /**

@@ -10,12 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller responsible for receiving and processing updates from the Telegram Bot API
- * via a webhook mechanism.
- * <p>It serves as the single entry point for all incoming messages, commands, and
- * callback queries from Telegram users.</p>
- * <p>This controller implements a security check using the {@code X-Telegram-Bot-Api-Secret-Token}
- * header to ensure that updates originate from the trusted Telegram server.</p>
+ * REST controller that receives and processes updates from the Telegram Bot webhook.
+ * <p>This is the single entry point for all incoming Telegram events, including
+ * messages, commands, and callback queries.</p>
+ * <p>Requests are optionally validated using the
+ * {@code X-Telegram-Bot-Api-Secret-Token} header to ensure they originate from
+ * Telegram.</p>
  */
 @Slf4j
 @RestController
@@ -24,27 +24,26 @@ import org.springframework.web.bind.annotation.*;
 public class WebhookController {
 
     /**
-     * The core handler component responsible for parsing the {@link UpdateDto}
-     * and routing it to the appropriate business logic (e.g., command,
-     * message or callback handlers, etc.).
+     * Delegates incoming updates to the appropriate handler based on their type
+     * (messages, commands, callback queries, etc.).
      */
     private final GlobalHandler globalHandler;
 
     /**
-     * Configuration properties related to the Telegram bot, primarily used here
-     * to access the required secret token for webhook validation.
+     * Telegram bot configuration properties, including the optional webhook secret
+     * used for request validation.
      */
     private final TelegramBotProperties telegramBotProperties;
 
     /**
-     * Main handler method that receives and processes incoming updates from the Telegram Bot API.
-     * <p>It first validates the optional secret token provided by Telegram to secure
-     * the webhook endpoint. If the secret is configured and invalid, the request
-     * is rejected with a 403 Forbidden status.</p>
-     * @param secretHeader The security token provided by Telegram in the {@code X-Telegram-Bot-Api-Secret-Token} header.
-     * @param update The deserialized body of the incoming update from Telegram.
-     * @return A {@link ResponseEntity} with status 200 (OK) if processed successfully,
-     * or 403 (FORBIDDEN) if the secret token is invalid.
+     * Handles incoming webhook updates from Telegram.
+     * <p>Validates the optional secret token (if configured) and rejects requests
+     * that do not match the expected value.</p>
+     * <p>Valid updates are forwarded to the {@link GlobalHandler} for processing.</p>
+     *
+     * @param secretHeader value of the {@code X-Telegram-Bot-Api-Secret-Token} header
+     * @param update incoming Telegram update payload
+     * @return HTTP 200 if processed successfully, or HTTP 403 if the secret token is invalid
      */
     @PostMapping
     public ResponseEntity<String> onUpdate(

@@ -10,6 +10,10 @@ import org.example.carrentalbot.util.TelegramClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * Default implementation of {@link ReminderDelivery}.
+ * Sends reminders through multiple channels (Telegram and email).
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -18,6 +22,13 @@ public class ReminderDeliveryImpl implements ReminderDelivery {
     private final EmailServiceImpl emailService;
     private final TelegramClient telegramClient;
 
+    /**
+     * Sends the reminder via all supported channels.
+     *
+     * <p>Execution is asynchronous to avoid blocking the caller.</p>
+     *
+     * @param reminder the reminder to send
+     */
     @Override
     @Async
     public void send(Reminder reminder) {

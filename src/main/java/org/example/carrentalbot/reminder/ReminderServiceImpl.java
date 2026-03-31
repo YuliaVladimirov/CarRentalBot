@@ -17,6 +17,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Default implementation of {@link ReminderService}.
+ * Manages reminder creation, scheduled processing, and cleanup.
+ * Uses {@link ReminderRepository} for persistence operations
+ * and {@link ReminderDelivery} for sending notifications.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,10 +31,20 @@ public class ReminderServiceImpl implements ReminderService {
     private final ReminderRepository reminderRepository;
     private final ReminderDelivery reminderDelivery;
 
+    /** Retention period (in days) for completed or canceled reminders. */
     private static final int RETENTION_DAYS = 90;
     private static final List<ReminderStatus> ELIGIBLE_FOR_SENT = List.of(
             ReminderStatus.PENDING, ReminderStatus.FAILED);
 
+    /**
+     * Creates reminders for the given booking based on its start and end dates.
+     *
+     * <p>Reminders are scheduled for the day before and the day of
+     * the start and end of the booking.</p>
+     *
+     * @param booking the booking for which reminders should be created
+     * @return a list of created {@link Reminder} entities
+     */
     @Override
     public List<Reminder> createReminders(Booking booking) {
 
@@ -79,10 +95,23 @@ public class ReminderServiceImpl implements ReminderService {
         return reminderRepository.saveAll(reminders);
     }
 
+    /**
+     * Checks whether a reminder should be scheduled.
+     *
+     * @param dueAt the planned reminder time
+     * @param now the current time
+     * @return {@code true} if the reminder is in the future
+     */
     private boolean isReminderEligible(LocalDateTime dueAt, LocalDateTime now) {
         return dueAt.isAfter(now);
     }
 
+     /**
+     * {@inheritDoc}
+     *
+     * <p>Reminders are processed in batches. Each reminder is marked as sent
+     * before delivery to avoid duplicate processing.</p>
+     */
     @Override
     @Scheduled(fixedRate = 3600000)
     @Transactional
@@ -131,6 +160,9 @@ public class ReminderServiceImpl implements ReminderService {
         } while (dueReminders.size() == BATCH_SIZE);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void cancelReminders(Booking booking) {
@@ -142,6 +174,10 @@ public class ReminderServiceImpl implements ReminderService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * Cleans up old completed or canceled reminders based on retention policy.
+     */
     @Override
     @Scheduled(cron = "0 0 3 * * ?") // 3:00 AM daily
     @Transactional

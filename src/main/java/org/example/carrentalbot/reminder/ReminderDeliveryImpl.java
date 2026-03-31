@@ -24,7 +24,6 @@ public class ReminderDeliveryImpl implements ReminderDelivery {
 
     /**
      * Sends the reminder via all supported channels.
-     *
      * <p>Execution is asynchronous to avoid blocking the caller.</p>
      *
      * @param reminder the reminder to send

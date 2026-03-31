@@ -3,36 +3,36 @@ package org.example.carrentalbot.model.enums;
 import lombok.Getter;
 
 /**
- * Defines the mode in which the car inventory is being queried and displayed to the user.
- * This enum is typically used to determine which filtering criteria should be applied to the car list.
+ * Defines how cars are filtered and presented to the user.
+ * <p>Determines whether all available cars are shown or only cars
+ * available for a specific rental period.</p>
  */
 @Getter
 public enum CarBrowsingMode {
 
     /**
-     * This browsing mode selects all cars that are currently
-     * {@code IN_SERVICE}, regardless of any future booking conflicts.
-     * It is used when the user has not yet specified a rental period.
-     * @see org.example.carrentalbot.model.enums.CarStatus
+     * Shows all cars that are currently in service.
+     * <p>No date-based filtering is applied. This mode is used when
+     * the user has not selected a rental period.</p>
      */
     ALL_CARS("All Cars"),
 
     /**
-     * This browsing mode applies temporal filtering, selecting
-     * only cars that are {@code IN_SERVICE} AND have no confirmed bookings
-     * overlapping with the user-specified start and end dates.
-     * @see org.example.carrentalbot.model.enums.CarStatus
+     * Shows cars available for a selected rental period.
+     * <p>Includes only cars that are in service and not reserved
+     * for overlapping confirmed bookings.</p>
      */
     CARS_FOR_DATES("Car For Dates");
 
     /**
-     * The user-friendly, displayable name for the browsing mode.
+     * Display name of the browsing mode.
      */
     private final String value;
 
     /**
-     * Constructs a {@code CarBrowsingMode} with the specified display value.
-     * @param value The display name to be associated with the enum constant.
+     * Creates a browsing mode with a display name.
+     *
+     * @param value human-readable mode name
      */
     CarBrowsingMode(String value) {
         this.value = value;

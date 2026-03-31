@@ -3,17 +3,16 @@ package org.example.carrentalbot.model.enums;
 import lombok.Getter;
 
 /**
- * Defines the fixed types of scheduled reminders sent to the customer based
- * on the start and end dates of their car rental.
- * <p>Each type provides the necessary text templates (title and message body)
- * for generating consistent, timely communications.</p>
+ * Defines reminder templates sent to customers based on their rental period.
+ * <p>Each type represents a specific moment in the rental lifecycle
+ * (before start or before end) and provides predefined message content
+ * for consistent communication.</p>
  */
 @Getter
 public enum ReminderType {
 
     /**
-     * Reminder scheduled to be sent exactly <b>1 day before</b> the official
-     * start date of the car rental period, triggered daily at 10:00 AM system time.
+     * Sent one day before the rental start date.
      */
     START_DAY_BEFORE(
             "Rental Start Reminder ⏳",
@@ -21,8 +20,7 @@ public enum ReminderType {
                     Dear customer, your rental starts tomorrow.
                     """),
     /**
-     * Reminder scheduled to be sent <b>on the day</b> the rental is scheduled to begin,
-     * triggered daily at 10:00 AM system time.
+     * Sent on the rental start date.
      */
     START_DAY_OF(
             "Rental Starting Today ⏳",
@@ -31,8 +29,7 @@ public enum ReminderType {
                     Have a great trip!
                     """),
     /**
-     * Reminder scheduled to be sent exactly <b>1 day before</b> the official
-     * end date of the car rental, triggered daily at 10:00 AM system time.
+     * Sent one day before the rental end date.
      */
     END_DAY_BEFORE(
             "Rental Return Reminder ⏳",
@@ -40,9 +37,7 @@ public enum ReminderType {
                     Dear customer, your rental ends tomorrow.
                     """),
     /**
-     * Reminder scheduled to be sent <b>on the day</b> the car is scheduled to be
-     * returned, triggered daily at 10:00 AM system time. This message urges the
-     * customer to return the vehicle promptly.
+     * Sent on the rental end date.
      */
     END_DAY_OF(
             "Rental Due Today ⏳",
@@ -52,20 +47,21 @@ public enum ReminderType {
                     """);
 
     /**
-     * The short, prominent title displayed for the reminder.
+     * Reminder title displayed to the customer.
      */
     private final String title;
 
     /**
-     * The body of the reminder message. This text often precedes or
-     * includes dynamic information like booking ID, rental period or total days.
+     * Reminder message body.
+     * <p>May include dynamic booking-related information at runtime.</p>
      */
     private final String message;
 
     /**
-     * Constructs a {@code ReminderType} with the specified title and message template.
-     * @param title The title of the reminder notification.
-     * @param message The body template of the reminder message.
+     * Creates a reminder template with a title and message body.
+     *
+     * @param title reminder title
+     * @param message reminder message template
      */
     ReminderType(String title, String message) {
         this.title = title;

@@ -9,13 +9,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 /**
- * Represents a scheduled notification related to a specific
- * {@link org.example.carrentalbot.model.Booking}.
- * This entity tracks the type of reminder (e.g., Rental Start Reminder, Rental Return Reminder),
- * its scheduled time, and its current execution status, including retry attempts.
- * <p>Maps to the {@code reminders} table and acts as a queue item for the
- * scheduled job processing system.</p>
- * <p>Uses Lombok for boilerplate code generation.</p>
+ * Represents a scheduled reminder notification for a booking.
+ * <p>Each reminder is tied to a specific booking and defines when and
+ * what type of notification should be sent to the customer.</p>
+ * <p>Used to manage time-based customer notifications during the
+ * rental lifecycle.</p>
+ * <p>Mapped to the {@code reminders} table.</p>
  *
  * @see org.example.carrentalbot.model.Booking
  * @see org.example.carrentalbot.model.enums.ReminderType
@@ -31,8 +30,8 @@ import java.time.LocalDateTime;
 public class Reminder {
 
     /**
-     * The unique internal identifier for this reminder record.
-     * Uses an auto-incrementing long (IDENTITY) strategy.
+     * Unique identifier of the reminder.
+     * Generated automatically as a UUID.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,8 +39,8 @@ public class Reminder {
     private Long id;
 
     /**
-     * The associated booking transaction this reminder is related to.
-     * This is a mandatory Many-to-One relationship, loaded lazily.
+     * Booking associated with this reminder.
+     *
      * @see org.example.carrentalbot.model.Booking
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -49,9 +48,8 @@ public class Reminder {
     private Booking booking;
 
     /**
-     * The category or purpose of the reminder (e.g., START_DAY_BEFORE, START_DAY_OF, END_DAY_BEFORE, END_DAY_OF).
-     * This determines the content and logic executed when the reminder is processed.
-     * Mapped as a String (ENUM) in the database.
+     * Type of reminder defining its purpose and timing within the rental lifecycle.
+     *
      * @see org.example.carrentalbot.model.enums.ReminderType
      */
     @Enumerated(EnumType.STRING)
@@ -59,16 +57,15 @@ public class Reminder {
     private ReminderType reminderType;
 
     /**
-     * The exact date and time the reminder is scheduled to be processed and sent.
-     * This field is mandatory.
+     * Scheduled date and time when the reminder should be processed.
      */
     @Column(name = "due_at", nullable = false)
     private LocalDateTime dueAt;
 
     /**
-     * The current processing status of the reminder (e.g., PENDING, SENT, FAILED, CANCELED).
-     * Defaults to {@code PENDING}. Only PENDING reminders are eligible for processing.
-     * Mapped as a String (ENUM) in the database.
+     * Current status of the reminder.
+     * <p>Only {@code PENDING} reminders are eligible for processing.</p>
+     *
      * @see org.example.carrentalbot.model.enums.ReminderStatus
      */
     @Enumerated(EnumType.STRING)
@@ -77,8 +74,7 @@ public class Reminder {
     private ReminderStatus status = ReminderStatus.PENDING;
 
     /**
-     * The timestamp indicating when this reminder record was first created.
-     * Set automatically by {@code @CreationTimestamp} and is immutable.
+     * Timestamp when the reminder was created.
      */
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

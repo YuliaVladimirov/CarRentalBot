@@ -3,20 +3,17 @@ package org.example.carrentalbot.model.enums;
 import lombok.Getter;
 
 /**
- * Defines the current conversational context (state) the user is currently in.
- * The context serves as a security and integrity mechanism, preventing users from
- * executing commands or selecting options that are outside the scope of their
- * current workflow, thereby enforcing application flow control.
- * <p>Each context includes a human-readable label and a specific error message
- * to be displayed if an unauthorized action is attempted while in that state.</p>
+ * Represents the current conversational flow the user is in.
+ * <p>Defines which actions and commands are allowed based on the user's
+ * current step in the application workflow.</p>
+ * <p>Used to enforce navigation consistency across multistep processes.</p>
  */
 @Getter
 public enum FlowContext {
 
     /**
-     * The user is in the general browsing or catalog view, typically exploring
-     * available car categories and checking overall car inventory.
-     * Commands related to exploring cars and car details are allowed.
+     * User is browsing available cars and viewing the catalog.
+     * <p>Only browsing-related actions are allowed.</p>
      */
     BROWSING_FLOW(
             "Catalog",
@@ -25,9 +22,9 @@ public enum FlowContext {
                     """),
 
     /**
-     * The user is actively proceeding through the multistep process of creating a new booking.
-     * Only commands related to completing, canceling, or navigating steps within the
-     * booking wizard are permitted.
+     * User is in the process of creating a new booking.
+     * <p>Only booking workflow actions are allowed (e.g., step navigation,
+     * confirmation, or cancellation).</p>
      */
     BOOKING_FLOW(
             "Booking",
@@ -36,10 +33,8 @@ public enum FlowContext {
                     """),
 
     /**
-     * The user is inside the workflow for modifying an existing, **non-CONFIRMED** booking
-     * (e.g., changing phone or email). This flow is dedicated to changes made *before* the
-     * final confirmation step. Only commands relevant to the modification process
-     * are permitted.
+     * User is modifying an existing booking that is not yet confirmed.
+     * <p>Only edit-related actions are allowed during this flow.</p>
      */
     EDIT_BOOKING_FLOW(
             "Edit Booking",
@@ -48,10 +43,8 @@ public enum FlowContext {
                     """),
 
     /**
-     * The user is viewing a list or detail of their past and current reservations.
-     * This context allows navigation to view booking details and permits modifications
-     * (e.g., changing phone or email) to any eligible reservation that has not yet
-     * started.
+     * User is viewing their existing bookings.
+     * <p>Allows viewing and limited modifications of eligible reservations.</p>
      */
     MY_BOOKINGS_FLOW(
             "My Bookings",
@@ -60,20 +53,20 @@ public enum FlowContext {
                     """);
 
     /**
-     * The user-friendly, displayable name for the flow context.
+     * Display name of the flow context.
      */
     private final String value;
 
     /**
-     * The specific error message if users attempt
-     * an action that is restricted within this specific flow.
+     * Message shown when a user attempts an action not allowed in this flow.
      */
     private final String errorMessage;
 
     /**
-     * Constructs a {@code FlowContext} with the specified display value and error message.
-     * @param value The display name to be associated with the enum constant.
-     * @param errorMessage The message to be displayed upon a flow violation.
+     * Creates a flow context with a display name and restriction message.
+     *
+     * @param value human-readable flow name
+     * @param errorMessage message shown for invalid actions in this flow
      */
     FlowContext(String value, String errorMessage) {
         this.value = value;

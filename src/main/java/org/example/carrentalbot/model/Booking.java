@@ -12,11 +12,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Represents a confirmed or proposed rental reservation transaction
- * between a specific {@link org.example.carrentalbot.model.Customer} and a {@link org.example.carrentalbot.model.Car}.
- * This entity defines the rental period, costs, contact details, and current status of the reservation.
- * <p>Maps to the {@code bookings} table in the database.</p>
- * <p>Uses Lombok for boilerplate code generation.</p>
+ * Represents a rental booking between a customer and a car.
+ * <p>Defines the rental period, pricing information, contact details,
+ * and the current lifecycle status of the reservation.</p>
+ * <p>Mapped to the {@code bookings} table.</p>
  *
  * @see org.example.carrentalbot.model.Customer
  * @see org.example.carrentalbot.model.Car
@@ -32,8 +31,8 @@ import java.util.UUID;
 public class Booking {
 
     /**
-     * The unique internal identifier for this booking transaction.
-     * Generated automatically using the UUID strategy.
+     * Unique identifier of the booking.
+     * Generated automatically as a UUID.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -41,8 +40,8 @@ public class Booking {
     private UUID id;
 
     /**
-     * The customer who initiated and owns this booking.
-     * This is a mandatory Many-to-One relationship, loaded lazily.
+     * Customer who created this booking.
+     *
      * @see org.example.carrentalbot.model.Customer
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -50,8 +49,8 @@ public class Booking {
     private Customer customer;
 
     /**
-     * The specific car reserved for this booking period.
-     * This is a mandatory Many-to-One relationship, loaded lazily.
+     * Car reserved for this booking.
+     *
      * @see org.example.carrentalbot.model.Car
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -59,47 +58,47 @@ public class Booking {
     private Car car;
 
     /**
-     * The first day of the rental period (inclusive). This field is mandatory.
+     * Start date of the rental period (inclusive).
      */
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
     /**
-     * The last day of the rental period (inclusive). This field is mandatory.
+     * End date of the rental period (inclusive).
      */
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
     /**
-     * The total number of rental days calculated from {@code startDate} to {@code endDate}.
-     * This is a calculated, mandatory field.
+     * Total number of rental days calculated from start and end dates.
      */
     @Column (name = "total_days", nullable = false)
     private Integer totalDays;
 
+
     /**
-     * The total financial cost of the booking. This is a calculated, mandatory field
-     * based on {@code totalDays} and the car's daily rate at the time of booking.
-     * Stored with 10 digits total, 2 of which are after the decimal.
+     * Total cost of the booking, calculated from the rental duration
+     * and the car’s daily rate at the time of booking.
      */
     @Column(name = "total_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalCost;
 
     /**
-     * The primary contact phone number provided by the customer at the time of booking.
+     * Customer contact phone number provided during booking.
      */
     @Column(name = "phone", nullable = false, length = 20)
     private String phone;
 
     /**
-     * The primary contact email address provided by the customer at the time of booking.
+     * Customer contact email provided during booking.
      */
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 
     /**
-     * The current status of the booking (e.g., PENDING, CONFIRMED, CANCELLED).
-     * Only bookings with status {@code CONFIRMED} prevent overlapping reservations.
+     * Current status of the booking.
+     * <p>Only {@code CONFIRMED} bookings block car availability.</p>
+     *
      * @see org.example.carrentalbot.model.enums.BookingStatus
      */
     @Enumerated(EnumType.STRING)
@@ -107,16 +106,14 @@ public class Booking {
     private BookingStatus status;
 
     /**
-     * The timestamp indicating when this booking record was first created.
-     * Set automatically by {@code @CreationTimestamp} and is immutable.
+     * Timestamp when the booking was created.
      */
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     /**
-     * The timestamp indicating the last time this booking record was updated (e.g., status change).
-     * Set automatically by {@code @UpdateTimestamp}.
+     * Timestamp of the last booking update.
      */
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp

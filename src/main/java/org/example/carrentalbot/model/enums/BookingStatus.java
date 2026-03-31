@@ -3,38 +3,37 @@ package org.example.carrentalbot.model.enums;
 import lombok.Getter;
 
 /**
- * Defines the final transactional state of a customer's reservation *within the application's scope*.
- * This status determines the car's availability and the reservation's validity.
- *
- * <p>Used throughout the system for inventory management, scheduling, and customer communication.</p>
- *
+ * Represents the lifecycle status of a booking.
+ * <p>Determines whether a booking reserves a car or has been released,
+ * and affects car availability and system processing logic.</p>
+ * <p>Used for scheduling, inventory management, and customer notifications.</p>
  */
 @Getter
 public enum BookingStatus {
 
     /**
-     * The reservation is active, validated, and secured. The booked car
-     * is officially reserved for the customer and is marked as unavailable
-     * for other bookings during the reserved period.
+     * Active booking that has been confirmed.
+     * <p>The car is reserved for the customer for the specified period
+     * and is not available for other bookings.</p>
      */
     CONFIRMED ("Confirmed"),
 
     /**
-     * The reservation has been voided by the customer or the system.
-     * The car is immediately released and returned to the pool of available
-     * inventory for new reservations. This status is final and stops all
-     * further transaction processing.
+     * Booking that has been canceled.
+     * <p>The reservation is invalidated and the car is released back
+     * to the available inventory.</p>
      */
     CANCELLED ("Cancelled");
 
     /**
-     * The user-friendly, displayable name for the booking status.
+     * Display name of the booking status.
      */
     private final String value;
 
     /**
-     * Constructs a {@code BookingStatus} with the specified display value.
-     * @param value The display name to be associated with the enum constant.
+     * Creates a booking status with a display name.
+     *
+     * @param value human-readable status name
      */
     BookingStatus(String value) {
         this.value = value;

@@ -3,11 +3,9 @@ package org.example.carrentalbot.model.enums;
 import lombok.Getter;
 
 /**
- * Defines the fixed administrative and operational lifecycle status for a car
- * in the rental fleet. This status dictates whether a car is currently eligible
- * for booking and rental transactions.
- *
- * <p>Only the {@code IN_SERVICE} status permits the creation of new rental bookings.</p>
+ * Represents the operational status of a car in the rental fleet.
+ * <p>Determines whether a car is available for booking and rental operations.</p>
+ * <p>Only {@code IN_SERVICE} cars are eligible for new bookings.</p>
  *
  * @see org.example.carrentalbot.model.Car
  */
@@ -22,13 +20,14 @@ public enum CarStatus {
     RETIRED ("Retired");
 
     /**
-     * The user-friendly, displayable name for the car's status.
+     * Display name of the car status.
      */
     private final String value;
 
     /**
-     * Constructs a {@code CarStatus} with the specified display value.
-     * @param value The display name to be associated with the enum constant.
+     * Creates a car status with a display name.
+     *
+     * @param value the human-readable status name
      */
     CarStatus(String value) {this.value = value;}
 }

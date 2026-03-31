@@ -3,16 +3,15 @@ package org.example.carrentalbot.model.enums;
 import lombok.Getter;
 
 /**
- * Defines the fixed types of notifications sent to the user regarding their
- * booking status. Each type bundles the necessary text templates (subject,
- * title, and message body) for generating consistent communications.
- * <p>This structure ensures that all notification text is centralized and type-safe.</p>
+ * Defines notification templates used for booking-related user communication.
+ * <p>Each type contains predefined text components (subject, title, and message)
+ * ensuring consistent and centralized messaging across the system.</p>
  */
 @Getter
 public enum NotificationType {
 
     /**
-     * Notification sent upon successful creation and confirmation of a new booking.
+     * Sent when a booking is successfully created and confirmed.
      */
     CONFIRMATION(
             "Booking Confirmation",
@@ -21,7 +20,7 @@ public enum NotificationType {
                     Your booking has been successfully confirmed.
                     """),
     /**
-     * Notification sent when an existing, confirmed booking is modified (e.g., phone, email).
+     * Sent when an existing booking is updated.
      */
     UPDATE(
             "Booking Update",
@@ -30,7 +29,7 @@ public enum NotificationType {
                     Your booking has been successfully updated.
                     """),
     /**
-     * Notification sent when an active reservation is canceled by the user.
+     * Sent when a booking is canceled.
      */
     CANCELLATION(
             "Booking Cancellation",
@@ -40,25 +39,26 @@ public enum NotificationType {
                     """);
 
     /**
-     * The subject line used when sending the notification via email.
+     * Notification subject line.
      */
     private final String subject;
 
     /**
-     * The short, bold title displayed when sending the notification via email.
+     * Notification title displayed to the user.
      */
     private final String title;
 
     /**
-     * The notification body message when sending the notification via email.
+     * Notification message body.
      */
     private final String message;
 
     /**
-     * Constructs a {@code NotificationType} with all required text components.
-     * @param subject The email subject line.
-     * @param title The notification title.
-     * @param message The body template of the message.
+     * Creates a notification template with predefined text components.
+     *
+     * @param subject notification subject line
+     * @param title notification title
+     * @param message notification body content
      */
     NotificationType(String subject,
                      String title,

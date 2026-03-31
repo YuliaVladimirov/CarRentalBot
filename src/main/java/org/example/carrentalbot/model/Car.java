@@ -11,14 +11,13 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Represents a vehicle available for rental in the system.
- * This entity stores the descriptive metadata, rental rates, and
- * availability status for a car, and maintains a history of all
- * associated rental bookings.
- * <p>Maps to the {@code cars} table in the database.</p>
- * <p>Uses Lombok for boilerplate code generation.</p>
+ * Represents a car available for rental in the system.
+ * <p>Stores descriptive information, pricing, availability status,
+ * and booking history.</p>
+ * <p>Mapped to the {@code cars} table.</p>
  *
  * @see org.example.carrentalbot.model.enums.CarCategory
+ * @see org.example.carrentalbot.model.enums.CarStatus
  * @see org.example.carrentalbot.model.Booking
  */
 @Entity
@@ -31,8 +30,8 @@ import java.util.UUID;
 public class Car {
 
     /**
-     * The unique internal identifier for this car record.
-     * Generated automatically using the UUID strategy.
+     * Internal unique identifier of the car.
+     * Generated automatically as a UUID.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -40,22 +39,20 @@ public class Car {
     private UUID id;
 
     /**
-     * The brand or manufacturer of the car (e.g., "Toyota", "BMW").
-     * This field is mandatory and limited to 100 characters.
+     * Car manufacturer (e.g., "Toyota", "BMW").
      */
     @Column(name = "brand", nullable = false, length = 100)
     private String brand;
 
     /**
-     * The specific model name of the car (e.g., "Camry", "X5").
-     * This field is mandatory and limited to 100 characters.
+     * Car model (e.g., Camry, X5).
      */
     @Column(name = "model", nullable = false, length = 100)
     private String model;
 
     /**
-     * The predefined category of the car, used for rental pricing and filtering
-     * (e.g., SEDAN, CONVERTIBLE, SUV). Mapped as a String to the database.
+     * Car category used for pricing and filtering.
+
      * @see org.example.carrentalbot.model.enums.CarCategory
      */
     @Enumerated(EnumType.STRING)
@@ -63,31 +60,27 @@ public class Car {
     private CarCategory category;
 
     /**
-     * A brief description providing additional context or features of the car.
-     * Optional, max length 500 characters.
+     * Optional additional description of the car.
      */
     @Column(name = "description", length = 500)
     private String description;
 
     /**
-     * The file ID referencing the car's primary image in the asset storage system.
-     * Optional. Max length 200 characters.
+     * Identifier of the car image in the storage system.
      */
     @Column(name = "image_file_id", length = 200)
     private String imageFileId;
 
     /**
-     * The rental rate charged per day for this car.
-     * This field is mandatory and stored with 10 digits total, 2 of which are after the decimal.
+     * Daily rental price for the car.
      */
     @Column(name = "daily_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal dailyRate;
 
     /**
-     * The administrative status of the car, which dictates whether it can
-     * be rented, regardless of booking conflicts. For example, a car
-     * in {@code UNDER_REPAIR} status cannot be booked.
-     * Mapped as a String (ENUM) in the database.
+     * Operational status of the car.
+     * <p>Only cars in {@code IN_SERVICE} status are available for booking.</p>
+     *
      * @see org.example.carrentalbot.model.enums.CarStatus
      */
     @Enumerated(EnumType.STRING)
@@ -96,9 +89,9 @@ public class Car {
     private CarStatus carStatus = CarStatus.IN_SERVICE;
 
     /**
-     * A collection of all bookings associated with this specific car.
-     * This is a one-to-many relationship, loaded lazily. Operations on the
-     * Car (e.g., deletion) will cascade to its corresponding Bookings.
+     * Bookings associated with this car.
+     * <p>Lazy-loaded one-to-many relationship. Cascade operations apply to bookings.</p>
+     *
      * @see org.example.carrentalbot.model.Booking
      */
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

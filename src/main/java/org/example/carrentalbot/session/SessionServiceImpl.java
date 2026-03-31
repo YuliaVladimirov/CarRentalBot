@@ -106,13 +106,12 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Retrieves and parses a UUID value from the session.
-     *
      * <p>If the stored value is invalid, the field is removed from the session.</p>
      *
      * @param chatId chat session identifier
      * @param field session key
-     * @return the {@link Optional} containing the {@link UUID}, or empty if not found.
-     * @throws IllegalArgumentException if the serialization fails.
+     * @return the {@link Optional} containing the {@link UUID}, or empty if not found
+     * @throws IllegalArgumentException if the serialization fails
      */
     @Override
     public Optional<UUID> getUUID(Long chatId, String field) {
@@ -130,13 +129,12 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Retrieves and parses a LocalDate value from the session.
-     *
      * <p>If the stored value is invalid, the field is removed from the session.</p>
      *
      * @param chatId chat session identifier
      * @param field session key
-     * @return the {@link Optional} containing the {@link LocalDate}, or empty if not found.
-     * @throws IllegalArgumentException if the serialization fails.
+     * @return the {@link Optional} containing the {@link LocalDate}, or empty if not found
+     * @throws IllegalArgumentException if the serialization fails
      */
     @Override
     public Optional<LocalDate> getLocalDate(Long chatId, String field) {
@@ -154,13 +152,12 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Retrieves and parses an Integer value from the session.
-     *
      * <p>If the stored value is invalid, the field is removed from the session.</p>
      *
      * @param chatId chat session identifier
      * @param field session key
-     * @return the {@link Optional} containing the {@link Integer}, or empty if not found.
-     * @throws IllegalArgumentException if the serialization fails.
+     * @return the {@link Optional} containing the {@link Integer}, or empty if not found
+     * @throws IllegalArgumentException if the serialization fails
      */
     @Override
     public Optional<Integer> getInteger(Long chatId, String field) {
@@ -178,13 +175,12 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Retrieves and parses a BigDecimal value from the session.
-     *
      * <p>If the stored value is invalid, the field is removed from the session.</p>
      *
      * @param chatId chat session identifier
      * @param field session key
-     * @return the {@link Optional} containing the {@link BigDecimal}, or empty if not found.
-     * @throws IllegalArgumentException if the serialization fails.
+     * @return the {@link Optional} containing the {@link BigDecimal}, or empty if not found
+     * @throws IllegalArgumentException if the serialization fails
      */
     @Override
     public Optional<BigDecimal> getBigDecimal(Long chatId, String field) {
@@ -202,13 +198,12 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Retrieves and parses a CarCategory value from the session.
-     *
      * <p>If the stored value is invalid, the field is removed from the session.</p>
      *
      * @param chatId chat session identifier
      * @param field session key
-     * @return the {@link Optional} containing the {@link CarCategory}, or empty if not found.
-     * @throws IllegalArgumentException if the serialization fails.
+     * @return the {@link Optional} containing the {@link CarCategory}, or empty if not found
+     * @throws IllegalArgumentException if the serialization fails
      */
     @Override
     public Optional<CarCategory> getCarCategory(Long chatId, String field) {
@@ -226,13 +221,12 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Retrieves and parses a FlowContext value from the session.
-     *
      * <p>If the stored value is invalid, the field is removed from the session.</p>
      *
      * @param chatId chat session identifier
      * @param field session key
-     * @return the {@link Optional} containing the {@link FlowContext}, or empty if not found.
-     * @throws IllegalArgumentException if the serialization fails.
+     * @return the {@link Optional} containing the {@link FlowContext}, or empty if not found
+     * @throws IllegalArgumentException if the serialization fails
      */
     @Override
     public Optional<FlowContext> getFlowContext(Long chatId, String field) {
@@ -250,13 +244,12 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Retrieves and parses a CarBrowsingMode value from the session.
-     *
      * <p>If the stored value is invalid, the field is removed from the session.</p>
      *
      * @param chatId chat session identifier
      * @param field session key
-     * @return the {@link Optional} containing the {@link CarBrowsingMode}, or empty if not found.
-     * @throws IllegalArgumentException if the serialization fails.
+     * @return the {@link Optional} containing the {@link CarBrowsingMode}, or empty if not found
+     * @throws IllegalArgumentException if the serialization fails
      */
     @Override
     public Optional<CarBrowsingMode> getCarBrowsingMode(Long chatId, String field) {

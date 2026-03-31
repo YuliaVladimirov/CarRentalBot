@@ -38,7 +38,6 @@ public class ReminderServiceImpl implements ReminderService {
 
     /**
      * Creates reminders for the given booking based on its start and end dates.
-     *
      * <p>Reminders are scheduled for the day before and the day of
      * the start and end of the booking.</p>
      *
@@ -108,7 +107,6 @@ public class ReminderServiceImpl implements ReminderService {
 
      /**
      * {@inheritDoc}
-     *
      * <p>Reminders are processed in batches. Each reminder is marked as sent
      * before delivery to avoid duplicate processing.</p>
      */

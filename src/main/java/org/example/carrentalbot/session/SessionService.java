@@ -31,7 +31,7 @@ public interface SessionService {
      *
      * @param chatId the chat session identifier
      * @param field the session key
-     * @return the {@link Optional} containing the {@link String} value, or empty if not found.
+     * @return the {@link Optional} containing the {@link String} value, or empty if not found
      */
     Optional<String> getString(Long chatId, String field);
 
@@ -40,7 +40,7 @@ public interface SessionService {
      *
      * @param chatId the chat session identifier
      * @param field the session key
-     * @return the {@link Optional} containing the {@link UUID}, or empty if not found.
+     * @return the {@link Optional} containing the {@link UUID}, or empty if not found
      */
     Optional<UUID> getUUID(Long chatId, String field);
 
@@ -76,7 +76,7 @@ public interface SessionService {
      *
      * @param chatId the chat session identifier
      * @param field the session key
-     * @return the {@link Optional} containing the {@link CarCategory}, or empty if not found.
+     * @return the {@link Optional} containing the {@link CarCategory}, or empty if not found
      */
     Optional<CarCategory> getCarCategory(Long chatId, String field);
 
@@ -94,7 +94,7 @@ public interface SessionService {
      *
      * @param chatId the chat session identifier
      * @param field the session key
-     * @return the {@link Optional} containing the {@link CarBrowsingMode}, or empty if not found.
+     * @return the {@link Optional} containing the {@link CarBrowsingMode}, or empty if not found
      */
     Optional<CarBrowsingMode> getCarBrowsingMode(Long chatId, String field);
 

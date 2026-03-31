@@ -49,8 +49,8 @@ public class BookingServiceImpl implements BookingService {
 
     /**
      * {@inheritDoc}
-     * @throws DataNotFoundException if the car or customer does not exist.
-     * @throws InvalidStateException if the car is not available or already booked.
+     * @throws DataNotFoundException if the car or customer does not exist
+     * @throws InvalidStateException if the car is not available or already booked
      */
     @Override
     @Transactional
@@ -110,7 +110,7 @@ public class BookingServiceImpl implements BookingService {
 
     /**
      * {@inheritDoc}
-     * @throws DataNotFoundException if the customer was not found in the database.
+     * @throws DataNotFoundException if the customer was not found in the database
      */
     @Override
     @Transactional(readOnly = true)
@@ -124,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
 
     /**
      * {@inheritDoc}
-     * @throws DataNotFoundException if the booking was not found in the database.
+     * @throws DataNotFoundException if the booking was not found in the database
      */
     @Override
     @Transactional(readOnly = true)
@@ -135,7 +135,7 @@ public class BookingServiceImpl implements BookingService {
 
     /**
      * {@inheritDoc}
-     * @throws DataNotFoundException if the booking was not found in the database.
+     * @throws DataNotFoundException if the booking was not found in the database
      */
     @Override
     @Transactional
@@ -158,7 +158,7 @@ public class BookingServiceImpl implements BookingService {
 
     /**
      * {@inheritDoc}
-     * @throws DataNotFoundException if the booking was not found in the database.
+     * @throws DataNotFoundException if the booking was not found in the database
      */
     @Override
     @Transactional

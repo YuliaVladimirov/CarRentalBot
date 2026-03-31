@@ -36,6 +36,11 @@ public class ReminderDeliveryImpl implements ReminderDelivery {
         sendViaEmail(reminder);
     }
 
+    /**
+     * Sends the reminder via Telegram.
+     *
+     * @param reminder the reminder to send
+     */
     private void sendViaTelegram(Reminder reminder) {
 
         String text = String.format("""
@@ -61,6 +66,11 @@ public class ReminderDeliveryImpl implements ReminderDelivery {
                 .build());
     }
 
+    /**
+     * Sends the reminder via email.
+     *
+     * @param reminder the reminder to send
+     */
     private void sendViaEmail(Reminder reminder) {
 
         try {

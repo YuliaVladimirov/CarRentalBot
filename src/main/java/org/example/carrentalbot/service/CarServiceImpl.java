@@ -9,7 +9,6 @@ import org.example.carrentalbot.model.enums.CarCategory;
 import org.example.carrentalbot.repository.CarRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;

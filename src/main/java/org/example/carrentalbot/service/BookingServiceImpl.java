@@ -24,15 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Implementation of {@link BookingService}.
- * <p>Orchestrates the lifecycle of a {@link Booking}, including availability
- * verification, cost estimation, and state transitions (creation, updates, and cancellations).</p>
- * <p>This service coordinates between {@link BookingRepository}, {@link CarRepository},
- * and {@link CustomerRepository} to ensure atomic operations when creating or
- * modifying reservations.</p>
- */
-
-/**
  * Default implementation of {@link BookingService}.
  * Provides operations for managing bookings, availability checks, and pricing.
  * Uses {@link BookingRepository}, {@link CarRepository},

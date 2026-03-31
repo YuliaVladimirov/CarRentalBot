@@ -31,6 +31,13 @@ import java.util.UUID;
  * and {@link CustomerRepository} to ensure atomic operations when creating or
  * modifying reservations.</p>
  */
+
+/**
+ * Default implementation of {@link BookingService}.
+ * Provides operations for managing bookings, availability checks, and pricing.
+ * Uses {@link BookingRepository}, {@link CarRepository},
+ * and {@link CustomerRepository} for persistence operations.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,11 +48,7 @@ public class BookingServiceImpl implements BookingService {
     private final CustomerRepository customerRepository;
 
     /**
-     * Verifies if a specific vehicle is free of reservations for the requested period.
-     * @param carId     The unique identifier of the vehicle.
-     * @param startDate The start date of the intended rental.
-     * @param endDate   The end date of the intended rental.
-     * @return {@code true} if no overlapping bookings exist; {@code false} otherwise.
+     * {@inheritDoc}
      */
     @Override
     public boolean isCarAvailable(UUID carId, LocalDate startDate, LocalDate endDate) {
@@ -54,24 +57,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Executes a transactional booking creation flow.
-     * <ol>
-     * <li>Validates user and car existence.</li>
-     * <li>Enforces administrative {@link CarStatus} checks.</li>
-     * <li>Performs a final concurrency check on date availability.</li>
-     * <li>Persists the confirmed reservation.</li>
-     * </ol>
-     * @param carId          The unique identifier of the vehicle to be reserved.
-     * @param telegramUserId The unique Telegram ID of the customer making the reservation.
-     * @param startDate      The start date (inclusive) of the intended rental period.
-     * @param endDate        The end date (inclusive) of the intended rental period.
-     * @param totalDays      The pre-calculated duration of the rental in days.
-     * @param totalCost      The total monetary value of the reservation, including all applicable rates.
-     * @param phone          The primary contact phone number provided by the customer for this booking.
-     * @param email          The contact email address provided by the customer for reservation details.
-     * @return The confirmed {@link Booking} entity after successful persistence.
-     * @throws DataNotFoundException if the car or user does not exist.
-     * @throws InvalidStateException if the car is not in service or is already booked.
+     * {@inheritDoc}
+     * @throws DataNotFoundException if the car or customer does not exist.
+     * @throws InvalidStateException if the car is not available or already booked.
      */
     @Override
     @Transactional
@@ -111,10 +99,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Calculates the inclusive number of days for a rental period.
-     * @param startDate The first day of rental.
-     * @param endDate   The last day of rental.
-     * @return The total count of days (inclusive).
+     * {@inheritDoc}
      */
     @Override
     public Integer calculateTotalDays(LocalDate startDate, LocalDate endDate) {
@@ -123,10 +108,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Computes the total rental price based on a daily rate.
-     * @param dailyRate The price per single day.
-     * @param totalDays The duration of the rental.
-     * @return The calculated cost, rounded to two decimal places.
+     * {@inheritDoc}
      */
     @Override
     public BigDecimal calculateTotalCost(BigDecimal dailyRate, long totalDays) {
@@ -136,9 +118,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Retrieves all reservations associated with a specific Telegram user.
-     * @param telegramUserId The user's unique Telegram ID.
-     * @return A list of bookings for the customer.
+     * {@inheritDoc}
      * @throws DataNotFoundException if the customer was not found in the database.
      */
     @Override
@@ -152,9 +132,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Fetches a specific reservation including associated car details.
-     * @param bookingId The unique identifier of the booking.
-     * @return The found {@link Booking}.
+     * {@inheritDoc}
      * @throws DataNotFoundException if the booking was not found in the database.
      */
     @Override
@@ -165,9 +143,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Transitions a booking status to {@link BookingStatus#CANCELLED}.
-     * @param bookingId The ID of the reservation to terminate.
-     * @return The updated booking entity.
+     * {@inheritDoc}
      * @throws DataNotFoundException if the booking was not found in the database.
      */
     @Override
@@ -190,11 +166,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Updates contact information for an existing reservation.
-     * @param bookingId The ID of the reservation to modify.
-     * @param phone     The new phone number (optional).
-     * @param email     The new email address (optional).
-     * @return The updated booking entity.
+     * {@inheritDoc}
      * @throws DataNotFoundException if the booking was not found in the database.
      */
     @Override

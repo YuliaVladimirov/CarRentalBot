@@ -9,13 +9,10 @@ import org.example.carrentalbot.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of {@link CustomerService}.
- * <p>Handles the lifecycle of a {@link Customer} entity, ensuring that every
- * Telegram user interacting with the bot is correctly mapped to a persistent
- * database record.</p>
- * <p>Uses {@link CustomerRepository} to perform idempotent registration
- * and leverages {@link CustomerRegistration} to signal state changes back to
- * the calling controllers or handlers.</p>
+ * Default implementation of {@link CustomerService}.
+ * Handles the lifecycle of {@link Customer} entities, ensuring that every
+ * Telegram user interacting with the bot is mapped to a persistent record.
+ * Uses {@link CustomerRepository} for persistence operations.
  */
 @Slf4j
 @Service
@@ -25,15 +22,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     /**
-     * Executes the registration logic using a functional optional-based flow.
-     * <ol>
-     * <li>Attempts to retrieve the customer by {@code telegramUserId}.</li>
-     * <li>If present: Wraps the existing customer in a registration object with {@code isNew = false}.</li>
-     * <li>If absent: Builds, flushes, and returns a new {@link Customer} with {@code isNew = true}.</li>
-     * </ol>
-     * @param chatId       The chat ID provided by the Telegram API.
-     * @param telegramUser The user metadata provided by the Telegram API.
-     * @return The resulting {@link CustomerRegistration} wrapper.
+     * {@inheritDoc}
      */
     @Override
     public CustomerRegistration registerIfNotExists(Long chatId, FromDto telegramUser) {

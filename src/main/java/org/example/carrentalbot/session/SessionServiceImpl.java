@@ -17,9 +17,8 @@ import java.util.UUID;
 
 /**
  * Redis-backed implementation of {@link SessionService} using Hash structures.
- * <p>Data is stored as a Redis Hash where the key is prefixed with {@code chat:}
- * followed by the chatId. Each session is subject to a sliding expiration
- * defined by {@code DEFAULT_TTL}.</p>
+ * Session data is stored in Redis hashes under keys prefixed with {@code chat:}.
+ * Each session has a sliding expiration controlled by a fixed TTL.
  */
 @Slf4j
 @Service
@@ -33,11 +32,9 @@ public class SessionServiceImpl implements SessionService {
     private static final Duration DEFAULT_TTL = Duration.ofHours(1);
 
     /**
-     * Core Spring Data Redis helper used for performing high-level data operations.
-     * <p>Configured to manage session state within Redis Hashes. It utilizes
-     * {@link String} keys for chat-based identification and {@link Object} values
-     * that undergo manual serialization to maintain type safety across
-     * different conversational steps.</p>
+     * Spring Data Redis template used for session persistence.
+     * Stores session data in Redis hashes keyed by chat identifier,
+     * with values serialized as strings.
      */
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -46,13 +43,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Serializes the value to a String and persists it in a Redis Hash.
-     * <p>This method automatically refreshes the TTL of the entire session
-     * hash upon every write operation.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "carCategory").
-     * @param value  The object to persist; must be a supported type for serialization.
-     * @throws IllegalArgumentException if chatId or field is null, or if the type is unsupported.
+     * {@inheritDoc}
      */
     @Override
     public void put(Long chatId, String field, Object value) {
@@ -73,10 +64,10 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Internal helper to convert complex types into persistent String formats.
-     * <p>Supported types: Enums, UUIDs, LocalDates, Integers, and BigDecimals.</p>
-     * @param value The object to convert; must be a supported type for serialization.
-     * @throws IllegalArgumentException if the type is unsupported.
+     * Converts supported types into a String representation for Redis storage.
+     * Supported types include enums, UUID, LocalDate, Integer, and BigDecimal.
+     *
+     * @throws IllegalArgumentException if the type is not supported
      */
     private String serializeValue(Object value) {
 
@@ -106,10 +97,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Base retrieval method for raw String data from the Redis Hash.
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "phone").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * {@inheritDoc}
      */
     @Override
     public Optional<String> getString(Long chatId, String field) {
@@ -117,12 +105,13 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Retrieves a UUID with fail-safe error handling.
-     * <p>If the stored data is corrupted or in an invalid format,
-     * the specific field is purged to maintain session integrity.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "carId").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * Retrieves and parses a UUID value from the session.
+     *
+     * <p>If the stored value is invalid, the field is removed from the session.</p>
+     *
+     * @param chatId chat session identifier
+     * @param field session key
+     * @return the {@link Optional} containing the {@link UUID}, or empty if not found.
      * @throws IllegalArgumentException if the serialization fails.
      */
     @Override
@@ -140,12 +129,13 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Retrieves a LocalDate with fail-safe error handling.
-     * <p>If the stored data is corrupted or in an invalid format,
-     * the specific field is purged to maintain session integrity.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "sartDate").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * Retrieves and parses a LocalDate value from the session.
+     *
+     * <p>If the stored value is invalid, the field is removed from the session.</p>
+     *
+     * @param chatId chat session identifier
+     * @param field session key
+     * @return the {@link Optional} containing the {@link LocalDate}, or empty if not found.
      * @throws IllegalArgumentException if the serialization fails.
      */
     @Override
@@ -161,13 +151,15 @@ public class SessionServiceImpl implements SessionService {
                     }
                 });
     }
+
     /**
-     * Retrieves an Integer with fail-safe error handling.
-     * <p>If the stored data is corrupted or in an invalid format,
-     * the specific field is purged to maintain session integrity.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "totalDays").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * Retrieves and parses an Integer value from the session.
+     *
+     * <p>If the stored value is invalid, the field is removed from the session.</p>
+     *
+     * @param chatId chat session identifier
+     * @param field session key
+     * @return the {@link Optional} containing the {@link Integer}, or empty if not found.
      * @throws IllegalArgumentException if the serialization fails.
      */
     @Override
@@ -185,12 +177,13 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Retrieves an BigDecimal with fail-safe error handling.
-     * <p>If the stored data is corrupted or in an invalid format,
-     * the specific field is purged to maintain session integrity.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "totalCost").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * Retrieves and parses a BigDecimal value from the session.
+     *
+     * <p>If the stored value is invalid, the field is removed from the session.</p>
+     *
+     * @param chatId chat session identifier
+     * @param field session key
+     * @return the {@link Optional} containing the {@link BigDecimal}, or empty if not found.
      * @throws IllegalArgumentException if the serialization fails.
      */
     @Override
@@ -208,12 +201,13 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Retrieves a {@link CarCategory} with fail-safe error handling.
-     * <p>If the stored data is corrupted or in an invalid format,
-     * the specific field is purged to maintain session integrity.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "carCategory").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * Retrieves and parses a CarCategory value from the session.
+     *
+     * <p>If the stored value is invalid, the field is removed from the session.</p>
+     *
+     * @param chatId chat session identifier
+     * @param field session key
+     * @return the {@link Optional} containing the {@link CarCategory}, or empty if not found.
      * @throws IllegalArgumentException if the serialization fails.
      */
     @Override
@@ -231,12 +225,13 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Retrieves a {@link FlowContext} with fail-safe error handling.
-     * <p>If the stored data is corrupted or in an invalid format,
-     * the specific field is purged to maintain session integrity.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "flowContext").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * Retrieves and parses a FlowContext value from the session.
+     *
+     * <p>If the stored value is invalid, the field is removed from the session.</p>
+     *
+     * @param chatId chat session identifier
+     * @param field session key
+     * @return the {@link Optional} containing the {@link FlowContext}, or empty if not found.
      * @throws IllegalArgumentException if the serialization fails.
      */
     @Override
@@ -254,12 +249,13 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Retrieves a {@link CarBrowsingMode} with fail-safe error handling.
-     * <p>If the stored data is corrupted or in an invalid format,
-     * the specific field is purged to maintain session integrity.</p>
-     * @param chatId The unique identifier for the chat session.
-     * @param field  The key representing the specific data point (e.g., "carBrowsingMode").
-     * @return An {@link Optional} containing the value, or empty if not found.
+     * Retrieves and parses a CarBrowsingMode value from the session.
+     *
+     * <p>If the stored value is invalid, the field is removed from the session.</p>
+     *
+     * @param chatId chat session identifier
+     * @param field session key
+     * @return the {@link Optional} containing the {@link CarBrowsingMode}, or empty if not found.
      * @throws IllegalArgumentException if the serialization fails.
      */
     @Override
@@ -277,8 +273,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * Deletes the entire Redis key associated with the chat.
-     * @param chatId The chat session to clear.
+     * {@inheritDoc}
      */
     @Override
     public void deleteAll(Long chatId) {
@@ -287,8 +282,9 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * Removes a specific field from the session hash.
-     * @param chatId The chat session to clear.
-     * @param field  The key representing the specific data point (e.g., "email").
+     *
+     * @param chatId chat session identifier
+     * @param field  session key
      */
     private void delete(Long chatId, String field) {
         redisTemplate.opsForHash().delete(key(chatId), field);

@@ -12,8 +12,28 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository for managing {@link Reminder} persistence operations.
+ */
 public interface ReminderRepository extends JpaRepository<Reminder, Long> {
 
+
+    /**
+     * Retrieves reminders that are due for processing.
+     * <p>A reminder is considered due if:
+     * <ul>
+     *   <li>its status is within the eligible statuses</li>
+     *   <li>its due time is in the past or present</li>
+     * </ul>
+     * </p>
+     * <p>Results are ordered by due time (ascending) and include related
+     * booking, car, and customer data.</p>
+     *
+     * @param now current timestamp used for comparison
+     * @param eligibleStatuses statuses eligible for processing
+     * @param pageable pagination information
+     * @return list of {@link Reminder} entities that are due for processing
+     */
     @Query(value = """
             SELECT r FROM Reminder r
             JOIN FETCH r.booking b
@@ -32,7 +52,13 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
                                     @Param("eligibleStatuses") List<ReminderStatus> eligibleStatuses,
                                     Pageable pageable);
 
-
+    /**
+     * Marks a reminder as SENT if it is in one of the eligible statuses.
+     *
+     * @param id reminder identifier
+     * @param eligibleStatuses statuses allowed to transition to SENT
+     * @return number of updated records (0 or 1)
+     */
     @Modifying
     @Query(value = """
             UPDATE Reminder r
@@ -43,7 +69,12 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
     int markAsSent(@Param("id") Long id,
                    @Param("eligibleStatuses") List<ReminderStatus> eligibleStatuses);
 
-
+    /**
+     * Marks a reminder as FAILED if it is currently PENDING.
+     *
+     * @param id reminder identifier
+     * @return number of updated records (0 or 1)
+     */
     @Modifying
     @Query(value = """
             UPDATE Reminder r
@@ -54,6 +85,12 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
     int markAsFailed(@Param("id") Long id);
 
 
+    /**
+     * Cancels all pending reminders for the specified booking.
+     *
+     * @param bookingId booking identifier
+     * @return number of updated reminders
+     */
     @Modifying
     @Query(value = """
             UPDATE Reminder r
@@ -63,7 +100,14 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
             """)
     int markAsCancelled(@Param("bookingId") UUID bookingId);
 
-
+    /**
+     * Deletes old completed reminders from the system.
+     * <p>Only reminders with status SENT or CANCELLED are removed
+     * if they are older than the retention threshold.</p>
+     *
+     * @param retentionDate cutoff date for deletion
+     * @return number of deleted records
+     */
     @Modifying
     @Query(value = """
             DELETE FROM Reminder r

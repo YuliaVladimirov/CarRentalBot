@@ -11,8 +11,16 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository for managing {@link Car} persistence operations.
+ */
 public interface CarRepository extends JpaRepository<Car, UUID> {
 
+    /**
+     * Retrieves car categories along with the minimum daily rate among cars in each category.
+     *
+     * @return a list of {@link CarProjection} containing category and minimum price
+     */
     @Query(value = """
             SELECT new org.example.carrentalbot.record.CarProjection(c.category, MIN(c.dailyRate))
             FROM Car c
@@ -20,6 +28,12 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
             """)
     List<CarProjection> getCarCategories();
 
+    /**
+     * Finds all cars in the given category that are currently in service.
+     *
+     * @param category the car category to filter by
+     * @return list of available {@link Car} entities in the specified category
+     */
     @Query(value = """
             SELECT c FROM Car c
             WHERE c.category = :category
@@ -28,6 +42,20 @@ public interface CarRepository extends JpaRepository<Car, UUID> {
     List<Car> findByCategory(
             @Param("category") CarCategory category);
 
+    /**
+     * Finds all available cars for a given category and date range.
+     * <p>A car is considered available if:
+     * <ul>
+     *   <li>it is in service</li>
+     *   <li>it does not have a confirmed booking overlapping the given period</li>
+     * </ul>
+     * </p>
+     *
+     * @param category the car category to filter by
+     * @param startDate rental start date
+     * @param endDate rental end date
+     * @return list of available {@link Car} entities
+     */
     @Query(value = """
             SELECT c FROM Car c
             WHERE c.category = :category

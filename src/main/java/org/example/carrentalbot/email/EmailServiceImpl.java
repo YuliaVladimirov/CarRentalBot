@@ -19,10 +19,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
- * Asynchronous implementation of {@link EmailService} with built-in retry logic.
- * <p>Leverages Spring's {@link Async} for non-blocking execution and
- * {@link Retryable} for fault tolerance. Templates are constructed via
- * {@link EmailTemplateBuilder} to produce responsive HTML bodies.</p>
+ * Asynchronous implementation of {@link EmailService} with retry support.
+ * Sends HTML emails using {@link JavaMailSender} and builds content via
+ * {@link EmailTemplateBuilder}.
  */
 @Slf4j
 @Service
@@ -30,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     /**
-     * The core Spring interface for sending emails.
+     * The core Spring interface used to create and send email messages.
      * <p>Configured via {@code application.properties} to connect to the SMTP
      * server, this sender handles the low-level transmission of {@link MimeMessage}
      * objects over the network.</p>
@@ -38,7 +37,7 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
 
     /**
-     * Logic component responsible for generating responsive HTML content.
+     * Component responsible for generating responsive HTML content.
      * <p>Transforms raw {@link Booking} and {@link Reminder} data into formatted
      * email bodies using predefined templates, ensuring a consistent visual
      * identity for all user-facing communications.</p>
@@ -50,13 +49,13 @@ public class EmailServiceImpl implements EmailService {
     private String userName;
 
     /**
-     * Sends a booking notification asynchronously using a dedicated HTML reminder template.
-     * <p>If a {@link MailException} occurs, the system will wait 5 seconds
-     * before retrying. After failure exhaustion, {@code recoverFailedNotification}
-     * is triggered.</p>
-     * @param booking          Context for the notification.
-     * @param notificationType Type determining subject and message body.
-     * @throws MessagingException If the MIME message creation fails.
+     * Sends a booking notification email asynchronously.
+     * Retries on {@link MailException}. If all attempts fail,
+     * {@link #recoverFailedNotification(MailException, Booking, NotificationType)} is called.
+     *
+     * @param booking the booking associated with the notification
+     * @param notificationType the notification type
+     * @throws MessagingException if the email cannot be created
      */
     @Override
     @Async("emailExecutor")
@@ -81,11 +80,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     /**
-     * Final fallback for notifications. Logs the critical failure for
-     * administrative monitoring.
-     * @param exception        The root cause of the delivery failure.
-     * @param booking          The booking associated with the failed attempt.
-     * @param notificationType The type of notification that failed.
+     * {@inheritDoc}
      */
     @Override
     @Recover
@@ -97,12 +92,12 @@ public class EmailServiceImpl implements EmailService {
     }
 
     /**
-     * Sends a reminder asynchronously using a dedicated HTML reminder template.
-     * <p>If a {@link MailException} occurs, the system will wait 5 seconds
-     * before retrying. After failure exhaustion, {@code recoverFailedReminder}
-     * is triggered.</p>
-     * @param reminder The reminder data object.
-     * @throws MessagingException If the MIME message creation fails.
+     * Sends a booking reminder email asynchronously.
+     * Retries on {@link MailException}. If all attempts fail,
+     * {@link #recoverFailedReminder(MailException, Reminder)} is called.
+     *
+     * @param reminder the reminder data
+     * @throws MessagingException if the email cannot be created
      */
     @Override
     @Async("emailExecutor")
@@ -127,10 +122,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     /**
-     * Final fallback for notifications. Logs the critical failure for
-     * administrative monitoring.
-     * @param exception        The root cause of the delivery failure.
-     * @param reminder The reminder associated with the failed attempt.
+     * {@inheritDoc}
      */
     @Override
     @Recover

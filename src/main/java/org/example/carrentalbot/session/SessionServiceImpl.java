@@ -25,16 +25,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SessionServiceImpl implements SessionService {
 
-    /** Prefix used for all Redis keys to ensure namespace isolation. */
+    /**
+     * Redis key prefix for session storage.
+     */
     private static final String SESSION_PREFIX = "chat:";
 
-    /** Maximum idle time for a session before it is automatically evicted by Redis. */
+    /**
+     * Default expiration time for session data in Redis.
+     */
     private static final Duration DEFAULT_TTL = Duration.ofHours(1);
 
     /**
-     * Spring Data Redis template used for session persistence.
-     * Stores session data in Redis hashes keyed by chat identifier,
-     * with values serialized as strings.
+     * Redis template used for session persistence.
      */
     private final RedisTemplate<String, Object> redisTemplate;
 

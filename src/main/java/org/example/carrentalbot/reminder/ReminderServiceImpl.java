@@ -33,6 +33,10 @@ public class ReminderServiceImpl implements ReminderService {
 
     /** Retention period (in days) for completed or canceled reminders. */
     private static final int RETENTION_DAYS = 90;
+
+    /**
+     * Reminder statuses that are eligible for sending.
+     */
     private static final List<ReminderStatus> ELIGIBLE_FOR_SENT = List.of(
             ReminderStatus.PENDING, ReminderStatus.FAILED);
 

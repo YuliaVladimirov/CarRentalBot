@@ -24,14 +24,12 @@ import org.springframework.web.bind.annotation.*;
 public class WebhookController {
 
     /**
-     * Delegates incoming updates to the appropriate handler based on their type
-     * (messages, commands, callback queries, etc.).
+     * Central dispatcher for processing incoming Telegram updates.
      */
     private final GlobalHandler globalHandler;
 
     /**
-     * Telegram bot configuration properties, including the optional webhook secret
-     * used for request validation.
+     * Telegram bot configuration properties.
      */
     private final TelegramBotProperties telegramBotProperties;
 

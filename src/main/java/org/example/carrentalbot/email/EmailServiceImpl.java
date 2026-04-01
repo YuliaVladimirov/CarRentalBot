@@ -29,22 +29,18 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     /**
-     * The core Spring interface used to create and send email messages.
-     * <p>Configured via {@code application.properties} to connect to the SMTP
-     * server, this sender handles the low-level transmission of {@link MimeMessage}
-     * objects over the network.</p>
+     * Spring service for sending email messages via SMTP.
      */
     private final JavaMailSender mailSender;
 
     /**
-     * Component responsible for generating responsive HTML content.
-     * <p>Transforms raw {@link Booking} and {@link Reminder} data into formatted
-     * email bodies using predefined templates, ensuring a consistent visual
-     * identity for all user-facing communications.</p>
+     * Builds HTML email bodies from domain objects using predefined templates.
      */
     private final EmailTemplateBuilder emailTemplateBuilder;
 
-    /** The system email address used as the 'From' header. */
+    /**
+     * Sender email address.
+     */
     @Value("${spring.mail.username}")
     private String userName;
 

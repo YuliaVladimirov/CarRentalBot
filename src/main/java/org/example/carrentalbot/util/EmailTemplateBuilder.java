@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class EmailTemplateBuilder {
 
+    /** Engine used to render email templates into HTML content. */
     private final TemplateEngine templateEngine;
 
     /**

@@ -28,6 +28,8 @@ import java.io.IOException;
 public class TelegramClient {
 
     private final RestTemplate restTemplate;
+
+    /** Engine used to render email templates into HTML content. */
     private final String apiBase;
 
     /**

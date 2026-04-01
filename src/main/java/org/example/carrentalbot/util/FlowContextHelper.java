@@ -9,10 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 
 /**
- * Helper component for validating whether a handler is allowed to run
- * in the user's current conversational flow context.
- * <p>This class ensures that a user's current session state (FlowContext) aligns with
- * the permitted contexts for a specific action or command.</p>
+ * Helper component responsible for validating whether a handler is allowed to execute
+ * within the user's current conversational {@link FlowContext}.
+ * <p>Ensures that the current session state is compatible with the allowed contexts
+ * defined for a given operation. This prevents invalid transitions between
+ * conversational states.</p>
  * <p>If a handler is invoked in an invalid context, an
  * {@link InvalidFlowContextException} is thrown with a user-friendly message.</p>
  */
@@ -20,23 +21,20 @@ import java.util.EnumSet;
 @RequiredArgsConstructor
 public class FlowContextHelper {
 
-    /**
-     * Service used to retrieve and manage session-specific data.
-     */
     private final SessionService sessionService;
 
     /**
-     * Validates if the current flow context for a given chat ID is permitted.
-     * <p>The validation logic follows these rules:
+     * Validates whether the current flow context for the specified chat is allowed
+     * for the requested operation.
+     * <p>Validation rules:
      * <ul>
-     *     <li>If a context exists, it must be present in the {@code allowedContexts} set.</li>
-     *     <li>If no context exists, the action is only permitted if {@code allowedContexts}
-     *     contains all possible {@link FlowContext} values (representing a global/open state).</li>
+     *   <li>If a current context exists, it must be included in {@code allowedContexts}</li>
+     *   <li>If no context exists, the operation is allowed only when {@code allowedContexts}
+     *       contains all {@link FlowContext} values (global/unrestricted state)</li>
      * </ul>
-     * </p>
-     * @param chatId          The unique identifier of the chat/user session.
-     * @param allowedContexts An {@link EnumSet} of {@link FlowContext} values that are valid for this operation.
-     * @throws InvalidFlowContextException if the current context is not allowed or is missing when required.
+     * @param chatId unique identifier of the chat/session
+     * @param allowedContexts set of permitted {@link FlowContext} values for this operation
+     * @throws InvalidFlowContextException if the current context is not permitted or missing
      */
     public void validateFlowContext(Long chatId, EnumSet<FlowContext> allowedContexts) {
         FlowContext current = sessionService

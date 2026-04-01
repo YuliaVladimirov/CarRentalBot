@@ -13,82 +13,95 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Registry component that manages and distributes different types of message handlers.
- * <p>
- * This class acts as a central repository for {@link CallbackHandler}, {@link CommandHandler},
- * and {@link TextHandler} implementations. It categorizes handlers into maps for quick lookup
- * and identifies mandatory fallback handlers for each category.
- * </p>
+ * Central registry for all handler implementations used in update processing.
+ * <p>Aggregates and organizes {@link CallbackHandler}, {@link CommandHandler},
+ * and {@link TextHandler} beans, providing efficient access patterns for each type:</p>
+ * <ul>
+ *   <li><b>Callback handlers</b> — indexed by key for prefix-based resolution</li>
+ *   <li><b>Command handlers</b> — indexed by command for direct lookup</li>
+ *   <li><b>Text handlers</b> — evaluated sequentially using {@code canHandle}</li>
+ * </ul>
+ * <p>Each handler category defines a mandatory fallback handler that is used
+ * when no specific handler matches the input.</p>
+ * <p>This component is initialized at application startup by collecting all
+ * handler beans from the Spring context.</p>
  */
 @Component
 @Getter
 @Slf4j
 public class HandlerRegistry {
 
+    public static final String FALLBACK_KEY = "__FALLBACK__";
+
     /**
-     * Map of callback handlers indexed by their unique key.
+     * Callback handlers indexed by their unique key.
      */
     private final Map<String, CallbackHandler> callbackHandlers;
 
     /**
-     * The default handler used when no specific callback key matches.
+     * Fallback handler used when no callback key matches.
      */
     private final CallbackHandler fallbackCallbackHandler;
 
     /**
-     * Map of command handlers indexed by their specific command string.
+     * Command handlers indexed by their command string (e.g. "/start").
      */
     private final Map<String, CommandHandler> commandHandlers;
 
     /**
-     * The default handler used when an unknown command is received.
+     * Fallback handler used when an unknown command is received.
      */
     private final CommandHandler fallbackCommandHandler;
 
     /**
-     * List of handlers processed sequentially for plain text messages.
+     * Ordered list of text handlers evaluated sequentially.
      */
     private final List<TextHandler> textHandlers;
 
     /**
-     * The default handler used when no text handlers can process the input.
+     * Fallback handler used when no text handler can process the input.
      */
     private final FallbackTextHandler fallbackTextHandler;
 
     /**
-     * Constructs the registry by filtering and indexing provided handler implementations.
-     * <p>
-     * Handlers marked with the key {@code "__FALLBACK__"} are assigned as fallback handlers.
-     * All other handlers are registered into their respective maps or lists.
-     * </p>
-     * @param callbackHandlerList List of available {@link CallbackHandler} beans.
-     * @param commandHandlerList  List of available {@link CommandHandler} beans.
-     * @param textHandlerList     List of available {@link TextHandler} beans.
-     * @throws IllegalStateException if a required fallback handler is missing from the provided lists.
+     * Constructs the registry by indexing and categorizing handler implementations.
+     * <p>Handlers are discovered via Spring injection and grouped as follows:</p>
+     * <ul>
+     *   <li>Callback and command handlers are indexed into maps for fast lookup</li>
+     *   <li>Text handlers are stored as an ordered list for sequential evaluation</li>
+     * </ul>
+     * <p>Fallback handlers are identified using a reserved key ({@link HandlerRegistry#FALLBACK_KEY})
+     * for callback and command handlers, and by type ({@link FallbackTextHandler})
+     * for text handlers.</p>
+     *
+     * @param callbackHandlerList all available {@link CallbackHandler} beans
+     * @param commandHandlerList  all available {@link CommandHandler} beans
+     * @param textHandlerList     all available {@link TextHandler} beans
+     *
+     * @throws IllegalStateException if any required fallback handler is missing
      */
-
     public HandlerRegistry(List<CallbackHandler> callbackHandlerList,
                            List<CommandHandler> commandHandlerList,
                            List<TextHandler> textHandlerList) {
         // Callbacks
         this.callbackHandlers = callbackHandlerList.stream()
-                .filter(callbackHandler -> !"__FALLBACK__".equals(callbackHandler.getKey()))
+                .filter(callbackHandler -> !FALLBACK_KEY.equals(callbackHandler.getKey()))
                 .peek(callbackHandler -> log.info("Registered callback handler: {}", callbackHandler.getClass().getSimpleName()))
                 .collect(Collectors.toMap(CallbackHandler::getKey, h -> h));
 
         this.fallbackCallbackHandler = callbackHandlerList.stream()
-                .filter(callbackHandler -> "__FALLBACK__".equals(callbackHandler.getKey()))
+                .filter(callbackHandler -> FALLBACK_KEY.equals(callbackHandler.getKey()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No fallback callback handler defined!"));
 
         // Commands
         this.commandHandlers = commandHandlerList.stream()
-                .filter(commandHandler -> !"__FALLBACK__".equals(commandHandler.getCommand()))
+                .filter(commandHandler -> !FALLBACK_KEY.equals(commandHandler.getCommand()))
                 .peek(commandHandler -> log.info("Registered command handler: {}", commandHandler.getClass().getSimpleName()))
                 .collect(Collectors.toMap(CommandHandler::getCommand, h -> h));
 
         this.fallbackCommandHandler = commandHandlerList.stream()
-                .filter(commandHandler -> "__FALLBACK__".equals(commandHandler.getCommand()))
+                .filter(commandHandler -> FALLBACK_KEY.equals(commandHandler.getCommand()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No fallback command handler defined!"));
 

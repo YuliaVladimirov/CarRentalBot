@@ -20,9 +20,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Factory component responsible for building Telegram inline keyboards
+ * used across bot handlers.
+ * <p>This class centralizes creation of all {@link InlineKeyboardMarkupDto}
+ * instances to ensure consistency of button layout, callback data structure,
+ * and UI formatting across the application.</p>
+ */
 @Component
 public class KeyboardFactory {
 
+    /**
+     * Creates a single inline keyboard button with callback data.
+     *
+     * @param text visible text displayed on the button
+     * @param data callback data sent to Telegram bot on click
+     * @return constructed {@link InlineKeyboardButtonDto}
+     */
     private InlineKeyboardButtonDto button(String text, String data) {
         return InlineKeyboardButtonDto.builder()
                 .text(text)
@@ -30,6 +44,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds the main menu keyboard shown to the user after start.
+     *
+     * @return main menu keyboard with navigation options
+     */
     public InlineKeyboardMarkupDto buildMainMenuKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -41,6 +60,12 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard with available car categories and minimal pricing.
+     *
+     * @param availability list of car category projections with pricing info
+     * @return category selection keyboard
+     */
     public InlineKeyboardMarkupDto buildCarCategoryKeyboard(List<CarProjection> availability) {
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
 
@@ -70,6 +95,11 @@ public class KeyboardFactory {
         };
     }
 
+    /**
+     * Builds keyboard for selecting car browsing mode.
+     *
+     * @return browsing mode selection keyboard
+     */
     public InlineKeyboardMarkupDto buildCarBrowsingModeKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -81,6 +111,12 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard listing available cars for selection.
+     *
+     * @param cars list of available cars
+     * @return car selection keyboard
+     */
     public InlineKeyboardMarkupDto buildCarsKeyboard(List<Car> cars) {
 
         List<List<InlineKeyboardButtonDto>> rows = new ArrayList<>();
@@ -99,6 +135,12 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds confirmation keyboard for selected booking dates.
+     *
+     * @param callbackKey callback to continue booking flow
+     * @return confirmation keyboard
+     */
     public InlineKeyboardMarkupDto buildConfirmDatesKeyboard(String callbackKey) {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -109,6 +151,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard shown when selected dates are invalid.
+     *
+     * @return retry or navigation keyboard
+     */
     public InlineKeyboardMarkupDto buildInvalidDatesKeyboard(){
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -118,6 +165,12 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds simple confirmation keyboard with a single OK action.
+     *
+     * @param callbackKey callback action to execute on confirmation
+     * @return OK keyboard
+     */
     public InlineKeyboardMarkupDto buildOkKeyboard(String callbackKey) {
 
         return InlineKeyboardMarkupDto.builder()
@@ -127,6 +180,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard with navigation back to main menu.
+     *
+     * @return main menu navigation keyboard
+     */
     public InlineKeyboardMarkupDto buildToMainMenuKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -136,6 +194,13 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard for car details view with custom action button.
+     *
+     * @param callbackKey action callback
+     * @param text button label text
+     * @return car details keyboard
+     */
     public InlineKeyboardMarkupDto buildCarDetailsKeyboard(String callbackKey, String text) {
 
         return InlineKeyboardMarkupDto.builder()
@@ -146,6 +211,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard shown when a car is available for booking.
+     *
+     * @return availability action keyboard
+     */
     public InlineKeyboardMarkupDto buildCarAvailableKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -156,6 +226,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard shown when a car is not available for selected dates.
+     *
+     * @return unavailable state keyboard
+     */
     public InlineKeyboardMarkupDto buildCarUnavailableKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -166,6 +241,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard to start booking flow.
+     *
+     * @return start booking confirmation keyboard
+     */
     public InlineKeyboardMarkupDto buildStartBookingKeyboard() {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -175,6 +255,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard for booking management actions.
+     *
+     * @return booking details keyboard
+     */
     public InlineKeyboardMarkupDto buildBookingDetailsKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -187,6 +272,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds confirmation keyboard for booking cancellation.
+     *
+     * @return cancellation confirmation keyboard
+     */
     public InlineKeyboardMarkupDto buildCancelBookingKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -197,6 +287,12 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard for listing user's bookings.
+     *
+     * @param bookingId booking identifier
+     * @return my bookings keyboard
+     */
     public InlineKeyboardMarkupDto buildMyBookingsKeyboard(UUID bookingId) {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -206,6 +302,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard for viewing a specific booking details.
+     *
+     * @return booking details actions keyboard
+     */
     public InlineKeyboardMarkupDto buildMyBookingDetailsKeyboard() {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -216,6 +317,12 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard for editing booking information.
+     *
+     * @param callbackKey continuation callback action
+     * @return edit booking keyboard
+     */
     public InlineKeyboardMarkupDto buildEditBookingKeyboard(String callbackKey) {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -227,6 +334,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds keyboard for canceling a user's booking.
+     *
+     * @return cancel booking confirmation keyboard
+     */
     public InlineKeyboardMarkupDto buildCancelMyBookingKeyboard() {
 
         return InlineKeyboardMarkupDto.builder()
@@ -238,6 +350,11 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds help menu keyboard with navigation and external support link.
+     *
+     * @return help menu keyboard
+     */
     public InlineKeyboardMarkupDto buildHelpMenuKeyboard() {
         return InlineKeyboardMarkupDto.builder()
                 .inlineKeyboard(List.of(
@@ -252,6 +369,16 @@ public class KeyboardFactory {
                 .build();
     }
 
+    /**
+     * Builds inline calendar keyboard for date selection.
+     *
+     * <p>Supports month navigation and day selection callbacks.</p>
+     *
+     * @param year calendar year
+     * @param month calendar month (1-12)
+     * @param prefix callback prefix for handling actions
+     * @return calendar keyboard
+     */
     public InlineKeyboardMarkupDto buildCalendar(int year, int month, String prefix) {
 
         YearMonth yearMonth = YearMonth.of(year, month);

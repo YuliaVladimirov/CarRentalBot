@@ -9,12 +9,28 @@ import org.thymeleaf.context.Context;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Builder component responsible for generating HTML email bodies
+ * using Thymeleaf templates.
+ * <p>This class prepares template contexts and delegates rendering
+ * to {@link TemplateEngine} for different booking-related email types.</p>
+ */
 @Component
 @RequiredArgsConstructor
 public class EmailTemplateBuilder {
 
     private final TemplateEngine templateEngine;
 
+    /**
+     * Builds HTML email body for booking notifications.
+     * <p>Includes full booking details such as car information, pricing,
+     * dates, and customer contact information.</p>
+     *
+     * @param booking booking entity containing all relevant data
+     * @param title email title displayed in template
+     * @param message main message content for the email
+     * @return rendered HTML email body
+     */
     public String buildNotificationHtmlBody(Booking booking, String title, String message) {
 
         Context context = new Context();
@@ -35,6 +51,16 @@ public class EmailTemplateBuilder {
         return templateEngine.process("email/notification.html", context);
     }
 
+    /**
+     * Builds HTML email body for booking reminder notifications.
+     * <p>Includes essential booking details such as car information and rental period,
+     * intended for reminder-style communication.</p>
+     *
+     * @param booking booking entity containing relevant data
+     * @param title email title displayed in template
+     * @param message reminder message content
+     * @return rendered HTML email body
+     */
     public String buildReminderHtmlBody(Booking booking, String title, String message) {
 
         Context context = new Context();

@@ -14,6 +14,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+/**
+ * Configuration class for application asynchronous execution.
+ * <p>Defines thread pool executors for different types of background tasks
+ * such as Telegram processing and email sending.</p>
+ * <p>Also integrates MDC (Mapped Diagnostic Context) propagation across threads
+ * to preserve logging context in asynchronous execution.</p>
+ */
 @Configuration
 @RequiredArgsConstructor
 public class AsyncConfig implements AsyncConfigurer {
@@ -21,6 +28,11 @@ public class AsyncConfig implements AsyncConfigurer {
     //Custom handler
     private final CustomAsyncExceptionHandler customAsyncExceptionHandler;
 
+    /**
+     * Task decorator responsible for propagating MDC context across threads.
+     * <p>This ensures that logging context (such as request identifiers or thread names)
+     * is preserved when tasks are executed asynchronously.</p>
+     */
     static class MdcTaskDecorator implements TaskDecorator {
         @Override
         public Runnable decorate(Runnable runnable) {
@@ -46,8 +58,13 @@ public class AsyncConfig implements AsyncConfigurer {
         }
     }
 
-
-    // Executor for Telegram bot async tasks (processing updates, DB work, etc.)
+    /**
+     * Executor for Telegram-related asynchronous tasks.
+     * <p>Used for processing bot updates, handling business logic, and database operations.
+     * Configured with a large thread pool to handle high load bursts.</p>
+     *
+     * @return configured {@link Executor} for Telegram processing
+     */
     @Bean(name = "telegramExecutor")
     @Primary
     public Executor telegramExecutor() {
@@ -63,7 +80,13 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
-    // Executor dedicated to sending emails
+    /**
+     * Executor dedicated to email sending tasks.
+     * <p>Designed for lightweight background email processing with limited concurrency
+     * to prevent overload of external email providers.</p>
+     *
+     * @return configured {@link Executor} for email processing
+     */
     @Bean(name = "emailExecutor")
     public Executor emailExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -78,12 +101,24 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
-    // This method registers the custom handler with all task executors
+    /**
+     * Provides a custom handler for uncaught exceptions in asynchronous methods.
+     * <p>This handler is applied to all async executors to ensure proper logging
+     * and error tracking for background tasks.</p>
+     *
+     * @return custom {@link AsyncUncaughtExceptionHandler}
+     */
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return customAsyncExceptionHandler;
     }
 
+    /**
+     * Defines the default async executor used by Spring's {@code @Async} methods.
+     * <p>Delegates execution to the Telegram executor by default.</p>
+     *
+     * @return default async {@link Executor}
+     */
     @Override
     public Executor getAsyncExecutor() {
         return telegramExecutor();

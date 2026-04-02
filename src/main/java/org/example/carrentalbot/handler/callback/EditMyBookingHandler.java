@@ -63,7 +63,7 @@ public class EditMyBookingHandler implements CallbackHandler {
     /**
      * Clock used for time-based validation to allow testability and consistent time access.
      */
-    private final Clock clock = Clock.systemDefaultZone();
+    private final Clock clock;
 
     /**
      * {@inheritDoc}

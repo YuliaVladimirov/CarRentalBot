@@ -12,18 +12,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
+import static org.example.carrentalbot.util.HandlerRegistry.FALLBACK_KEY;
+
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service acts as the "Catch-All" or "Dead Letter" handler for the
- * callback routing system. It is responsible for:
- * <ul>
- * <li>Providing a unique internal key {@code __FALLBACK__} for unmapped requests.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Gracefully handling scenarios where a callback key {@code "__FALLBACK__"} is recognized
- * preventing the bot from becoming unresponsive.</li>
- * <li>Guiding the user back to the primary navigation points (Main Menu or Help).</li>
- * </ul>
- * </p>
+ * Fallback implementation of {@link CallbackHandler} used when no other handler
+ * matches the incoming callback data.
+ * <p>This handler ensures the system remains responsive for unrecognized or
+ * unsupported callback interactions by providing a safe navigation path back
+ * to the main menu.</p>
+ * <p>It is registered using the global fallback key defined in the handler
+ * registry and acts as a safety net for the callback routing system.</p>
  */
 @Slf4j
 @Service
@@ -31,36 +29,32 @@ import java.util.EnumSet;
 public class FallbackCallbackHandler implements CallbackHandler {
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure that a safety
-     * response can be delivered regardless of the user's current session state.</p>
+     * Allowed execution contexts for the fallback handler.
+     * <p>This handler is available in all {@link FlowContext} states to ensure
+     * the system can always recover from invalid or unknown callback interactions.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Factory responsible for constructing the inline contextual keyboard
-     * for main menu navigation.
+     * Factory for building navigation keyboards, including return-to-main-menu actions.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to deliver the fallback message.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The string {@code "__FALLBACK__"}.
      */
     @Override
     public String getKey() {
-        return "__FALLBACK__";
+        return FALLBACK_KEY;
     }
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -68,16 +62,12 @@ public class FallbackCallbackHandler implements CallbackHandler {
     }
 
     /**
-     * Processes an unrecognized or unsupported callback request.
-     * <ol>
-     * <li>Logs the fallback event for administrative monitoring.</li>
-     * <li>Constructs a user-friendly HTML error message.</li>
-     * <li>Provides actionable instructions for the user to reset their state
-     * using navigation keyboard, or commands {@code /main} or {@code /help}.</li>
-     * <li>Delivers the response message via the Telegram API.</li>
-     * </ol>
-     * @param chatId The ID of the chat where the error occurred.
-     * @param callbackQuery The incoming callback query DTO that could not be routed.
+     * Handles unrecognized or unsupported callback interactions.
+     * <p>Logs the event and responds with a user-friendly message guiding the user
+     * back to the main menu or help section.</p>
+     *
+     * @param chatId chat identifier where the callback originated
+     * @param callbackQuery unrecognized callback payload
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

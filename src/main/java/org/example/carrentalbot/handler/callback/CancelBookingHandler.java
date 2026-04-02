@@ -13,16 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service manages the cancellation intent during a booking or editing session.
- * Rather than performing an immediate deletion, it acts as a confirmation gatekeeper. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code ConfirmBookingHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining accessibility to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</li>
- * <li>Present a verification prompt to prevent accidental data loss.</li>
- * <li>Provide a specialized keyboard for final cancellation confirmation or resumption.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for initiating booking cancellation.
+ *
+ * <p>Acts as a confirmation step to prevent accidental cancellation during
+ * booking or editing flows.</p>
  */
 @Slf4j
 @Service
@@ -30,30 +24,28 @@ import java.util.EnumSet;
 public class CancelBookingHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code CancelBookingHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "CANCEL_BOOKING";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</p>
+     * Allowed flow contexts for this handler.
+     * Handler is available during booking and booking-editing flows.
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     /**
-     * Factory responsible for constructing the binary "Confirm/Deny" cancellation keyboard.
+     * Factory for building cancellation confirmation keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver the
-     * cancellation verification message.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -62,7 +54,6 @@ public class CancelBookingHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -70,14 +61,10 @@ public class CancelBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Executes the logic to present a cancellation confirmation dialog.
-     * <ol>
-     * <li>Logs the initiation of the cancellation flow.</li>
-     * <li>Builds a specific "Confirm/Deny" cancellation keyboard via {@link KeyboardFactory}.</li>
-     * <li>Sends a plain-text verification query to the user.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
+     * Displays a cancellation confirmation prompt to the user.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

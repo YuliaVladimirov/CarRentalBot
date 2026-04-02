@@ -27,20 +27,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service marks the completion of the booking journey by persisting the
- * reservation and initiating post-booking processes. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code ConfirmBookingHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining accessibility to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</li>
- * <li>Final validation and retrieval of the complete booking dataset from the session.</li>
- * <li>Persisting the new {@link Booking} entity via the {@link BookingService}.</li>
- * <li>Scheduling automated rental reminders through the {@link ReminderService}.</li>
- * <li>Triggering asynchronous email confirmations via the {@link EmailService}.</li>
- * <li>Clearing the user session to prevent data leakage and reset the bot state.</li>
- * <li>Dispatching an HTML-formatted message with a final confirmation receipt and a path back to the main menu.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for finalizing the booking process.
+ *
+ * <p>Persists the booking, triggers post-booking actions (reminders and email),
+ * clears session state, and returns a final confirmation to the user.</p>
  */
 @Slf4j
 @Service
@@ -48,57 +38,48 @@ import java.util.UUID;
 public class ConfirmBookingHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code ConfirmBookingHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "CONFIRM_BOOKING";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BOOKING_FLOW} and
-     * {@link FlowContext#EDIT_BOOKING_FLOW}.</p>
+     * Allowed flow contexts for this handler.
+     * Handler is available during booking and booking-editing flows.
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     /**
-     * Service responsible for performing business logic calculations, specifically
-     * for saving the {@link Booking} to the database.
+     * Service for booking creation and persistence.
      */
     private final BookingService bookingService;
 
     /**
-     * Service responsible for dispatching HTML-formatted email confirmations
-     * to the user's provided email address.
+     * Service for sending booking confirmation emails to users.
      */
     private final EmailService emailService;
 
     /**
-     * Service responsible for scheduling "push" notifications for the user as the
-     * rental start date approaches.
+     * Service for scheduling booking reminders before rental start.
      */
     private final ReminderService reminderService;
 
     /**
-     * Service responsible for managing user-specific session data, specifically
-     * to retrieve the final booking parameters and
-     * perform a total session cleanup upon successful persistence.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for generating the final action keyboard, specifically
-     * for generating the "To Main Menu" keyboard for post-flow navigation.
+     * Factory for building post-booking navigation keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically for sending the final success message and booking ID to the user.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -107,7 +88,6 @@ public class ConfirmBookingHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -115,18 +95,11 @@ public class ConfirmBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Orchestrates the finalization of the booking process.
-     * <ol>
-     * <li>Collects all seven mandatory data points from the {@link SessionService}.</li>
-     * <li><b>Persistence:</b> Creates the {@link Booking} record in the database.</li>
-     * <li><b>Automation:</b> Generates and schedules {@link Reminder} entries.</li>
-     * <li><b>User Feedback:</b> Sends a Telegram message containing the new Booking ID.</li>
-     * <li><b>Cleanup:</b> Purges all transient data from the session via {@code deleteAll}.</li>
-     * <li><b>Notification:</b> Attempts to send an email confirmation (logged as critical failure if unsuccessful).</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The callback query containing the user's Telegram ID.
-     * @throws DataNotFoundException if the session state is incomplete at the moment of confirmation.
+     * Finalizes the booking by persisting data and triggering post-booking actions.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
+     * @throws DataNotFoundException if required session data is missing
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

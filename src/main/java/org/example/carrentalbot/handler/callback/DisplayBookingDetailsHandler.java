@@ -22,19 +22,10 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service serves as the final confirmation screen in the booking lifecycle.
- * It aggregates all transient session data and car information to present a comprehensive
- * summary to the user. Its responsibilities include:
- * <ul>
- * <li>Providing the unique {@code DisplayBookingDetailsHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining accessibility to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</li>
- * <li>Retrieving vehicle details, selected dates, and contact information from the session.</li>
- * <li>Invoking {@link BookingService} to calculate the total rental duration and final price.</li>
- * <li>Formatting the data into a high-readability HTML summary.</li>
- * <li>Dispatching a rich media message (photo of the car + details) with the final action keyboard.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for displaying the final booking summary.
+ *
+ * <p>Operates within booking-related flows and presents aggregated booking data,
+ * including car details, dates, and pricing, before confirmation.</p>
  */
 @Slf4j
 @Service
@@ -42,50 +33,43 @@ import java.util.UUID;
 public class DisplayBookingDetailsHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code DisplayBookingDetailsHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "DISPLAY_BOOKING_DETAILS";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BOOKING_FLOW} and
-     * {@link FlowContext#EDIT_BOOKING_FLOW}.</p>
+     * Allowed flow contexts for this handler.
+     * Handler is available during booking and booking-editing flows.
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     /**
-     * Service responsible for retrieving the full {@link Car} entity, including technical
-     * specifications and the {@code imageFileId} for the summary photo.
+     * Service for retrieving car data used in booking and display flows.
      */
     private final CarService carService;
 
     /**
-     * Service responsible for performing business logic calculations, specifically for determining
-     * the rental duration and applying the daily rate to compute the total cost.
+     * Service for booking logic and availability checks.
      */
     private final BookingService bookingService;
 
     /**
-     * Service responsible for managing user-specific session data, specifically
-     * the final calculated totals for the booking.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for generating the final action keyboard, specifically
-     * offering "Confirm", "Edit" and "Cancel" options.
+     * Factory for building inline keyboards for booking interactions.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically for sending the vehicle photo with the summarized booking details as a caption.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -94,7 +78,6 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -102,23 +85,11 @@ public class DisplayBookingDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Orchestrates the construction and display of the final booking summary.
-     * <ol>
-     * <li>Fetches the following from {@link SessionService}:
-     * <ul>
-     * <li>{@code carId} (UUID)</li>
-     * <li>{@code startDate} & {@code endDate} (in {@link LocalDate} format)</li>
-     * <li>{@code phone} & {@code email} (in {@link String} format)</li>
-     * </ul>
-     * <li>Calculates the total days and total cost
-     * </li>
-     * <li>Updates the session with these calculated values for use in the final persistence step.</li>
-     * <li>Constructs a stylized HTML caption featuring car specifications and pricing.</li>
-     * <li>Dispatches the message with car's image and final booking summary using {@code sendPhoto}.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
-     * @throws DataNotFoundException if any required piece of the booking puzzle is missing from the session.
+     * Builds and displays the final booking details for confirmation.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
+     * @throws DataNotFoundException if required session data is missing
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

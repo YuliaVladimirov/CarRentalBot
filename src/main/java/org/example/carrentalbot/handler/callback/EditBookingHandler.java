@@ -15,18 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service facilitates the modification of contact information during the
- * active booking process. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code EditBookingHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining accessibility to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</li>
- * <li>Managing the state transition from {@link FlowContext#BOOKING_FLOW} to {@link FlowContext#EDIT_BOOKING_FLOW}.</li>
- * <li>Ensuring the user is informed about the limitations of the edit (e.g., dates cannot be changed here).</li>
- * <li>Providing a specialized keyboard that allows users to jump between Phone and Email entry.</li>
- * <li>Routing the user back to the summary screen ({@link DisplayBookingDetailsHandler}) once edits are complete.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for editing booking contact information.
+ *
+ * <p>Allows users to update phone or email during an active booking or booking management flow.</p>
  */
 @Slf4j
 @Service
@@ -34,36 +25,33 @@ import java.util.EnumSet;
 public class EditBookingHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code EditBookingHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "EDIT_BOOKING";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Permitted in {@code BOOKING_FLOW} (initial entry), {@code EDIT_BOOKING_FLOW} (recursive entry),
-     * and {@code MY_BOOKINGS_FLOW} (cross-flow utility).</p>
+     * Allowed flow contexts for this handler.
+     * Handler is available during booking, editing, and booking management flows.
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW, FlowContext.MY_BOOKINGS_FLOW);
 
     /**
-     * Service responsible for persisting the state transition to {@link FlowContext#EDIT_BOOKING_FLOW}.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for building the edit actions keyboard.
+     * Factory for building booking editing keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver the
-     * edit instructions and menu.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -72,7 +60,6 @@ public class EditBookingHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -80,14 +67,11 @@ public class EditBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Orchestrates the transition to the in-flow editing state.
-     * <ol>
-     * <li>Retrieves the current {@link FlowContext} to determine if a state shift is required.</li>
-     * <li>Dispatches an HTML-formatted message with an editing keyboard.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
-     * @throws DataNotFoundException if the flow context is missing from the session.
+     * Switches the user into edit mode for booking contact details and displays the edit UI.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
+     * @throws DataNotFoundException if flow context is missing from session
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

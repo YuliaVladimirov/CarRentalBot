@@ -14,18 +14,10 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service acts as the bridge between the discovery phase and the transactional phase
- * of the application. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code StartBookingHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Initiating the booking lifecycle and updating
- * the user's session state to {@link FlowContext#BOOKING_FLOW}.</li>
- * <li>Providing the user with introductory instructions for the data collection sequence.</li>
- * <li>Dispatching the HTML-formatted message with the initial booking keyboard
- * to move the user toward contact details entry.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for starting the booking flow.
+ *
+ * <p>Operates within the browsing flow and transitions the user into the booking
+ * process, providing initial instructions and the next interaction step.</p>
  */
 @Slf4j
 @Service
@@ -33,36 +25,33 @@ import java.util.EnumSet;
 public class StartBookingHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code StartBookingHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "START_BOOKING";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BROWSING_FLOW}, as a booking can only be
-     * started once a vehicle and dates have been identified during the browsing process.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can only be executed within the browsing flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     /**
-     * Service used to persist the state transition from browsing to booking.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the inline keyboard for the initial booking step.
+     * Factory for building the inline keyboard for the initial booking step.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to deliver booking instructions.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -71,7 +60,6 @@ public class StartBookingHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -79,16 +67,10 @@ public class StartBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Executes the logic to transition the user into the booking flow.
-     * <ol>
-     * <li>Logs the start of the booking sequence for audit and tracking purposes.</li>
-     * <li><b>State Transition:</b> Updates the session {@code flowContext} to {@link FlowContext#BOOKING_FLOW}.
-     * This is critical for ensuring that the user is now within a reservation process.</li>
-     * <li>Prepares a welcome message outlining the step-by-step nature of the booking.</li>
-     * <li>Sends an HTML-formatted message with a specialized keyboard.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
+     * Transitions the user into the booking flow and sends initial instructions.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

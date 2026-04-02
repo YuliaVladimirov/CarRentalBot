@@ -14,18 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service serves as the terminal point for a user's intent to abandon their
- * current progress. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code ConfirmBookingHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining accessibility to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</li>
- * <li>Executing the final "Hard Reset" of the user's conversational state.</li>
- * <li>Purging all transient booking data (dates, car selection, contact info) from the session.</li>
- * <li>Sends a Telegram message with the cancellation receipt.</li>
- * <li>Providing a clean transition back to the Main Menu.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for finalizing booking cancellation.
+ *
+ * <p>Clears all session data and returns the user to the main menu.</p>
  */
 @Slf4j
 @Service
@@ -33,36 +24,33 @@ import java.util.EnumSet;
 public class ConfirmCancelBookingHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code ConfirmCancelBookingHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "CONFIRM_CANCEL_BOOKING";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BOOKING_FLOW} and {@link FlowContext#EDIT_BOOKING_FLOW}.</p>
+     * Allowed flow contexts for this handler.
+     * Handler is available during booking and booking-editing flows.
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BOOKING_FLOW, FlowContext.EDIT_BOOKING_FLOW);
 
     /**
-     * Service responsible for managing user-specific session data, specifically
-     * for performing the final session cleanup.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory component responsible for generating the "To Main Menu" keyboard for the final exit.
+     * Factory for building navigation keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API
-     * to deliver the final cancellation acknowledgment message.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -71,7 +59,6 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -79,16 +66,10 @@ public class ConfirmCancelBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Finalizes the cancellation by clearing the user session.
-     * <ol>
-     * <li>Logs the confirmed cancellation for session tracking.</li>
-     * <li>Invokes {@code deleteAll} to remove all attributes associated
-     * with the current {@code chatId} in session.</li>
-     * <li>Sends a final acknowledgment message to the user confirming the action.</li>
-     * <li>Attaches a "Main Menu" keyboard to facilitate the start of a new interaction.</li>
-     * </ol>
-     * @param chatId The ID of the chat to be cleared.
-     * @param callbackQuery The incoming callback query DTO.
+     * Clears the current booking session and confirms cancellation to the user.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

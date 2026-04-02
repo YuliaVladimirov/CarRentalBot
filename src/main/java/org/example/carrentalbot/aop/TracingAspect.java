@@ -14,6 +14,18 @@ import java.util.UUID;
 
 import static org.example.carrentalbot.aop.MDCFields.*;
 
+/**
+ * Aspect responsible for tracing execution across application layers.
+ * <p> It intercepts execution of:
+ * <ul>
+ *     <li>{@code @RestController} methods</li>
+ *     <li>{@code @Service} methods</li>
+ *     <li>{@code @Async} methods</li>
+ * </ul>
+ * and enriches logs with contextual metadata using MDC (Mapped Diagnostic Context),
+ * including tracing information and Telegram update details when available.
+ * </p>
+ */
 @Slf4j
 @Aspect
 @Component
@@ -24,10 +36,16 @@ public class TracingAspect {
                     "@within(org.springframework.stereotype.Service) || " +
                     "@annotation(org.springframework.scheduling.annotation.Async)";
 
+    /**
+     * Extracts Telegram update ID from update payload.
+     */
     private Long extractUpdateId(UpdateDto update) {
         return update.getUpdateId();
     }
 
+    /**
+     * Determines update type (message, callbackQuery, or other).
+     */
     private String extractUpdateType(UpdateDto update) {
         return Optional.ofNullable(update.getMessage()).map(m -> "message")
                 .orElseGet(() ->
@@ -35,6 +53,9 @@ public class TracingAspect {
                                 .orElse("other"));
     }
 
+    /**
+     * Extracts chat ID from Telegram update if present.
+     */
     private Long extractChatId(UpdateDto update) {
         return Optional.ofNullable(update.getMessage())
                 .map(MessageDto::getChat)
@@ -48,6 +69,9 @@ public class TracingAspect {
                 .orElse(null);
     }
 
+    /**
+     * Extracts Telegram user ID from update if present.
+     */
     private Long extractTelegramUserId(UpdateDto update) {
         return Optional.ofNullable(update.getMessage())
                 .map(MessageDto::getFrom)
@@ -60,6 +84,21 @@ public class TracingAspect {
                 .orElse(null);
     }
 
+    /**
+     * Around advice that wraps execution of controllers, services, and async methods.
+     * <p>Responsibilities:
+     * <ul>
+     *     <li>Generates a trace ID for request tracking</li>
+     *     <li>Stores class and method metadata in MDC</li>
+     *     <li>Extracts Telegram-related context (if available)</li>
+     *     <li>Logs execution time and errors</li>
+     * </ul>
+     * </p>
+     *
+     * @param joinPoint the intercepted method execution
+     * @return result of the original method execution
+     * @throws Throwable if the intercepted method throws an exception
+     */
     @Around(POINTCUT_EXPRESSION)
     public Object logExecution(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();

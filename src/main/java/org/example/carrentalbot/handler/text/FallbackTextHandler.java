@@ -12,16 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link TextHandler} interface.
- * <p>This service acts as the "Catch-All" or "Dead Letter" handler for the
- * text processing system. It is responsible for:
- * <ul>
- * <li>Ensuring a fail-safe response when no specialized {@link TextHandler} matches user input.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Providing a graceful rejection of unrecognized text, preventing the bot from becoming unresponsive.</li>
- * <li>Guiding the user back to valid conversational entry points (Main Menu or Help).</li>
- * </ul>
- * </p>
+ * Fallback text handler used when no other handler can process the input.
+ * <p>Provides a safe default response and guides the user back to valid navigation options.
+ * This handler is available globally.</p>
  */
 @Slf4j
 @Service
@@ -29,29 +22,24 @@ import java.util.EnumSet;
 public class FallbackTextHandler implements TextHandler {
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure that a safety
-     * response can be delivered regardless of the user's current session state.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Factory responsible for constructing the inline contextual keyboard
-     * for main menu navigation.
+     * Factory for building navigation keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically for delivering the fallback message.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * <p>This implementation always returns {@code false} as it is intended to be
-     * invoked explicitly by the dispatcher when all other matching attempts fail.</p>
-     * @return Always {@code false}.
      */
     @Override
     public boolean canHandle(String text) {
@@ -60,7 +48,6 @@ public class FallbackTextHandler implements TextHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -68,16 +55,10 @@ public class FallbackTextHandler implements TextHandler {
     }
 
     /**
-     * Processes an unrecognized or unsupported text message.
-     * <ol>
-     * <li>Logs the text fallback event for administrative monitoring.</li>
-     * <li>Constructs a user-friendly HTML error message explaining the lack of comprehension.</li>
-     * <li>Provides actionable instructions for the user to reset their state
-     * using navigation keyboard, or commands {@code /main} or {@code /help}.</li>
-     * <li>Delivers the response message via the Telegram API.</li>
-     * </ol>
-     * @param chatId The ID of the chat where the unhandled text originated.
-     * @param textInput The raw text input that could not be processed.
+     * Handles unsupported text input by notifying the user and offering navigation options.
+     *
+     * @param chatId chat identifier
+     * @param textInput user input text
      */
     @Override
     public void handle(Long chatId, String textInput) {

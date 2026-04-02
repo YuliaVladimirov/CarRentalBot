@@ -5,38 +5,36 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import java.util.EnumSet;
 
 /**
- * Defines the contract for processing raw text messages sent by the user.
- * <p>Each implementation of this interface is responsible for identifying and
- * handling specific text patterns, commands, or state-dependent user inputs
- * (such as providing phone numbers, emails, or search queries).</p>
+ * Contract for handling free-form text input from users.
+ * <p>Each implementation processes specific text patterns (e.g. phone numbers,
+ * emails, search queries) or state-dependent user input within a flow.</p>
  */
 public interface TextHandler {
 
     /**
-     * Determines whether this handler is capable of processing the provided text.
-     * <p>This method checks the text against a regular expression or verifying its length and format.</p>
-     * @param text The raw text message received from the user.
-     * @return {@code true} if this handler can process the message; {@code false} otherwise.
+     * Checks whether this handler can process the given text.
+     * <p>Evaluates the input string against the regex pattern.</p>
+     *
+     * @param text raw user input
+     * @return {@code true} if the text can be handled, otherwise {@code false}
      */
     boolean canHandle(String text);
 
     /**
-     * Returns a set of allowed application states (flow contexts) in which this
-     * text handler is permitted to execute its logic.
-     * <p>This is used by the dispatcher (e.g., {@code GlobalHandler}) to ensure
-     * the user is not attempting to perform an action outside a defined workflow.</p>
-     * If the implementation returns {@link EnumSet#allOf(Class)}, it signifies
-     * that the handler can be executed regardless of the user's current flow state.</p>
-     * @return An {@link EnumSet} of {@link FlowContext} constants that allow execution.
+     * Returns the flow contexts in which this handler is allowed to execute.
+     * <p>Flow context prevents users from performing actions outside the intended workflow.</p>
+     *
+     * @return allowed {@link FlowContext} values for execution
      */
     EnumSet<FlowContext> getAllowedContexts();
 
     /**
-     * Executes the main business logic for the provided text input.
-     * <p>Implementations should typically update the user's flow state, validate the data,
-     * persist it to the session store, and advance the user to the next step in the flow.</p>
-     * @param chatId The ID of the Telegram chat where the message originated.
-     * @param text The validated text input from the user.
+     * Processes the user input.
+     * <p>Implementations typically validate input, update session state,
+     * persist data, and move the user to the next step in the flow.</p>
+     *
+     * @param chatId chat identifier where the message originated
+     * @param text user input text
      */
     void handle(Long chatId, String text);
 }

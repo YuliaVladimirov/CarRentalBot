@@ -10,17 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CommandHandler} interface.
- * <p>This service provides a global shortcut to the bot's assistance and
- * documentation menu. It is responsible for:
- * <ul>
- * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Providing a context-agnostic way for users to find information about
- * bot features or commands.</li>
- * <li>Delegating the rendering of the help interface to the {@link HelpMenuHandler}.</li>
- * </ul>
- * </p>
+ * Handles the {@code /help} command.
+ * <p>Redirects the user to the help menu. This handler is available globally.</p>
  */
 @Slf4j
 @Service
@@ -28,27 +19,24 @@ import java.util.EnumSet;
 public class HelpCommandHandler implements CommandHandler {
 
     /**
-     * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
+     * Command identifier used to route commands to this handler.
      */
     public static final String COMMAND = "/help";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure
-     * that users can request assistance even if they are in the middle of a complex
-     * booking or edit flow.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * The underlying handler responsible for displaying the help text,
-     * available commands, and any associated support keyboards.
+     * Handler for displaying the help menu.
      */
     private final HelpMenuHandler helpMenuHandler;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
@@ -57,7 +45,6 @@ public class HelpCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -65,14 +52,10 @@ public class HelpCommandHandler implements CommandHandler {
     }
 
     /**
-     * Executes the "Request Assistance" logic.
-     * <p>Following the <b>Delegation Pattern</b>, this method passes control
-     * directly to the {@link HelpMenuHandler}. This ensures a consistent
-     * user experience between typing {@code /help} and clicking a "Help"
-     * button in an inline keyboard.</p>
-     * @param chatId The ID of the chat.
-     * @param from Metadata about the Telegram user (unused as the
-     * {@link HelpMenuHandler} manages the response content).
+     * Redirects the user to the help menu.
+     *
+     * @param chatId chat identifier
+     * @param from user metadata (unused)
      */
     @Override
     public void handle(Long chatId, FromDto from) {

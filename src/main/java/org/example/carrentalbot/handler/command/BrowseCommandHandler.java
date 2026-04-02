@@ -10,16 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CommandHandler} interface.
- * <p>This service provides a global shortcut to the car browsing and
- * selection flow. It is responsible for:
- * <ul>
- * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Allowing users to bypass menus and immediately view available vehicle types.</li>
- * <li>Delegating the category display logic to the {@link BrowseCategoriesHandler}.</li>
- * </ul>
- * </p>
+ * Handles the {@code /browse} command.
+ * <p>Provides a shortcut to the car browsing flow and redirects the user
+ * to the category selection screen. This handler is available globally.</p>
  */
 @Slf4j
 @Service
@@ -27,27 +20,24 @@ import java.util.EnumSet;
 public class BrowseCommandHandler implements CommandHandler {
 
     /**
-     * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
+     * Command identifier used to route commands to this handler.
      */
     public static final String COMMAND = "/browse";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure
-     * that users can start looking for a car even if they are currently in a different
-     * operational context.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * The underlying handler responsible for fetching and displaying the
-     * available car categories to the user.
+     * Handler for displaying available car categories.
      */
     private final BrowseCategoriesHandler browseCategoriesHandler;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
@@ -56,7 +46,6 @@ public class BrowseCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -64,13 +53,10 @@ public class BrowseCommandHandler implements CommandHandler {
     }
 
     /**
-     * Executes the "Browse Cars" shortcut logic.
-     * <p>By delegating to the {@link BrowseCategoriesHandler}, this method
-     * triggers the same category list that a user would see if they navigated
-     * through the inline menu buttons, ensuring a unified UI experience.</p>
-     * @param chatId The ID of the chat.
-     * @param from Metadata about the Telegram user (unused here as the
-     * delegated handler manages the response).
+     * Redirects the user to the car categories view.
+     *
+     * @param chatId chat identifier
+     * @param from user metadata (unused)
      */
     @Override
     public void handle(Long chatId, FromDto from) {

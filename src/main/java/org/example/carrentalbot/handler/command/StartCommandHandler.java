@@ -15,17 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CommandHandler} interface.
- * <p>This service is the primary entry point for all users of the Car Rental Bot.
- * This handler is responsible for:
- * <ul>
- * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Idempotent registration of the customer in the database.</li>
- * <li>Differentiating between new users and returning customers for personalized greetings.</li>
- * <li>Immediate hand-off to the {@link MainMenuHandler} to present available services.</li>
- * </ul>
- * </p>
+ * Handles the {@code /start} command.
+ * <p>Registers the user if needed, sends a welcome message, and opens the main menu.
+ * This handler is available globally.</p>
  */
 @Slf4j
 @Service
@@ -33,37 +25,34 @@ import java.util.EnumSet;
 public class StartCommandHandler implements CommandHandler {
 
     /**
-     * The unique routing identifier used to identify {@code StartCommandHandler} and properly route commands.
+     * Command identifier used to route commands to this handler.
      */
     public static final String COMMAND = "/start";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure
-     * that a reset or restart can be possible regardless of the user's current session state.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Service responsible for persisting or retrieving the {@link Customer} record based on
-     * Telegram user information.
+     * Service for managing customer registration.
      */
     private final CustomerServiceImpl customerService;
 
     /**
-     * Handler responsible for displaying the initial navigation options after the welcome message.
+     * Handler for displaying the main menu.
      */
     private final MainMenuHandler mainMenuHandler;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically for delivering the personalized welcome text.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
@@ -72,7 +61,6 @@ public class StartCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -80,15 +68,10 @@ public class StartCommandHandler implements CommandHandler {
     }
 
     /**
-     * Orchestrates the user's first interaction with the bot.
-     * <ol>
-     * <li>Invokes {@code registerIfNotExists} to ensure a database record exists for the user.</li>
-     * <li>Checks {@code CustomerRegistration.isNew()} to branch the greeting logic.</li>
-     * <li>Sends a "Hi!" or "Welcome back!" message via the {@link TelegramClient}.</li>
-     * <li>Delegates control to the {@link MainMenuHandler} to present the main interface.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param from The Telegram user data used for registration and personalization.
+     * Registers the user (if new), sends a welcome message, and delegates to the main menu.
+     *
+     * @param chatId chat identifier
+     * @param from user metadata
      */
     @Override
     public void handle(Long chatId, FromDto from) {

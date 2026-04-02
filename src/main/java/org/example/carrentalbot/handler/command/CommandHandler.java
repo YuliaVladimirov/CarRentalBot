@@ -6,36 +6,34 @@ import org.example.carrentalbot.model.enums.FlowContext;
 import java.util.EnumSet;
 
 /**
- * Defines the contract for processing slash-commands and universal bot instructions.
- * <p>Each implementation  of this interface is responsible for defining a unique command string (e.g., "/start")
- * and handling the business logic associated with that direct user input.</p>
+ * Contract for handling slash commands and global bot actions.
+ * <p>Each implementation processes a specific command (e.g. "/start", "/help")
+ * and defines the logic executed for that user input.</p>
  */
 public interface CommandHandler {
 
     /**
-     * Returns the specific command string this handler is responsible for.
-     * @return The command string (e.g., "/start", "/help" or an internal fallback key).
+     * Returns the command handled by this implementation.
+     *
+     * @return command string (e.g. "/start", "/help")
      */
     String getCommand();
 
     /**
-     * Returns a set of allowed application states (flow contexts) in which this
-     * command handler is permitted to execute its logic.
-     * <p>This is used by the dispatcher (e.g., {@code GlobalHandler}) to ensure
-     * the user is not attempting to perform an action outside a defined workflow.</p>
-     * If the implementation returns {@link EnumSet#allOf(Class)}, it signifies
-     * that the handler can be executed regardless of the user's current flow state.</p>
-     * @return An {@link EnumSet} of {@link FlowContext} constants that allow execution.
+     * Returns the flow contexts in which this handler is allowed to execute.
+     * <p>Flow context prevents users from performing actions outside the intended workflow.</p>
+     *
+     * @return allowed {@link FlowContext} values for execution
      */
     EnumSet<FlowContext> getAllowedContexts();
 
     /**
-     * Executes the main business logic for the provided command input.
-     * <p>Implementations should typically update the user's flow state,
-     * managing session store, and send a response message with the appropriate inline keyboard
-     * to advance the user to the next step in the flow.
-     * @param chatId The ID of the chat where the command was issued.
-     * @param from Metadata about the Telegram user who sent the command.
+     * Processes the command.
+     * <p>Implementations typically update session state and send a response
+     * to guide the user through the next step.</p>
+     *
+     * @param chatId chat identifier where the command was issued
+     * @param from user metadata from Telegram
      */
     void handle(Long chatId, FromDto from);
 }

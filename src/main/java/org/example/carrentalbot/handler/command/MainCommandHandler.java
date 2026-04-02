@@ -11,16 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CommandHandler} interface.
- * <p>This service provides a global navigation shortcut to the bot's home screen.
- * It is responsible for:
- * <ul>
- * <li>Providing a unique identifier {@code COMMAND} for proper command routing.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Delegating the UI rendering and state management directly to the
- * {@link MainMenuHandler}.</li>
- * </ul>
- * </p>
+ * Handles the {@code /main} command.
+ * <p>Redirects the user to the main menu. This handler is available globally.</p>
  */
 @Slf4j
 @Service
@@ -28,26 +20,24 @@ import java.util.EnumSet;
 public class MainCommandHandler implements CommandHandler {
 
     /**
-     * The unique routing identifier used to identify {@code MainCommandHandler} and properly route commands.
+     * Command identifier used to route commands to this handler.
      */
     public static final String COMMAND = "/main";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure
-     * that users can always return to the main menu.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * The underlying handler responsible for displaying the main menu
-     * options and resetting the flow context.
+     * Handler for displaying the main menu.
      */
     private final MainMenuHandler mainMenuHandler;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@code COMMAND}.
      */
     @Override
     public String getCommand() {
@@ -56,7 +46,6 @@ public class MainCommandHandler implements CommandHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -64,13 +53,10 @@ public class MainCommandHandler implements CommandHandler {
     }
 
     /**
-     * Executes the "Return to Main Menu" logic.
-     * <p>This implementation follows the <b>Delegation Pattern</b>. It passes control to the {@link MainMenuHandler},
-     * effectively duplicating the behavior of clicking a "Back to Main Menu"
-     * inline button via a typed command.</p>
-     * @param chatId The ID of the chat.
-     * @param from Metadata about the Telegram user (unused as the
-     * {@link MainMenuHandler} handles context resetting).
+     * Redirects the user to the main menu.
+     *
+     * @param chatId chat identifier
+     * @param from user metadata (unused)
      */
     @Override
     public void handle(Long chatId, FromDto from) {

@@ -12,17 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
+import static org.example.carrentalbot.util.HandlerRegistry.FALLBACK_KEY;
+
 /**
- * Concrete implementation of the {@link CommandHandler} interface.
- * <p>Acts as the "Catch-All" or "Dead Letter" handler for the command routing system.
- * It is responsible for:
- * <ul>
- * <li>Ensuring a fail-safe response when no specialized {@link CommandHandler} matches user input.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Providing a graceful rejection of unrecognized command, preventing the bot from becoming unresponsive.</li>
- * <li>Guiding the user back to valid conversational entry points (Main Menu or Help).</li>
- * </ul>
- * </p>
+ * Fallback command handler used when no command matches user input.
+ * <p>Provides a safe default response and guides the user back to the main menu. This handler is available globally.</p>
  */
 @Slf4j
 @Service
@@ -30,36 +24,32 @@ import java.util.EnumSet;
 public class FallbackCommandHandler implements CommandHandler {
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Configured to {@link EnumSet#allOf(Class)} to ensure that a safety
-     * response can be delivered regardless of the user's current session state.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Factory responsible for constructing the inline contextual keyboard
-     * for main menu navigation.
+     * Factory for building navigation keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to deliver the fallback message.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The string {@code "__FALLBACK__"}.
      */
     @Override
     public String getCommand() {
-        return "__FALLBACK__";
+        return FALLBACK_KEY;
     }
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -67,16 +57,10 @@ public class FallbackCommandHandler implements CommandHandler {
     }
 
     /**
-     * Processes unrecognized commands by sending a help-oriented response.
-     * <ol>
-     * <li>Logs the text fallback event for administrative monitoring.</li>
-     * <li>Constructs a user-friendly HTML error message explaining the lack of comprehension.</li>
-     * <li>Provides actionable instructions for the user to reset their state
-     * using navigation keyboard, or commands {@code /main} or {@code /help}.</li>
-     * <li>Delivers the response message via the Telegram API.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param from User metadata (unused in fallback).
+     * Handles unsupported commands by notifying the user and offering navigation options.
+     *
+     * @param chatId chat identifier
+     * @param from user metadata
      */
     @Override
     public void handle(Long chatId, FromDto from) {

@@ -37,7 +37,7 @@ This project is implemented as a Spring Boot Web Application using:
 
 ## 📝 Project Documentation
 - [Database Structure](doc/DB.md)
-- JavaDoc: Full documentation for classes/methods *(to be added)*
+- Javadoc: Full documentation for classes/methods
 
 ---
 

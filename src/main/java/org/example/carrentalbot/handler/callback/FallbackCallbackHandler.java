@@ -15,13 +15,8 @@ import java.util.EnumSet;
 import static org.example.carrentalbot.util.HandlerRegistry.FALLBACK_KEY;
 
 /**
- * Fallback implementation of {@link CallbackHandler} used when no other handler
- * matches the incoming callback data.
- * <p>This handler ensures the system remains responsive for unrecognized or
- * unsupported callback interactions by providing a safe navigation path back
- * to the main menu.</p>
- * <p>It is registered using the global fallback key defined in the handler
- * registry and acts as a safety net for the callback routing system.</p>
+ * Fallback callback handler used when no handler matches the callback data.
+ * <p>Provides a safe default response and guides the user back to the main menu. This handler available globally.</p>
  */
 @Slf4j
 @Service
@@ -29,9 +24,9 @@ import static org.example.carrentalbot.util.HandlerRegistry.FALLBACK_KEY;
 public class FallbackCallbackHandler implements CallbackHandler {
 
     /**
-     * Allowed execution contexts for the fallback handler.
-     * <p>This handler is available in all {@link FlowContext} states to ensure
-     * the system can always recover from invalid or unknown callback interactions.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
@@ -62,12 +57,10 @@ public class FallbackCallbackHandler implements CallbackHandler {
     }
 
     /**
-     * Handles unrecognized or unsupported callback interactions.
-     * <p>Logs the event and responds with a user-friendly message guiding the user
-     * back to the main menu or help section.</p>
+     * Handles unsupported callbacks by notifying the user and offering navigation options.
      *
-     * @param chatId chat identifier where the callback originated
-     * @param callbackQuery unrecognized callback payload
+     * @param chatId chat identifier
+     * @param callbackQuery incoming callback query
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

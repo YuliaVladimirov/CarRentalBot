@@ -13,16 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service provides users with instructional content and a summary of available
- * bot commands. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code HelpMenuHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Generating a formatted HTML help guide including command descriptions.</li>
- * <li>Dispatching the help interface with an associated navigational keyboard.</li>
- * </ul>
- * </p>
+ * Displays the help menu with available commands and usage tips.
+ * <p>
+ * Available in all flow contexts. Sends an HTML-formatted guide
+ * along with a navigation keyboard.
  */
 @Slf4j
 @Service
@@ -30,31 +24,28 @@ import java.util.EnumSet;
 public class HelpMenuHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code HelpMenuHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "HELP";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Uses {@link EnumSet#allOf(Class)} to ensure assistance is available
-     * regardless of the user's current transactional state.</p>
+     * Allowed flow contexts for this handler.
+     * <p>Accessible from any flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Factory responsible for constructing the help menu inline keyboard.
+     * Factory for constructing the help menu inline keyboard.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to display the help menu.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -63,7 +54,6 @@ public class HelpMenuHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -71,15 +61,10 @@ public class HelpMenuHandler implements CallbackHandler {
     }
 
     /**
-     * Processes the request to display the help and commands menu.
-     * <ol>
-     * <li>Logs the activation of the help menu.</li>
-     * <li>Defines the structured help text using HTML formatting for commands and contact info.</li>
-     * <li>Invokes the {@link KeyboardFactory} to build the help-specific keyboard markup.</li>
-     * <li>Sends the help guide to the user, specifying HTML parse mode for proper rendering.</li>
-     * </ol>
-     * @param chatId The ID of the chat where the help information should be sent.
-     * @param callbackQuery The incoming callback query DTO.
+     * Sends help information and commands to the user.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery incoming callback
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

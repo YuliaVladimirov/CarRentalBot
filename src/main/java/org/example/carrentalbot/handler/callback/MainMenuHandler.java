@@ -13,16 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service acts as the primary navigation hub, allowing users to return to
- * the main interface of the bot. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code MainMenuHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining global accessibility across all {@link FlowContext} states.</li>
- * <li>Constructing the primary navigation menu via {@link KeyboardFactory}.</li>
- * <li>Dispatching the main menu message with appropriate formatting and markup.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for navigating the user to the main menu.
+ *
+ * <p>This handler acts as a global navigation entry point, allowing users to
+ * reset or exit any workflow and return to the primary bot interface.</p>
  */
 @Slf4j
 @Service
@@ -30,30 +24,29 @@ import java.util.EnumSet;
 public class MainMenuHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code MainMenuHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "GO_TO_MAIN_MENU";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Uses {@link EnumSet#allOf(Class)} to ensure the main menu is accessible
-     * as a global escape or reset point from any conversational flow.</p>
+     * Allowed flow contexts for this handler.
+     * <p>The main menu is globally accessible and can be triggered from any
+     * conversational state as a universal navigation reset point.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Factory responsible for constructing the main menu inline keyboard.
+     * Factory for constructing main menu keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages, specifically to display the main menu.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -62,7 +55,6 @@ public class MainMenuHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -70,14 +62,10 @@ public class MainMenuHandler implements CallbackHandler {
     }
 
     /**
-     * Processes the request to display the main navigation menu.
-     * <ol>
-     * <li>Logs the execution of the main menu navigation.</li>
-     * <li>Invokes the {@link KeyboardFactory} to build the standard main menu keyboard.</li>
-     * <li>Sends a new message to the user with HTML formatting and the navigation markup.</li>
-     * </ol>
-     * @param chatId The ID of the chat where the main menu should be displayed.
-     * @param callbackQuery The incoming callback query DTO.
+     * Displays the main navigation menu to the user.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload triggering navigation
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

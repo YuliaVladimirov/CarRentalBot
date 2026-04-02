@@ -17,17 +17,9 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service initiates the car discovery process by displaying available
- * vehicle categories. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code BrowseCategoriesHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Transitioning the user's session state to {@link FlowContext#BROWSING_FLOW}.</li>
- * <li>Retrieving the list of distinct car categories from the {@link CarService}.</li>
- * <li>Constructing the category-selection menu via {@link KeyboardFactory}.</li>
- *  <li>Dispatching the category-selection menu message with appropriate formatting and markup.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for starting the car browsing flow.
+ * <p>Displays available vehicle categories and transitions the user into the
+ * browsing state of the application.</p>
  */
 @Slf4j
 @Service
@@ -35,42 +27,39 @@ import java.util.List;
 public class BrowseCategoriesHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code BrowseCategoriesHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "BROWSE_CATEGORIES";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Uses {@link EnumSet#allOf(Class)} to allow users to start browsing
-     * cars from any point in the application.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can be triggered from any application state to allow
+     * users to start browsing cars at any time.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Service responsible for retrieving car category data and inventory information.
+     * Service for retrieving car category data.
      */
     private final CarService carService;
 
     /**
-     * Service responsible for managing user-specific session data, specifically the
-     * active {@link FlowContext}.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the inline keyboard that displays car categories.
+     * Factory for building car category selection keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to display the category list.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -79,7 +68,6 @@ public class BrowseCategoriesHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -87,17 +75,10 @@ public class BrowseCategoriesHandler implements CallbackHandler {
     }
 
     /**
-     * Processes the request to browse car categories and updates the user's flow state.
-     * <ol>
-     * <li>Logs the start of the browsing flow.</li>
-     * <li>Updates the user's session in {@link SessionService}, setting the current
-     * flow to {@link FlowContext#BROWSING_FLOW}.</li>
-     * <li>Fetches the list of available {@link CarProjection} categories from the database.</li>
-     * <li>Invokes {@link KeyboardFactory} to generate a keyboard based on the retrieved categories.</li>
-     * <li>Sends the category selection message to the user via the Telegram API.</li>
-     * </ol>
-     * @param chatId The ID of the chat where the categories should be displayed.
-     * @param callbackQuery The incoming callback query DTO.
+     * Starts the car browsing flow and displays available categories to the user.
+
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload triggering the browsing flow
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

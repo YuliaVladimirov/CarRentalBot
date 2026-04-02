@@ -23,19 +23,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service serves as the detailed view for a specific vehicle. It provides the
- * user with comprehensive information, including a visual representation and pricing.
- * It is responsible for:
- * <ul>
- * <li>Providing the unique {@code DisplayCarDetailsHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Restricting execution to {@link FlowContext#BROWSING_FLOW}.</li>
- * <li>Updating and synchronizing the {@code carId} within the user's session.</li>
- * <li>Retrieving full vehicle specifications from the {@link CarService}.</li>
- * <li>Determining the appropriate call-to-action (Booking vs. Availability) based on the current browsing mode.</li>
- * <li>Dispatching a photo message with a detailed HTML caption and navigation markup.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for displaying detailed information about a selected car.
+ *
+ * <p>Operates within the browsing flow and presents vehicle details along with
+ * the next available user action.</p>
  */
 @Slf4j
 @Service
@@ -43,43 +34,38 @@ import java.util.UUID;
 public class DisplayCarDetailsHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code DisplayCarDetailsHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "DISPLAY_CAR_DETAILS";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BROWSING_FLOW} to ensure car details
-     * are accessed only during the browsing lifecycle.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can only be executed within the browsing flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     /**
-     * Service responsible for retrieving detailed car information and imagery from the database.
+     * Service for retrieving car inventory data.
      */
     private final CarService carService;
 
     /**
-     * Service responsible for managing user-specific session data,
-     * specifically the {@code carId} (in {@link UUID} format).
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the inline contextual keyboard
-     * that displays the next step options (Check Availability or Start Booking).
+     * Factory for building contextual keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to send photo-based messages with car details.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -88,7 +74,6 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -96,18 +81,10 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Processes the request to display detailed information for a specific car.
-     * <ol>
-     * <li>Logs the initiation of the detailed view flow.</li>
-     * <li>Extracts and persists the vehicle's {@link UUID} in the session via {@link #updateCarIdInSession}.</li>
-     * <li>Fetches the {@link Car} entity from the service.</li>
-     * <li>Determines the next navigation step (Start Date selection or Start Booking) via {@link #getDataForKeyboard}.</li>
-     * <li>Formats the vehicle's brand, model, description, and daily rate into an HTML caption.</li>
-     * <li>Sends the car's image and information to the user using {@code sendPhoto}.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
-     * @throws DataNotFoundException if the car ID or browsing mode is missing.
+     * Displays detailed information about the selected car.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload containing car selection
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
@@ -141,17 +118,10 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Synchronizes the selected car's UUID between the incoming callback and the session.
-     * <ol>
-     * <li>Attempts to extract the {@link UUID} from the raw callback data.</li>
-     * <li>Retrieves any previously stored car ID from the {@link SessionService}.</li>
-     * <li>Validates that at least one source provides a valid ID; otherwise, throws {@link DataNotFoundException}.</li>
-     * <li>Updates the session with the active car ID.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackData The raw data string from the Telegram callback query.
-     * @return The active {@link UUID} for the vehicle.
-     * @throws DataNotFoundException if no vehicle ID can be found in callback or session.
+     * Resolves and synchronizes the selected car ID with the user session.
+     *
+     * @return resolved car identifier
+     * @throws DataNotFoundException if no car ID can be resolved from callback or session
      */
     private UUID updateCarIdInSession(Long chatId, String callbackData) {
         UUID fromCallback = extractCarIdFromCallback(callbackData);
@@ -179,11 +149,11 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Parses the callback data string to extract a {@link UUID}.
-     * <p>Expected format: {@code KEY:UUID_STRING}.</p>
-     * @param callbackData The raw callback string.
-     * @return The parsed {@link UUID}, or {@code null} if parsing fails or data is missing.
-     * @throws InvalidDataException if the ID string is malformed.
+     * Extracts a {@link UUID} from callback data.
+     *
+     * @param callbackData raw callback payload
+     * @return parsed UUID or {@code null} if absent
+     * @throws InvalidDataException if the value is invalid
      */
     private UUID extractCarIdFromCallback(String callbackData) {
 
@@ -201,12 +171,11 @@ public class DisplayCarDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Logic-driven router that selects the next {@link CallbackHandler} key
-     * based on the user's current {@link FlowContext}.
-     * Retrieves the active {@link CarBrowsingMode} from the session.
-     * @param chatId The ID of the chat.
-     * @return A {@link Map.Entry} where the key is the next {@link CallbackHandler} KEY and the value is the button label.
-     * @throws DataNotFoundException if the browsing mode is missing from the session.
+     * Resolves the next action based on the current browsing mode.
+     *
+     * @param chatId chat identifier
+     * @return key-label pair for the next action
+     * @throws DataNotFoundException if browsing mode is missing
      */
     private Map.Entry<String, String> getDataForKeyboard(Long chatId) {
         CarBrowsingMode carBrowsingMode = sessionService

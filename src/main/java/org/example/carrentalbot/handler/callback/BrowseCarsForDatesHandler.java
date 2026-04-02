@@ -20,17 +20,10 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service filters and displays vehicle inventory based on a user-specified
- * date range. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code BrowseCarsForDatesHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Restricting execution to {@link FlowContext#BROWSING_FLOW}.</li>
- * <li>Validating the presence of required session data (category, start date, and end date).</li>
- * <li>Retrieving available vehicles from {@link CarService} that are not booked during the period.</li>
- * <li>Delivering a filtered vehicle selection interface to the user.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for displaying available cars for the selected date range.
+ *
+ * <p>Operates within the browsing flow and filters vehicles by category and dates,
+ * presenting only those available for the specified period.</p>
  */
 @Slf4j
 @Service
@@ -38,43 +31,38 @@ import java.util.List;
 public class BrowseCarsForDatesHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code BrowseCarsForDatesHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "BROWSE_CARS_FOR_DATES";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BROWSING_FLOW} to ensure the date-filtered car search
-     * only occurs during the browsing lifecycle.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can only be executed within the browsing flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     /**
-     * Service responsible for checking vehicle availability in the inventory based on specific dates.
+     * Service for checking vehicle availability in the inventory based on specific dates.
      */
     private final CarService carService;
 
     /**
-     * Service responsible for managing user-specific session data, specifically the
-     * chosen {@link CarCategory}, {@code startDate} and {@code endDate} (both in {@link LocalDate} format).
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the inline keyboard
-     * that displays the car list available for selected rental period.
+     * Factory for building car selection keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to display the car list in the selected category for the chosen dates.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -83,7 +71,6 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -91,18 +78,11 @@ public class BrowseCarsForDatesHandler implements CallbackHandler {
     }
 
     /**
-     * Processes the request to search for available cars within a specific date range.
-     * <ol>
-     * <li>Logs the start of the date-filtered browsing flow.</li>
-     * <li>Retrieves the target {@link CarCategory} from the session.</li>
-     * <li>Retrieves the {@code startDate} and {@code endDate} from the session.</li>
-     * <li>Invokes {@link CarService} to find cars that are available for the entire duration.</li>
-     * <li>Invokes {@link KeyboardFactory} to build a selection keyboard using the list of available vehicles.</li>
-     * <li>Sends an HTML-formatted message to the user displaying the available options.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
-     * @throws DataNotFoundException if the category or any of the dates are missing from the session.
+     * Retrieves and displays cars available for the selected category and date range.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
+     * @throws DataNotFoundException if required session data is missing
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

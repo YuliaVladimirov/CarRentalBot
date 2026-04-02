@@ -18,17 +18,9 @@ import java.util.EnumSet;
 import java.util.Optional;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service acts as an intermediary step in the browsing flow, allowing users
- * to select how they wish to view cars within a chosen category. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code ChooseCarBrowsingModeHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Enforcing access control by restricting execution to {@link FlowContext#BROWSING_FLOW}.</li>
- * <li>Extracting and persisting the selected {@link CarCategory} into the user's session.</li>
- * <li>Invokes {@link KeyboardFactory} to generate a keyboard based on the browsing mode ("All Cars" or "Cars For My Dates").</li>
- * <li>Sends the browsing mode selection message to the user via the Telegram API.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for selecting the car browsing mode.
+ * <p>Operates within the browsing flow and determines how cars should be presented
+ * to the user (e.g., all cars or filtered by availability dates).</p>
  */
 @Slf4j
 @Service
@@ -36,37 +28,33 @@ import java.util.Optional;
 public class ChooseCarBrowsingModeHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code ChooseCarBrowsingModeHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "CHOOSE_CAR_BROWSING_MODE";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BROWSING_FLOW}
-     * to ensure browsing mode selection only occurs during the browsing lifecycle.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can only be executed within the browsing flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     /**
-     * Service responsible for managing user-specific session data, specifically the
-     * currently selected {@link CarCategory}.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the inline keyboard for selecting the car browsing mode.
+     * Factory for building car browsing mode keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to display the car browsing mode selection menu.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -75,7 +63,6 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -83,15 +70,10 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     }
 
     /**
-     * Processes the request to select a car browsing mode.
-     * <ol>
-     * <li>Logs the browsing mode selection event.</li>
-     * <li>Updates the session with the target category via {@link #updateCategoryInSession(Long, String)}.</li>
-     * <li>Invokes {@link KeyboardFactory} to build the browsing mode keyboard.</li>
-     * <li>Sends the "Choose browsing mode" message to the user via the Telegram API.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
+     * Processes the car browsing mode selection.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload containing the selected browsing mode
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
@@ -110,16 +92,9 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     }
 
     /**
-     * Synchronizes the car category between the incoming callback and the session.
-     * <ol>
-     * <li>Attempts to extract the {@link CarCategory} from the raw callback data.</li>
-     * <li>Retrieves any previously stored category from the {@link SessionService}.</li>
-     * <li>Validates that at least one source provides a valid category; otherwise, throws {@code DataNotFoundException}.</li>
-     * <li>Updates the session with the active car category.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackData The raw data string from the Telegram callback query.
-     * @throws DataNotFoundException if no category can be found in callback or session.
+     * Resolves and persists the selected car category into the user session.
+     *
+     * @throws DataNotFoundException if no category can be resolved from callback or session
      */
     private void updateCategoryInSession(Long chatId, String callbackData) {
         CarCategory fromCallback = extractCategoryFromCallback(callbackData);
@@ -145,11 +120,11 @@ public class ChooseCarBrowsingModeHandler implements CallbackHandler {
     }
 
     /**
-     * Parses the callback data string to extract a {@link CarCategory}.
-     * <p>Expected format: {@code KEY:CAR_CATEGORY} (e.g., "CHOOSE_CAR_BROWSING_MODE:SUV").</p>
-     * @param callbackData The raw callback string.
-     * @return The parsed {@link CarCategory}, or {@code null} if parsing fails or data is missing.
-     * @throws InvalidDataException if the category string does not match any known {@link CarCategory}.
+     * Extracts a {@link CarCategory} from callback data.
+     *
+     * @param callbackData raw callback payload
+     * @return parsed category or {@code null} if not present
+     * @throws InvalidDataException if category is invalid
      */
     private CarCategory extractCategoryFromCallback(String callbackData) {
         return Optional.ofNullable(callbackData)

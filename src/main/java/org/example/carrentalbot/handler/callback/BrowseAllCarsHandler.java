@@ -22,18 +22,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service is responsible for retrieving and displaying the complete list
- * of available vehicles within a specific category. It is responsible for:
- * <ul>
- * <li>Providing the unique {@code BrowseAllCarsHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Enforcing access control by restricting execution to {@link FlowContext#BROWSING_FLOW}.</li>
- * <li>Updating and synchronizing the {@link CarBrowsingMode} within the user's session.</li>
- * <li>Retrieving filtered car data from the {@link CarService} based on the stored category.</li>
- * <li>Constructing the vehicle selection menu via {@link KeyboardFactory}.</li>
- * <li>Dispatching the vehicle-selection menu message with appropriate formatting and markup.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for displaying all cars in the selected category.
+ *
+ * <p>Operates within the browsing flow and presents the full vehicle list based on
+ * the user's selected category and browsing mode.</p>
  */
 @Slf4j
 @Service
@@ -41,42 +33,38 @@ import java.util.Optional;
 public class BrowseAllCarsHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code BrowseAllCarsHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "BROWSE_ALL_CARS";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#BROWSING_FLOW}
-     * to ensure the car search only occurs during the browsing lifecycle.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can only be executed within the browsing flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.BROWSING_FLOW);
 
     /**
-     * Service responsible for querying vehicle inventory data from the database.
+     * Service for retrieving car inventory data.
      */
     private final CarService carService;
 
     /**
-     * Service responsible for managing user-specific session data, specifically the
-     * chosen {@link CarCategory} and {@link CarBrowsingMode}.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the inline keyboard for selecting cars.
+     * Factory for building car selection keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver messages,
-     * specifically to display the car list in the selected category.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -85,7 +73,6 @@ public class BrowseAllCarsHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -93,18 +80,11 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     }
 
     /**
-     * Processes the request to display all cars in the current category.
-     * <ol>
-     * <li>Logs the initiation of the "all cars" browsing flow.</li>
-     * <li>Updates the user's session with the selected {@link CarBrowsingMode} via {@link #updateBrowsingModeInSession(Long, String)}.</li>
-     * <li>Retrieves the previously selected {@link CarCategory} from the session, throwing {@link DataNotFoundException} if missing.</li>
-     * <li>Fetches the list of {@link Car} entities matching the category from the {@link CarService}.</li>
-     * <li>Invokes {@link KeyboardFactory} to build an inline keyboard populated with the retrieved car list.</li>
-     * <li>Sends an HTML-formatted message to the user displaying the category name and vehicle options.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
-     * @throws DataNotFoundException if the required category is not found in the session.
+     * Displays all available cars for the selected category and browsing mode.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload containing browsing mode selection
+     * @throws DataNotFoundException if required session data is missing
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
@@ -135,16 +115,9 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     }
 
     /**
-     * Synchronizes the car browsing mode between the incoming callback and the existing session.
-     * <ol>
-     * <li>Extracts the {@link CarBrowsingMode} from the raw callback data.</li>
-     * <li>Retrieves the currently stored mode from the {@link SessionService}.</li>
-     * <li>Validates that a mode is present in either the callback or the session; otherwise, throws {@code DataNotFoundException}.</li>
-     * <li>Persists the result to the session if a change is detected.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackData The raw callback data string.
-     * @throws DataNotFoundException if no browsing mode is found in callback or session.
+     * Resolves and synchronizes the car browsing mode with the user session.
+     *
+     * @throws DataNotFoundException if no browsing mode can be resolved from callback or session
      */
     private void updateBrowsingModeInSession(Long chatId, String callbackData) {
         CarBrowsingMode fromCallback = extractBrowsingModeFromCallback(callbackData);
@@ -170,11 +143,11 @@ public class BrowseAllCarsHandler implements CallbackHandler {
     }
 
     /**
-     * Parses the callback data string to extract a {@link CarBrowsingMode}.
-     * <p>Expected format: {@code KEY:CAR_BROWSING_MODE} (e.g., "BROWSE_ALL_CARS:ALL_CARS").</p>
-     * @param callbackData The raw callback string.
-     * @return The parsed {@link CarBrowsingMode}, or {@code null} if parsing fails or data is missing.
-     * @throws InvalidDataException if the mode string does not match any known {@link CarBrowsingMode}.
+     * Extracts a {@link CarBrowsingMode} from callback data.
+     *
+     * @param callbackData raw callback payload
+     * @return parsed browsing mode or {@code null} if absent
+     * @throws InvalidDataException if the mode is invalid
      */
     private CarBrowsingMode extractBrowsingModeFromCallback(String callbackData) {
         return Optional.ofNullable(callbackData)

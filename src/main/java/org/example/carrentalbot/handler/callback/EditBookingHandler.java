@@ -16,7 +16,6 @@ import java.util.EnumSet;
 
 /**
  * Callback handler responsible for editing booking contact information.
- *
  * <p>Allows users to update phone or email during an active booking or booking management flow.</p>
  */
 @Slf4j

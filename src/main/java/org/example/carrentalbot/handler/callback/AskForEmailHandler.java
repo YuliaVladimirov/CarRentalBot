@@ -12,7 +12,6 @@ import java.util.EnumSet;
 
 /**
  * Callback handler responsible for requesting the user's email.
- *
  * <p>Operates within booking-related flows and prompts the user to provide
  * contact information in the expected format.</p>
  */

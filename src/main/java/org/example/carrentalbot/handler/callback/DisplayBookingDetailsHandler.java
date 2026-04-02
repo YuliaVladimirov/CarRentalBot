@@ -23,7 +23,6 @@ import java.util.UUID;
 
 /**
  * Callback handler responsible for displaying the final booking summary.
- *
  * <p>Operates within booking-related flows and presents aggregated booking data,
  * including car details, dates, and pricing, before confirmation.</p>
  */

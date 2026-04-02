@@ -133,6 +133,7 @@ public class DisplayMyBookingsHandler implements CallbackHandler {
 
     /**
      * Converts booking status into a display label.
+     *
      * @param status The status of the booking.
      * @return A formatted string representation of the status.
      */

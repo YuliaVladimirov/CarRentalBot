@@ -14,7 +14,6 @@ import java.util.EnumSet;
 
 /**
  * Callback handler responsible for navigating the user to the main menu.
- *
  * <p>This handler acts as a global navigation entry point, allowing users to
  * reset or exit any workflow and return to the primary bot interface.</p>
  */

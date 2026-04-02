@@ -14,7 +14,6 @@ import java.util.EnumSet;
 
 /**
  * Callback handler responsible for initiating booking cancellation.
- *
  * <p>Acts as a confirmation step to prevent accidental cancellation during
  * booking or editing flows.</p>
  */

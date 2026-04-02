@@ -23,7 +23,6 @@ import java.util.Optional;
 
 /**
  * Callback handler responsible for displaying all cars in the selected category.
- *
  * <p>Operates within the browsing flow and presents the full vehicle list based on
  * the user's selected category and browsing mode.</p>
  */

@@ -24,7 +24,6 @@ import java.util.Optional;
 /**
  * Callback handler responsible for processing the chosen start date
  * and initiating end date selection.
- *
  * <p>Operates within the browsing flow and handles calendar navigation,
  * date selection, and transition to end date selection.</p>
  */

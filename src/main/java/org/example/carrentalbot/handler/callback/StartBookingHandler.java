@@ -15,7 +15,6 @@ import java.util.EnumSet;
 
 /**
  * Callback handler responsible for starting the booking flow.
- *
  * <p>Operates within the browsing flow and transitions the user into the booking
  * process, providing initial instructions and the next interaction step.</p>
  */

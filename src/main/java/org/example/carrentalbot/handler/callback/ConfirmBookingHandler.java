@@ -28,7 +28,6 @@ import java.util.UUID;
 
 /**
  * Callback handler responsible for finalizing the booking process.
- *
  * <p>Persists the booking, triggers post-booking actions (reminders and email),
  * clears session state, and returns a final confirmation to the user.</p>
  */

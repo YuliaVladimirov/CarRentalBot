@@ -20,7 +20,6 @@ import java.util.Optional;
 
 /**
  * Callback handler responsible for initiating start date selection.
- *
  * <p>Operates within the browsing flow and presents an interactive calendar
  * for choosing the rental start date.</p>
  */

@@ -15,7 +15,6 @@ import java.util.EnumSet;
 
 /**
  * Callback handler responsible for finalizing booking cancellation.
- *
  * <p>Clears all session data and returns the user to the main menu.</p>
  */
 @Slf4j

@@ -14,9 +14,8 @@ import java.util.EnumSet;
 
 /**
  * Displays the help menu with available commands and usage tips.
- * <p>
- * Available in all flow contexts. Sends an HTML-formatted guide
- * along with a navigation keyboard.
+ * <p>Available in all flow contexts. Sends an HTML-formatted guide
+ * along with a navigation keyboard.</p>
  */
 @Slf4j
 @Service

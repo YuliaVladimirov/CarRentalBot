@@ -24,7 +24,6 @@ import java.util.UUID;
 
 /**
  * Callback handler responsible for displaying detailed information about a selected car.
- *
  * <p>Operates within the browsing flow and presents vehicle details along with
  * the next available user action.</p>
  */

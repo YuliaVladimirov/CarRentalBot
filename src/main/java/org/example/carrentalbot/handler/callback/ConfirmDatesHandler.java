@@ -22,7 +22,6 @@ import java.util.Optional;
 /**
  * Callback handler responsible for processing chosen end date
  * and initiating confirmation of rental period.
- *
  * <p>Operates within the browsing flow and handles calendar navigation,
  * date selection, and validation of rental duration.</p>
  */

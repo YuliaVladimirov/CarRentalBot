@@ -21,7 +21,6 @@ import java.util.List;
 
 /**
  * Callback handler responsible for displaying available cars for the selected date range.
- *
  * <p>Operates within the browsing flow and filters vehicles by category and dates,
  * presenting only those available for the specified period.</p>
  */

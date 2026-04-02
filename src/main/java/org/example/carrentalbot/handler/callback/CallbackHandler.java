@@ -5,42 +5,39 @@ import org.example.carrentalbot.model.enums.FlowContext;
 
 import java.util.EnumSet;
 
+
 /**
- * Defines the contract for processing user interactions originating from a
- * Telegram inline keyboard button press (a callback query).
- * <p>Each implementation of this interface is responsible for handling a specific
- * type of interaction, typically identified by a unique prefix in the callback data.</p>
+ * Contract for handling Telegram inline keyboard interactions (callback queries).
+ * <p>Each implementation processes a specific callback type identified by a unique
+ * prefix in the callback data.</p>
  */
 public interface CallbackHandler {
 
     /**
-     * Retrieves the unique key or prefix string that this handler is responsible for.
-     * <p>This key is matched against the beginning of the incoming callback data
-     * to determine which handler should process the query.</p>
-     * @return The unique string key for this handler (e.g., "BROWSE_ALL_CARS", "CONFIRM_BOOKING" or "CALENDAR_PICK"  ).
+     * Returns the unique prefix used to match incoming callback data.
+     * <p>The dispatcher uses this value to select the appropriate handler
+     * when the callback data starts with the returned key.</p>
+     *
+     * @return handler key (callback data prefix)
      */
     String getKey();
 
     /**
-     * Returns a set of allowed application states (flow contexts) in which this
-     * callback handler is permitted to execute its logic.
-     * <p>This is used by the dispatcher (e.g., {@code GlobalHandler}) to ensure
-     * the user is not attempting to perform an action outside a defined workflow.
-     * If the implementation returns {@link EnumSet#allOf(Class)}, it signifies
-     * that the handler can be executed regardless of the user's current flow state.</p>
-     * @return An {@link EnumSet} of {@link FlowContext} constants that allow execution.
+     * Returns the flow contexts in which this handler is allowed to execute.
+     * <p>Flow context prevents users from performing actions outside their current
+     * step in the interaction workflow (e.g. calling a confirmation handler before starting a process).</p>
+     *
+     * @return allowed {@link FlowContext} values for execution
      */
     EnumSet<FlowContext> getAllowedContexts();
 
     /**
-     * Executes the main business logic required to process the callback query.
-     * <p>Implementations should typically update the user's flow state,
-     * validate the received data, persist it to the session store, and send
-     * a response message with the inline keyboard
-     * to advance the user to the next step in the flow.</p>
-     * @param chatId The ID of the Telegram chat where the callback originated.
-     * @param callbackQuery The data transfer object containing the full callback
-     * details, including the user and the callback data payload.
+     * Processes the callback query.
+     * <p>Typical implementations may update session state, validate input data,
+     * persist changes, and send a response to the user.</p>
+     *
+     * @param chatId chat identifier where the callback originated
+     * @param callbackQuery callback payload containing user and data information
      */
     void handle(Long chatId, CallbackQueryDto callbackQuery);
 }

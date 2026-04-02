@@ -9,7 +9,6 @@ import org.example.carrentalbot.dto.SendMessageDto;
 import org.example.carrentalbot.email.EmailService;
 import org.example.carrentalbot.exception.DataNotFoundException;
 import org.example.carrentalbot.model.Booking;
-import org.example.carrentalbot.model.Reminder;
 import org.example.carrentalbot.model.enums.NotificationType;
 import org.example.carrentalbot.model.enums.FlowContext;
 import org.example.carrentalbot.reminder.ReminderService;
@@ -23,20 +22,8 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service executes the final termination of an existing reservation.
- * It is responsible for:
- * <ul>
- * <li>Providing the unique {@code ConfirmCancelMyBookingHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Defining accessibility to {@link FlowContext#MY_BOOKINGS_FLOW}.</li>
- * <li>Updating the {@link Booking} status from "Confirmed" to "Canceled" in the database.</li>
- * <li>Revoking all pending {@link Reminder} entries associated with the booking.</li>
- * <li>Dispatching a {@link NotificationType#CANCELLATION} email.</li>
- * <li>Clearing the user's conversational session.</li>
- * <li>Sends a Telegram message with the cancellation receipt.</li>
- * <li>Providing a clean transition back to the Main Menu.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for confirming cancellation of an existing booking.
+ * <p>Cancels the booking, triggers notifications, and clears session state.</p>
  */
 @Slf4j
 @Service
@@ -44,50 +31,48 @@ import java.util.UUID;
 public class ConfirmCancelMyBookingHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code ConfirmCancelMyBookingHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "CONFIRM_CANCEL_MY_BOOKING";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#MY_BOOKINGS_FLOW}.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can only be executed within the "My Bookings" flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
 
     /**
-     * Service responsible for updating the {@link Booking} status to {@code CANCELLED}.
+     * Service for retrieving and managing booking data.
      */
     private final BookingService bookingService;
 
     /**
-     * Service responsible for dispatching the cancellation confirmation email.
+     * Service for sending booking notifications.
      */
     private final EmailService emailService;
 
     /**
-     * Service responsible for deleting or deactivate any scheduled reminders for the
-     * now-canceled reservation.
+     * Service for managing booking reminders.
      */
     private final ReminderService reminderService;
 
     /**
-     * Service responsible for performing a full session purge upon successful cancellation.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory component responsible for generating the "To Main Menu" keyboard for the final exit.
+     * Factory for building booking-related keyboards.
      */
     private final KeyboardFactory keyboardFactory;
+
     /**
-     * Component responsible for interacting with the Telegram Bot API
-     * to deliver the final cancellation acknowledgment message
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -96,7 +81,6 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -104,18 +88,11 @@ public class ConfirmCancelMyBookingHandler implements CallbackHandler {
     }
 
     /**
-     * Orchestrates the cancellation and cleanup process.
-     * <ol>
-     * <li>Retrieves the target {@code bookingId} from the {@link SessionService}.</li>
-     * <li>Invokes {@link BookingService#cancelBooking(UUID)} to change the booking status in the database.</li>
-     * <li>Calls {@link ReminderService#cancelReminders(Booking)} to prevent orphaned notifications from being sent to the user.</li>
-     * <li>Sends a final acknowledgment message to the user confirming the action.</li>
-     * <li>Purges all transient data in the session via {@code deleteAll}.</li>
-     * <li>Attempts to send the final cancellation notification email.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query DTO.
-     * @throws DataNotFoundException if the {@code bookingId} is missing from the session.
+     * Cancels the booking, notifies the user, and clears the session.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload
+     * @throws DataNotFoundException if booking id is missing from session
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {

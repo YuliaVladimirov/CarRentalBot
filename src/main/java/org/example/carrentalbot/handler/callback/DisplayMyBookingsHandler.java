@@ -19,18 +19,9 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service serves as the primary dashboard for user reservation management.
- * It is responsible for:
- * <ul>
- * <li>Providing the unique {@code DisplayMyBookingsHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Transitioning the conversational state to {@link FlowContext#MY_BOOKINGS_FLOW}.</li>
- * <li>Retrieving all historical and active bookings associated with a user's Telegram ID.</li>
- * <li>Handling "Empty State" scenarios where no bookings are found.</li>
- * <li>Iterating through retrieved bookings and presenting each as a detailed card with
- * context-specific management actions.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for displaying user's bookings.
+ * <p>Retrieves all bookings for the current user and presents them as interactive cards.
+ * If no bookings exist, an empty-state message is shown.</p>
  */
 @Slf4j
 @Service
@@ -38,44 +29,39 @@ import java.util.List;
 public class DisplayMyBookingsHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code DisplayMyBookingsHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "MY_BOOKINGS";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Set to {@link EnumSet#allOf(Class)} to allow users to check their reservations from any
-     * point in the application (e.g., via a persistent menu button).</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler is globally accessible and can be triggered from any
+     * conversational state.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.allOf(FlowContext.class);
 
     /**
-     * Service responsible for querying the persistence layer for booking records based on Telegram metadata.
+     * Service for retrieving user bookings.
      */
     private final BookingService bookingService;
 
     /**
-     * Service responsible for managing user-specific session data, specifically
-     * for updating the current {@code flowContext} to ensure the bot
-     * recognizes the user is now in management mode.
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the inline keyboard for each booking card,
-     * embedding the specific {@code bookingId} for downstream actions.
+     * Factory for building booking management keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver the
-     * booking list or empty-state notifications.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -84,7 +70,6 @@ public class DisplayMyBookingsHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -92,23 +77,10 @@ public class DisplayMyBookingsHandler implements CallbackHandler {
     }
 
     /**
-     * Orchestrates the retrieval and display of the user's booking history.
-     * <ol>
-     * <li>Logs the initiation of the "My Bookings" view.</li>
-     * <li><b>State Transition:</b> Switches the session context to {@link FlowContext#MY_BOOKINGS_FLOW}.</li>
-     * <li>Queries {@link BookingService} using the user's unique Telegram ID.</li>
-     * <li>If no bookings exist, sends a "📭 Empty" notification and terminates the flow.</li>
-     * <li>Iterates through each {@link Booking}, formatting a rich-text card featuring:
-     * <ul>
-     * <li>Car brand, model, and category.</li>
-     * <li>Formatted rental dates and total cost.</li>
-     * <li>A color-coded status indicator via {@link #getStatusLabel}.</li>
-     * </ul>
-     * </li>
-     * <li>Dispatches each card as a separate message with a specialized management keyboard.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The incoming callback query containing user metadata.
+     * Loads and displays all bookings for the current user.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload containing user information
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
@@ -160,7 +132,7 @@ public class DisplayMyBookingsHandler implements CallbackHandler {
     }
 
     /**
-     * Translates a {@link BookingStatus} enum into a human-readable, emoji-enhanced label.
+     * Converts booking status into a display label.
      * @param status The status of the booking.
      * @return A formatted string representation of the status.
      */

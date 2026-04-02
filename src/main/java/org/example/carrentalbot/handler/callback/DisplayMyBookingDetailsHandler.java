@@ -22,19 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Concrete implementation of the {@link CallbackHandler} interface.
- * <p>This service provides an exhaustive detailed view of a specific reservation.
- * It is responsible for:
- * <ul>
- * <li>Providing the unique {@code DisplayMyBookingDetailsHandler} identifier ({@code KEY}) for callback routing.</li>
- * <li>Restricting accessibility to {@link FlowContext#MY_BOOKINGS_FLOW}.</li>
- * <li>Resolving the target {@code bookingId} from either the callback data or the existing session.</li>
- * <li>Synchronizing the session state to ensure downstream handlers have access to the active booking ID.</li>
- * <li>Fetching full relational data (Car, Category, Pricing) from the {@link BookingService}.</li>
- * <li>Presenting a comprehensive summary including daily rates, total costs, and contact details.</li>
- * <li>Displaying a specialized management keyboard for further interaction with the specific booking.</li>
- * </ul>
- * </p>
+ * Callback handler responsible for displaying detailed booking information.
+ * <p>Shows a full booking summary for a selected reservation in the "My Bookings" flow.</p>
  */
 @Slf4j
 @Service
@@ -42,46 +31,38 @@ import java.util.UUID;
 public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
     /**
-     * The unique callback data prefix used to identify {@code DisplayMyBookingDetailsHandler} and properly route callbacks.
+     * Callback data prefix used to route requests to this handler.
      */
     public static final String KEY = "MY_BOOKING_DETAILS";
 
     /**
-     * The set of application states in which this handler is permitted to execute.
-     * <p>Restricted to {@link FlowContext#MY_BOOKINGS_FLOW} to ensure the user is
-     * within the management context.</p>
+     * Allowed flow contexts for this handler.
+     * <p>This handler can only be executed within the "My Bookings" flow.</p>
      */
     private static final EnumSet<FlowContext> ALLOWED_CONTEXTS = EnumSet.of(FlowContext.MY_BOOKINGS_FLOW);
 
     /**
-     * Service responsible for fetching the complete {@link Booking} entity from the database.
-     * <p>Provides access to car details, pricing, and the current status of the reservation.</p>
+     * Service for retrieving booking data.
      */
     private final BookingService bookingService;
 
     /**
-     * Service responsible for synchronizing the {@code bookingId} between the current request
-     * and the persistent user session.
-     * <p>Ensures that subsequent management actions (Edit/Cancel) know which specific
-     * booking is being targeted.</p>
+     * Service for managing user session state.
      */
     private final SessionService sessionService;
 
     /**
-     * Factory responsible for constructing the management keyboard, which includes
-     * options for editing, cancelling, or returning to the main menu.
+     * Factory for building booking detail keyboards.
      */
     private final KeyboardFactory keyboardFactory;
 
     /**
-     * Component responsible for interacting with the Telegram Bot API to deliver the
-     * detailed HTML summary to the user.
+     * Client for sending messages via the Telegram Bot API.
      */
     private final TelegramClient telegramClient;
 
     /**
      * {@inheritDoc}
-     * @return The constant {@link #KEY}.
      */
     @Override
     public String getKey() {
@@ -90,7 +71,6 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
 
     /**
      * {@inheritDoc}
-     * @return {@link #ALLOWED_CONTEXTS}.
      */
     @Override
     public EnumSet<FlowContext> getAllowedContexts() {
@@ -98,15 +78,10 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Orchestrates the display of detailed booking information.
-     * <ol>
-     * <li>Extracts and persists the booking's {@link UUID} in the session via {@link #updateBookingIdInSession}.</li>
-     * <li>Retrieves the {@link Booking} entity and its associated car specifications.</li>
-     * <li>Formats a detailed HTML message including rental period, costs, and current status.</li>
-     * <li>Sends the formatted summary with a management-specific inline keyboard.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackQuery The callback query potentially containing the {@code bookingId} in its data.
+     * Loads and displays detailed information for a selected booking.
+     *
+     * @param chatId chat identifier
+     * @param callbackQuery callback payload containing booking reference
      */
     @Override
     public void handle(Long chatId, CallbackQueryDto callbackQuery) {
@@ -158,17 +133,10 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Synchronizes the selected booking ID between the incoming request and the persistent session.
-     * <ol>
-     * <li>Attempts to extract the {@link UUID} from the raw callback data.</li>
-     * <li>Retrieves any previously stored booking ID from the {@link SessionService}.</li>
-     * <li>Validates that at least one source provides a valid ID; otherwise, throws {@link DataNotFoundException}.</li>
-     * <li>Updates the session with the active booking ID.</li>
-     * </ol>
-     * @param chatId The ID of the chat.
-     * @param callbackData The raw data string from the Telegram callback.
-     * @return The resolved {@link UUID} of the booking.
-     * @throws DataNotFoundException if no ID is found in either the callback or the session.
+     * Resolves booking id from callback or session and synchronizes session state.
+     *
+     * @return resolved car identifier
+     * @throws DataNotFoundException if no booking ID can be resolved from callback or session
      */
     private UUID updateBookingIdInSession(Long chatId, String callbackData) {
         UUID fromCallback = extractBookingIdFromCallback(callbackData);
@@ -196,11 +164,11 @@ public class DisplayMyBookingDetailsHandler implements CallbackHandler {
     }
 
     /**
-     * Parses the booking ID from the callback data string.
-     * <p>Expected format: {@code KEY:UUID_STRING}.</p>
-     * @param callbackData The raw callback string.
-     * @return The parsed {@link UUID}, or {@code null} if the format is invalid or missing.
-     * @throws InvalidDataException if the string contains a malformed UUID.
+     * Extracts a {@link UUID} from callback data.
+     *
+     * @param callbackData raw callback payload
+     * @return parsed UUID or {@code null} if absent
+     * @throws InvalidDataException if the value is invalid
      */
     private UUID extractBookingIdFromCallback(String callbackData) {
 

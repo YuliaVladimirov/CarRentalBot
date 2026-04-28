@@ -9,6 +9,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -103,6 +104,8 @@ public class TracingAspect {
     public Object logExecution(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
+        Map<String, String> previousContext = MDC.getCopyOfContextMap();
+        try {
         String className = joinPoint.getTarget().getClass().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
 
@@ -136,7 +139,7 @@ public class TracingAspect {
             }
         }
 
-        try {
+
 
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - startTime;
@@ -150,6 +153,12 @@ public class TracingAspect {
             log.error("[ERROR] | executionTime={}| message={}", executionTime, exception.getMessage(), exception);
 
             throw exception;
+        } finally {
+            if (previousContext != null) {
+                MDC.setContextMap(previousContext);
+            } else {
+                MDC.clear();
+            }
         }
     }
 }

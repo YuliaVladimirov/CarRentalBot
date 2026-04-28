@@ -6,11 +6,13 @@ import org.example.carrentalbot.handler.callback.CallbackHandler;
 import org.example.carrentalbot.handler.command.CommandHandler;
 import org.example.carrentalbot.handler.text.FallbackTextHandler;
 import org.example.carrentalbot.handler.text.TextHandler;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Central registry for all handler implementations used in update processing.
@@ -80,41 +82,147 @@ public class HandlerRegistry {
      *
      * @throws IllegalStateException if any required fallback handler is missing
      */
+
     public HandlerRegistry(List<CallbackHandler> callbackHandlerList,
                            List<CommandHandler> commandHandlerList,
                            List<TextHandler> textHandlerList) {
-        // Callbacks
-        this.callbackHandlers = callbackHandlerList.stream()
-                .filter(callbackHandler -> !FALLBACK_KEY.equals(callbackHandler.getKey()))
-                .peek(callbackHandler -> log.info("Registered callback handler: {}", callbackHandler.getClass().getSimpleName()))
-                .collect(Collectors.toMap(CallbackHandler::getKey, h -> h));
 
-        this.fallbackCallbackHandler = callbackHandlerList.stream()
-                .filter(callbackHandler -> FALLBACK_KEY.equals(callbackHandler.getKey()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No fallback callback handler defined!"));
+        CallbackRegistration callbackRegistration = registerCallbackHandlers(callbackHandlerList);
+        this.callbackHandlers = callbackRegistration.handlers();
+        this.fallbackCallbackHandler = callbackRegistration.fallback();
 
-        // Commands
-        this.commandHandlers = commandHandlerList.stream()
-                .filter(commandHandler -> !FALLBACK_KEY.equals(commandHandler.getCommand()))
-                .peek(commandHandler -> log.info("Registered command handler: {}", commandHandler.getClass().getSimpleName()))
-                .collect(Collectors.toMap(CommandHandler::getCommand, h -> h));
+        CommandRegistration commandRegistration = registerCommandHandlers(commandHandlerList);
+        this.commandHandlers = commandRegistration.handlers();
+        this.fallbackCommandHandler = commandRegistration.fallback();
 
-        this.fallbackCommandHandler = commandHandlerList.stream()
-                .filter(commandHandler -> FALLBACK_KEY.equals(commandHandler.getCommand()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No fallback command handler defined!"));
+        TextRegistration textRegistration = registerTextHandlers(textHandlerList);
+        this.textHandlers = textRegistration.handlers();
+        this.fallbackTextHandler = textRegistration.fallback();
+    }
 
-        // Text Handlers
-        this.textHandlers = textHandlerList.stream()
-                .filter(textHandler -> !(textHandler instanceof FallbackTextHandler))
-                .peek(textHandler -> log.info("Registered text handler: {}", textHandler.getClass().getSimpleName()))
-                .toList();
+    private CallbackRegistration registerCallbackHandlers(List<CallbackHandler> handlers) {
+        Map<String, CallbackHandler> registry = new HashMap<>();
+        CallbackHandler fallback = null;
 
-        this.fallbackTextHandler = textHandlerList.stream()
-                .filter(textHandler -> textHandler instanceof FallbackTextHandler)
-                .map(textHandler -> (FallbackTextHandler) textHandler)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No fallback text handler defined!"));
+        for (CallbackHandler handler : handlers) {
+            String key = handler.getKey();
+            String handlerName = AopUtils.getTargetClass(handler).getSimpleName();
+
+            if (FALLBACK_KEY.equals(key)) {
+                if (fallback != null) {
+                    throw new IllegalStateException("Multiple fallback callback handlers defined");
+                }
+
+                fallback = handler;
+                log.info("Registered FallbackCallbackHandler");
+                continue;
+            }
+
+            CallbackHandler previous = registry.putIfAbsent(key, handler);
+            if (previous != null) {
+                throw new IllegalStateException(
+                        "Duplicate callback handler key '%s' for %s and %s"
+                                .formatted(
+                                        key,
+                                        AopUtils.getTargetClass(previous).getSimpleName(),
+                                        handlerName
+                                )
+                );
+            }
+
+            log.info("Registered callback handler: {}", handlerName);
+        }
+
+        if (fallback == null) {
+            throw new IllegalStateException("No fallback callback handler defined!");
+        }
+
+        return new CallbackRegistration(registry, fallback);
+    }
+
+    private CommandRegistration registerCommandHandlers(List<CommandHandler> handlers) {
+        Map<String, CommandHandler> registry = new HashMap<>();
+        CommandHandler fallback = null;
+
+        for (CommandHandler handler : handlers) {
+            String command = handler.getCommand();
+            String handlerName = AopUtils.getTargetClass(handler).getSimpleName();
+
+            if (FALLBACK_KEY.equals(command)) {
+                if (fallback != null) {
+                    throw new IllegalStateException("Multiple fallback command handlers defined");
+                }
+
+                fallback = handler;
+                log.info("Registered FallbackCommandHandler");
+                continue;
+            }
+
+            CommandHandler previous = registry.putIfAbsent(command, handler);
+            if (previous != null) {
+                throw new IllegalStateException(
+                        "Duplicate command handler '%s' for %s and %s"
+                                .formatted(
+                                        command,
+                                        AopUtils.getTargetClass(previous).getSimpleName(),
+                                        handlerName
+                                )
+                );
+            }
+
+            log.info("Registered command handler: {}", handlerName);
+        }
+
+        if (fallback == null) {
+            throw new IllegalStateException("No fallback command handler defined!");
+        }
+
+        return new CommandRegistration(registry, fallback);
+    }
+
+    private TextRegistration registerTextHandlers(List<TextHandler> handlers) {
+        List<TextHandler> registry = new ArrayList<>();
+        FallbackTextHandler fallback = null;
+
+        for (TextHandler handler : handlers) {
+            String handlerName = AopUtils.getTargetClass(handler).getSimpleName();
+
+            if (handler instanceof FallbackTextHandler fallbackHandler) {
+                if (fallback != null) {
+                    throw new IllegalStateException("Multiple fallback text handlers defined");
+                }
+
+                fallback = fallbackHandler;
+                log.info("Registered FallbackTextHandler");
+                continue;
+            }
+
+            registry.add(handler);
+            log.info("Registered text handler: {}", handlerName);
+        }
+
+        if (fallback == null) {
+            throw new IllegalStateException("No fallback text handler defined!");
+        }
+
+        return new TextRegistration(List.copyOf(registry), fallback);
+    }
+
+    private record CallbackRegistration(
+            Map<String, CallbackHandler> handlers,
+            CallbackHandler fallback
+    ) {
+    }
+
+    private record CommandRegistration(
+            Map<String, CommandHandler> handlers,
+            CommandHandler fallback
+    ) {
+    }
+
+    private record TextRegistration(
+            List<TextHandler> handlers,
+            FallbackTextHandler fallback
+    ) {
     }
 }
